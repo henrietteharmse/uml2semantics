@@ -5,6 +5,7 @@ import com.github.tototoshi.csv.*
 
 import scala.collection.mutable
 import scala.collection.mutable.Set
+import com.typesafe.scalalogging.Logger
 
 enum ClassesHeader:
   def name: String = toString
@@ -13,40 +14,39 @@ end ClassesHeader
 
 def parseClasses(maybeTsvFile: Option[File]): Map[String, UmlClass] =
   import org.uml2owl.ClassesHeader.*
-  new TSVFormat {}
+  val logger = Logger("parseClasses")
+  implicit object TsvFormat extends TSVFormat {}
 
   val reader = CSVReader.open(maybeTsvFile.get)
-  var umlClasses = mutable.Set[UmlClass]()
+  val umlClasses = mutable.Set[UmlClass]()
 
   reader.allWithHeaders().foreach(m => {
-    val errorMsg = "Error: ClassId cannot be empty"
-    val classId = if !m.contains(Curie.name) then errorMsg else
-      if m(Curie.name).isEmpty then errorMsg else {
-        m(Curie.name)
-      }
+    logger.trace(s"m = $m")
+
     val parentIdsSet =
       val maybeParentIds = m.get(ParentIds.name)
-      if maybeParentIds.isDefined
-        then maybeParentIds.get
-        else ""
+      logger.trace(s"maybeParentIds.get=${maybeParentIds.get}")
+      if maybeParentIds.isDefined then
+        maybeParentIds.get
+      else ""
     .split('|').map(_.trim).toSet
 
     val umlClass = UmlClass(
-      classId,
-      m.get(Name.name),
+      UmlIdentity(m.get(Curie.name), m.get(Name.name)),
       m.get(Definition.name),
       parentIdsSet
     )
-    println(s"umlClasses=${umlClasses.getClass}")
+    logger.trace(s"umlClasses.getClass.hasCode=${umlClasses.getClass.hashCode}")
     umlClasses += umlClass
   })
   reader.close()
-  val umlClassesById = umlClasses.map(umlClass => (umlClass.curie, umlClass)).toMap
-  println(s"umlClassesById type = ${umlClassesById.getClass}")
+  val umlClassesById = umlClasses.map(umlClass => (umlClass.id.identity, umlClass)).toMap
+  logger.trace(s"umlClassesById = ${umlClassesById}")
   umlClassesById
+end parseClasses
 
 def parseUMLClassDiagram(input: InputParameters): UmlClassDiagram =
-  UmlClassDiagram(parseClasses(input.classesTsv))
+  UmlClassDiagram(input.owlOntologyFile.get, input.ontologyIRI, parseClasses(input.classesTsv))
 
 
 

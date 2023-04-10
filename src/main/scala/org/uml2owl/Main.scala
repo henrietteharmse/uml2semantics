@@ -4,15 +4,14 @@ import scopt.OParser
 
 import java.io.File
 
-
 case class InputParameters(classesTsv: Option[File] = None,
                            attributesTsv: Option[File] = None,
                            associationsTsv: Option[File] = None,
                            associationsByRoleTsv: Option[File] = None,
                            enumerationsTsv: Option[File] = None,
                            owlOntologyFile: Option[File] = None,
-                           ontologyIRI: String = "https://example.com/ontology",
-                           ontologyPrefix: String = "ex:https://example.com/ontology#")
+                           ontologyIRI: String = "https://uml2owl.com/ontology",
+                           ontologyPrefix: String = "ex:https://owl2uml.com/ontology#")
 
 
 
@@ -56,6 +55,7 @@ val argParser =
     case Some(input) =>
 //      println("Process classes: input = " + _)
       val umlClassDiagram = parseUMLClassDiagram(input)
+      generateOWL(umlClassDiagram)
     case _ =>
 //      UmlClassDiagram()
   println("Done")

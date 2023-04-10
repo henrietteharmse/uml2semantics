@@ -9,9 +9,10 @@ lazy val root = (project in file("."))
   .settings(
     name := "scala-uml2owl",
     libraryDependencies ++= Seq(
-//      "com.nrinaudo" %% "kantan.csv-generic" % "0.7.0",
         "com.github.scopt" %% "scopt" % "4.1.0",
         "com.github.tototoshi" %% "scala-csv" % "1.3.10",
-        "net.sourceforge.owlapi" % "owlapi-distribution" % "5.5.0" % Provided
+        "net.sourceforge.owlapi" % "owlapi-distribution" % "5.5.0",
+        "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
+        "ch.qos.logback" % "logback-classic" % "1.3.5"
     )
   )
