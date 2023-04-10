@@ -55,7 +55,8 @@ val argParser =
     case Some(input) =>
 //      println("Process classes: input = " + _)
       val umlClassDiagram = parseUMLClassDiagram(input)
-      generateOWL(umlClassDiagram)
+      val owlWriter = new OWLWriter(umlClassDiagram)
+      owlWriter.generateOWL
     case _ =>
 //      UmlClassDiagram()
   println("Done")
