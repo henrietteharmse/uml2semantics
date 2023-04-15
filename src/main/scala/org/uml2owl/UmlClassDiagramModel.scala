@@ -35,7 +35,9 @@ object UmlIdentity:
 case class UmlClass(id: UmlIdentity,
                     definition: Option[String],
                     parentIds: Set[String])
-  extends UmlClassDiagramElement
+  extends UmlClassDiagramElement:
+  def definitionIsNonEmpty: Boolean =
+    this.definition.isDefined && this.definition.get.nonEmpty
 
 case class UmlAttribute()
   extends UmlClassDiagramElement

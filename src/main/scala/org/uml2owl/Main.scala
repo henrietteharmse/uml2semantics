@@ -56,7 +56,12 @@ val argParser =
 //      println("Process classes: input = " + _)
       val umlClassDiagram = parseUMLClassDiagram(input)
       val owlWriter = new OWLWriter(umlClassDiagram)
-      owlWriter.generateOWL
+      owlWriter.generateOWL match
+        case Left(exceptionMsg) => println(s"An exception occurred:$exceptionMsg")
+        case Right(warnings) =>
+          if warnings.nonEmpty then
+            println("During processing of the UMLClassdiagram the following potential problem were found:")
+            warnings.foreach(w => println(s"$w"))
     case _ =>
 //      UmlClassDiagram()
   println("Done")
