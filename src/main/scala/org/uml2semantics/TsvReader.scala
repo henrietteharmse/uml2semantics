@@ -1,11 +1,11 @@
-package org.uml2owl
+package org.uml2semantics
+
+import com.github.tototoshi.csv.*
+import com.typesafe.scalalogging.Logger
 
 import java.io.File
-import com.github.tototoshi.csv.*
-
 import scala.collection.mutable
 import scala.collection.mutable.Set
-import com.typesafe.scalalogging.Logger
 
 enum ClassesHeader:
   def name: String = toString
@@ -13,7 +13,7 @@ enum ClassesHeader:
 end ClassesHeader
 
 def parseClasses(maybeTsvFile: Option[File]): Map[String, UmlClass] =
-  import org.uml2owl.ClassesHeader.*
+  import ClassesHeader.*
   val logger = Logger("parseClasses")
   implicit object TsvFormat extends TSVFormat {}
 
@@ -41,7 +41,7 @@ def parseClasses(maybeTsvFile: Option[File]): Map[String, UmlClass] =
   })
   reader.close()
   val umlClassesById = umlClasses.map(umlClass => (umlClass.id.identity, umlClass)).toMap
-  logger.trace(s"umlClassesById = ${umlClassesById}")
+  logger.trace(s"umlClassesById = $umlClassesById")
   umlClassesById
 end parseClasses
 

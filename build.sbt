@@ -7,7 +7,7 @@ scalacOptions ++= Seq(// use ++= to add to existing options
 )
 lazy val root = (project in file("."))
   .settings(
-    name := "scala-uml2owl",
+    name := "uml2semantics",
     libraryDependencies ++= Seq(
         "com.github.scopt" %% "scopt" % "4.1.0",
         "com.github.tototoshi" %% "scala-csv" % "1.3.10",

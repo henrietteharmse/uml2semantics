@@ -1,5 +1,6 @@
-package org.uml2owl
+package org.uml2semantics
 
+import org.uml2semantics.owl.OWLWriter
 import scopt.OParser
 
 import java.io.File
@@ -10,16 +11,16 @@ case class InputParameters(classesTsv: Option[File] = None,
                            associationsByRoleTsv: Option[File] = None,
                            enumerationsTsv: Option[File] = None,
                            owlOntologyFile: Option[File] = None,
-                           ontologyIRI: String = "https://uml2owl.com/ontology",
-                           ontologyPrefix: String = "ex:https://owl2uml.com/ontology#")
+                           ontologyIRI: String = "https://uml2semtech.com/ontology",
+                           ontologyPrefix: String = "ex:https://uml2semtech.com/ontology#")
 
 
 
 val builder = OParser.builder[InputParameters]
 val argParser =
-  import builder._
+  import builder.*
   OParser.sequence(
-    programName("uml2owl"),
+    programName("uml2semtech"),
 //    head("uml2owl","v0.0.1"),
     opt[Option[File]]('c', "classes")
         .required()

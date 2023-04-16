@@ -1,8 +1,8 @@
-package org.uml2owl
+package org.uml2semantics
 
 import com.typesafe.scalalogging.Logger
-
 import java.io.File
+
 sealed trait UmlClassDiagramElement
 case class UmlIdentity (curie: String,
                         name: String
@@ -31,6 +31,7 @@ object UmlIdentity:
       logger.trace("Error: Both curie and name are empty.")
       throw new IllegalArgumentException("Both curie and name are empty.")
     else new UmlIdentity(curie.get, name.get)
+end UmlIdentity
 
 case class UmlClass(id: UmlIdentity,
                     definition: Option[String],
