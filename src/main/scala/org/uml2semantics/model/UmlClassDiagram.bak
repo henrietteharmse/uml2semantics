@@ -1,0 +1,150 @@
+package org.uml2semantics.model
+
+import com.typesafe.scalalogging.Logger
+import org.apache.commons.io.filefilter.TrueFileFilter
+
+import java.io.File
+import scala.collection.StringOps
+
+/**
+ * Cardinality is defined based on the following StackOverflow answer:
+ * https://stackoverflow.com/a/73760524/2214440
+ * 
+ * ToDo: Ideally we want cardinality to be able to represent UML class diagram cardinalities like *, 0..*, 1..5, 2..* 
+ */
+opaque type NonNegativeInteger <: Int = Int
+
+object NonNegativeInteger:
+  inline
+  def apply(inline n: Int): NonNegativeInteger =
+    inline if n < 0
+    then compiletime.error("Cannot compile NonNegativeInteger(n). n must be >= 0.")
+    else n: NonNegativeInteger
+
+  def make(n: Int): Option[NonNegativeInteger] =
+    Option.when(n >= 0)(n)
+
+  extension (nOption: Option[NonNegativeInteger])
+    inline
+    def orDefault[T <: NonNegativeInteger](default: T): NonNegativeInteger =
+      nOption.getOrElse(default)
+
+  extension (inline n: Int)
+    inline
+    def asNonNegativeInteger: NonNegativeInteger =
+      NonNegativeInteger(n)
+
+//  extension (n1: NonNegativeInteger)
+//    def >(n2: NonNegativeInteger): Boolean =
+//      n1 > n2
+
+//class NonNegativeInteger(n: Int) extends AnyVal:
+//
+//  def > (that: NonNegativeInteger): Boolean =
+//    this > that
+//
+//object NonNegativeInteger:
+//  def apply(n: Int): NonNegativeInteger =
+//    if n < 0
+//      then compiletime.error("Cannot compile NonNegativeInteger(n). n must be >= 0.")
+//      else n
+
+case class Cardinality(cardinality: Either[NonNegativeInteger, '*']):
+  def >(c: Cardinality): Boolean = (this, c) match
+    case (Right(t1), Right(t2)) => false
+    case (Right(t1), Left(t2)) => true
+    case (Left(t1), Right(t2)) => false
+    case (Left(t1), Left(t2)) => if (t1.asInstanceOf[NonNegativeInteger] < t2.asInstanceOf[NonNegativeInteger]) then true else false
+
+
+
+//opaque type Cardinality = NonNegativeInteger | '*'
+//
+//object Cardinality
+//  def apply(i: NonNegativeInteger | '*'): Cardinality = i
+//  given CanEqual[Cardinality, Cardinality] = CanEqual.derived
+//  def >=(c: Cardinality): Boolean =
+//    if this == c then
+//      true
+//    else
+//      (this, c) match
+//        case ('*', _) =>
+case class Multiplicity (min: Cardinality,
+                         max: Cardinality)
+
+
+object Multiplicity
+//  def apply (min: Cardinality, max: Cardinality): Multiplicity = (min, max) match
+//    case ()
+
+
+case class ClassName(name: String) extends AnyVal
+
+case class ClassIRI(classIRI: String) extends AnyVal:
+  def nonEmpty: Boolean = classIRI.nonEmpty
+
+type ClassId = ClassName | ClassIRI
+
+case class UmlIdentity (classIRI: ClassIRI,
+                        name: ClassName
+                       ):
+  def identity: ClassId =
+    if this.classIRI.nonEmpty then
+      this.classIRI
+    else this.name
+end UmlIdentity
+
+//case class UmlIdentity (curie: String,
+//                        name: String
+//                       ):
+//  def identity: String =
+//    if this.curie.nonEmpty then
+//      this.curie
+//    else this.name
+//
+//  def asIRI(prefix: String): String =
+//    prefix + '#' + identity
+//
+//end UmlIdentity
+
+object UmlIdentity:
+  private val logger = Logger[UmlIdentity]
+//  private def isBothCurieAndNameEmpty(curie: Option[String], name: Option[String]): Boolean =
+//    curie.isEmpty && name.isEmpty ||
+//      curie.isDefined && curie.get.isEmpty && name.isEmpty ||
+//      name.isDefined && name.get.isEmpty && curie.isEmpty ||
+//      curie.isDefined && curie.get.isEmpty && name.isDefined && name.get.isEmpty
+//
+//  def apply(curie: Option[String], name: Option[String]): UmlIdentity =
+//    logger.trace(s"isBothCurieAndNameEmpty(curie, name)=${isBothCurieAndNameEmpty(curie, name)}")
+//    if isBothCurieAndNameEmpty(curie, name) then
+//      logger.trace("Error: Both curie and name are empty.")
+//      throw new IllegalArgumentException("Both curie and name are empty.")
+//    else new UmlIdentity(curie.get, name.get)
+end UmlIdentity
+
+opaque type Primative = String
+object Primative:
+  def apply(s: String): Primative = s
+given CanEqual[Primative, Primative] = CanEqual.derived
+
+opaque type Class = UmlIdentity
+
+sealed trait UmlClassDiagramElement
+
+
+case class UmlClass(id: UmlIdentity,
+                    definition: Option[String],
+                    parentIds: Set[String])
+  extends UmlClassDiagramElement:
+  def definitionIsNonEmpty: Boolean =
+    this.definition.isDefined && this.definition.get.nonEmpty
+
+case class UmlClassAttribute(classId: UmlIdentity, attributeId: UmlIdentity, typeOfAttribute: Primative|Class, minCardinality: NonNegativeInteger,
+                             maxCardinality: NonNegativeInteger, definition: Option[String])
+  extends UmlClassDiagramElement
+
+case class OntologyIRI(ontologyIRI: String)
+case class UmlClassDiagram(owlOntologyFile: File, ontologyIRI: OntologyIRI, umlClasses: Map[String, UmlClass])
+object UmlClassDiagram:
+  def apply(owlOntologyFile: File, ontologyIRI: OntologyIRI) = new UmlClassDiagram(owlOntologyFile,ontologyIRI, Map())
