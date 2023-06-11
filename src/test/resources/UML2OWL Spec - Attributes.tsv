@@ -1,1 +1,1 @@
-ClassId	AttruteId	PrimitiveType	MinCardinality	MaxCardinality	Label	Definition
+ClassId	Curie	Type	PrimativeOrClass	MinCardinality	MaxCardinality	Name	Definition
