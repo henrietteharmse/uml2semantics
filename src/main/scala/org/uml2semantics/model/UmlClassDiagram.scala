@@ -2,21 +2,24 @@ package org.uml2semantics.model
 import java.io.File
 import com.typesafe.scalalogging.Logger
 
-import scala.annotation.targetName
+import scala.annotation.{tailrec, targetName}
 import scala.collection.mutable
 
-sealed trait ClassId
+sealed trait ClassId:
+  def id: String
 case class ClassName(name: String = "") extends ClassId:
   def nonEmpty: Boolean = name.nonEmpty
+  override def id: String = name
 
 case class ClassCurie(curie: String = "") extends ClassId:
   def nonEmpty: Boolean = curie.nonEmpty
+  override def id: String = curie
 
-case class UncertainClassId(uncertainId: String) extends ClassId
-
+case class UncertainClassId(uncertainId: String) extends ClassId:
+  override def id: String = uncertainId
 case class ClassParentIds(setOfParentIds: Set[UncertainClassId])
 object ClassParentIds:
-  val logger = Logger[ClassParentIds]
+  private val logger = Logger[ClassParentIds]
   @targetName("fromSetOfStrings")
   def apply(setOfParentIds: Set[String]): ClassParentIds =
     logger.trace(s"setOfParentIds=$setOfParentIds")
@@ -28,7 +31,7 @@ object ClassParentIds:
 
 
 case class ClassIRI(ontologyPrefix: OntologyPrefix, classId: ClassId):
-  val iri = ontologyPrefix.ontologyPrefix + classId
+  val iri: String = ontologyPrefix.ontologyPrefix + classId
 //  override def toString: String = ontologyPrefix.ontologyPrefix + classId
 
 case class OntologyIRI(ontologyIRI: String)
@@ -69,6 +72,7 @@ case class Multiplicity (min: Cardinality,
                          max: Cardinality)
 
 object Multiplicity:
+  @tailrec
   def apply (min: Cardinality, max: Cardinality): Multiplicity =
     require(max > min, "max cardinality must be greater than min cardinality")
     Multiplicity(min, max)
@@ -81,7 +85,7 @@ case class ClassIdentity(classCurie: ClassCurie,
     tmpClassId = classCurie
   else if className.nonEmpty then
     tmpClassId = className
-  val classIRI = ClassIRI(ontologyPrefix, tmpClassId)
+  val classIRI: ClassIRI = ClassIRI(ontologyPrefix, tmpClassId)
 
 
 

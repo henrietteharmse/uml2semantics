@@ -35,7 +35,7 @@ class OWLWriter(val umlClassDiagram: UmlClassDiagram):
   private def createAndAnnotateOWLClass(umlClass: UmlClass): OWLClass =
     val owlClass = dataFactory.getOWLClass(umlClass.classIdentity.classIRI.iri)
     createDefinitionAnnotation(owlClass, umlClass.classDefinition.definition)
-    createLabelAnnotation(owlClass, umlClass.classIdentity.classIRI.classId.toString)
+    createLabelAnnotation(owlClass, umlClass.classIdentity.classIRI.classId.id)
     owlClass
 
   private def generateOWLForClasses: ListBuffer[String] =
@@ -55,19 +55,11 @@ class OWLWriter(val umlClassDiagram: UmlClassDiagram):
             errorMessages.addOne(s"Could not add axiom ${owlClass.getIRI} subClassOf owl:Thing")
         else
           umlClass.classParentIds.setOfParentIds.foreach(parentClassId => {
-//            if parentClassId.uncertainId.isEmpty then {
-//              logger.trace("parentClassId is EMPTY")
-//              val addAxiomChangeApplied = manager.addAxiom(
-//                ontology, dataFactory.getOWLSubClassOfAxiom(owlClass, dataFactory.getOWLThing))
-//              if addAxiomChangeApplied != SUCCESSFULLY then
-//                errorMessages.addOne(s"Could not add axiom ${owlClass.getIRI} subClassOf owl:Thing")
-//            }
-//            else
-              logger.trace(s"parentId=$parentClassId")
-              val addAxiomChangeApplied = manager.addAxiom(ontology, dataFactory.getOWLSubClassOfAxiom(
-                owlClass, dataFactory.getOWLClass(umlClassDiagram.ontologyPrefix.ontologyPrefix + parentClassId.uncertainId)))
-              if addAxiomChangeApplied != SUCCESSFULLY then
-                errorMessages.addOne(s"Could not add axiom ${owlClass.getIRI} subClassOf $parentClassId")
+            logger.trace(s"parentId=$parentClassId")
+            val addAxiomChangeApplied = manager.addAxiom(ontology, dataFactory.getOWLSubClassOfAxiom(
+              owlClass, dataFactory.getOWLClass(umlClassDiagram.ontologyPrefix.ontologyPrefix + parentClassId.uncertainId)))
+            if addAxiomChangeApplied != SUCCESSFULLY then
+              errorMessages.addOne(s"Could not add axiom ${owlClass.getIRI} subClassOf $parentClassId")
           })
     })
     errorMessages
