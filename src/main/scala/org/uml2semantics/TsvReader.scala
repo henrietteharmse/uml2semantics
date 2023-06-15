@@ -2,17 +2,17 @@ package org.uml2semantics
 
 import com.github.tototoshi.csv.*
 import com.typesafe.scalalogging.Logger
-import org.uml2semantics.model.{ClassCurie, ClassDefinition, ClassIRI, ClassId, ClassName, OntologyIRI, OntologyPrefix, ClassParentIds, UmlClass, UmlClassDiagram, ClassIdentity, UncertainClassId}
+import org.uml2semantics.model.{ClassShortName, ClassDefinition, ClassIRI, ClassId, ClassName, OntologyIRI, OntologyPrefix, ClassParentIds, UmlClass, UmlClassDiagram, ClassIdentity, UncertainClassId}
 
 import java.io.File
 import scala.collection.mutable
 import scala.collection.mutable.Set
 
 enum ClassesHeader:
-  case Curie, Name, Definition, ParentIds
+  case ShortName, Name, Definition, ParentIds
 
 enum AttributesHeader:
-  case ClassId, Curie, Name, Type, PrimitiveOrClass, MinMultiplicity, MaxMultiplicity, Definition
+  case ClassId, ShortName, Name, Type, PrimitiveOrClass, MinMultiplicity, MaxMultiplicity, Definition
 
 def parseClasses(maybeTsvFile: Option[File], ontologyPrefix: OntologyPrefix): Map[ClassId, UmlClass] =
   import ClassesHeader.*
@@ -33,11 +33,11 @@ def parseClasses(maybeTsvFile: Option[File], ontologyPrefix: OntologyPrefix): Ma
       else ""
     .split('|').map(_.trim).toSet
 
-    val curieOption = m.get(Curie.toString)
+    val shortNameOption = m.get(ShortName.toString)
     val nameOption = m.get(Name.toString)
     val umlClass = UmlClass(
       ClassIdentity(
-        ClassCurie(curieOption.get),
+        ClassShortName(shortNameOption.get),
         ClassName(nameOption.get),
         ontologyPrefix
         ),

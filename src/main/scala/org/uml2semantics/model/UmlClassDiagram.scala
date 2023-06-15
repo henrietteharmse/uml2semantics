@@ -11,9 +11,13 @@ case class ClassName(name: String = "") extends ClassId:
   def nonEmpty: Boolean = name.nonEmpty
   override def id: String = name
 
-case class ClassCurie(curie: String = "") extends ClassId:
-  def nonEmpty: Boolean = curie.nonEmpty
-  override def id: String = curie
+case class ClassShortName(shortName: String = "") extends ClassId:
+  def nonEmpty: Boolean = shortName.nonEmpty
+  override def id: String = shortName
+
+/*
+@Todo: Add support for Curies
+*/
 
 case class UncertainClassId(uncertainId: String) extends ClassId:
   override def id: String = uncertainId
@@ -28,6 +32,8 @@ object ClassParentIds:
       .filterNot(s => s.isEmpty)
       .map(m => UncertainClassId(m))
     ClassParentIds(setOfParentUncertainClassIds)
+
+case class UmlClasses(mapOfUmlClasses: Map[ClassId, UmlClass])
 
 
 case class ClassIRI(ontologyPrefix: OntologyPrefix, classId: ClassId):
@@ -77,12 +83,12 @@ object Multiplicity:
     require(max > min, "max cardinality must be greater than min cardinality")
     Multiplicity(min, max)
 
-case class ClassIdentity(classCurie: ClassCurie,
+case class ClassIdentity(classShortName: ClassShortName,
                          className: ClassName,
                          ontologyPrefix: OntologyPrefix):
   var tmpClassId: ClassId = _
-  if classCurie.nonEmpty then
-    tmpClassId = classCurie
+  if classShortName.nonEmpty then
+    tmpClassId = classShortName
   else if className.nonEmpty then
     tmpClassId = className
   val classIRI: ClassIRI = ClassIRI(ontologyPrefix, tmpClassId)

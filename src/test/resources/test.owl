@@ -43,17 +43,6 @@
     
 
 
-    <!-- uml2ont:https://uml2semantics.com/ontology#ClassCurie(c1) -->
-
-
-    <owl:Class rdf:about="uml2ont:https://uml2semantics.com/ontology#ClassCurie(c1)">
-        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
-        <rdfs:comment>def</rdfs:comment>
-        <rdfs:label>c1</rdfs:label>
-    </owl:Class>
-    
-
-
     <!-- uml2ont:https://uml2semantics.com/ontology#ClassName(na) -->
 
 
@@ -63,6 +52,17 @@
         <rdfs:subClassOf rdf:resource="uml2ont:https://uml2semantics.com/ontology#5"/>
         <rdfs:comment></rdfs:comment>
         <rdfs:label>na</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- uml2ont:https://uml2semantics.com/ontology#ClassShortName(c1) -->
+
+
+    <owl:Class rdf:about="uml2ont:https://uml2semantics.com/ontology#ClassShortName(c1)">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+        <rdfs:comment>def</rdfs:comment>
+        <rdfs:label>c1</rdfs:label>
     </owl:Class>
 </rdf:RDF>
 
