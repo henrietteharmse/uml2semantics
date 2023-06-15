@@ -41,8 +41,8 @@ class OWLWriter(val umlClassDiagram: UmlClassDiagram):
   private def generateOWLForClasses: ListBuffer[String] =
     logger.trace("generateOWLForClasses")
     val errorMessages = new ListBuffer[String]()
-    umlClassDiagram.umlClasses.keySet.foreach(id => {
-      val umlClassOption = umlClassDiagram.umlClasses.get(id)
+    umlClassDiagram.umlClasses.mapOfUmlClasses.keySet.foreach(id => {
+      val umlClassOption = umlClassDiagram.umlClasses.mapOfUmlClasses.get(id)
       if umlClassOption.isDefined then
         val umlClass = umlClassOption.get
         val owlClass = createAndAnnotateOWLClass(umlClass)

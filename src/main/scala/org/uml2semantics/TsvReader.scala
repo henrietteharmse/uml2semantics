@@ -2,7 +2,7 @@ package org.uml2semantics
 
 import com.github.tototoshi.csv.*
 import com.typesafe.scalalogging.Logger
-import org.uml2semantics.model.{ClassShortName, ClassDefinition, ClassIRI, ClassId, ClassName, OntologyIRI, OntologyPrefix, ClassParentIds, UmlClass, UmlClassDiagram, ClassIdentity, UncertainClassId}
+import org.uml2semantics.model.{ClassDefinition, ClassIRI, ClassId, ClassIdentity, ClassName, ClassParentIds, ClassShortName, OntologyIRI, OntologyPrefix, UmlClass, UmlClassDiagram, UmlClasses, UncertainClassId}
 
 import java.io.File
 import scala.collection.mutable
@@ -14,7 +14,7 @@ enum ClassesHeader:
 enum AttributesHeader:
   case ClassId, ShortName, Name, Type, PrimitiveOrClass, MinMultiplicity, MaxMultiplicity, Definition
 
-def parseClasses(maybeTsvFile: Option[File], ontologyPrefix: OntologyPrefix): Map[ClassId, UmlClass] =
+def parseClasses(maybeTsvFile: Option[File], ontologyPrefix: OntologyPrefix): UmlClasses =
   import ClassesHeader.*
   val logger = Logger("parseClasses")
   implicit object TsvFormat extends TSVFormat {}
@@ -50,7 +50,7 @@ def parseClasses(maybeTsvFile: Option[File], ontologyPrefix: OntologyPrefix): Ma
   reader.close()
   val umlClassesById = umlClasses.map(umlClass => (umlClass.classIdentity.classIRI.classId, umlClass)).toMap
   logger.trace(s"umlClassesById = $umlClassesById")
-  umlClassesById
+  UmlClasses(umlClassesById)
 end parseClasses
 
 //def parseAttributes(maybeTsvFile: Option[File]):Unit =

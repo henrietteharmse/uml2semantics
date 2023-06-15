@@ -21,6 +21,20 @@ case class ClassShortName(shortName: String = "") extends ClassId:
 
 case class UncertainClassId(uncertainId: String) extends ClassId:
   override def id: String = uncertainId
+
+sealed trait AttributeId:
+  def id: String
+case class AttributeName(name: String = "") extends AttributeId:
+  def nonEmpty: Boolean = name.nonEmpty
+  override def id: String = name
+
+case class AttributeShortName(shortName: String = "") extends AttributeId:
+  def nonEmpty: Boolean = shortName.nonEmpty
+  override def id: String = shortName
+
+/*
+@Todo: Add support for Curies
+*/
 case class ClassParentIds(setOfParentIds: Set[UncertainClassId])
 object ClassParentIds:
   private val logger = Logger[ClassParentIds]
@@ -113,7 +127,7 @@ case class UmlClassAttribute(classId: ClassIdentity, attributeId: ClassIdentity,
 case class UmlClassDiagram(owlOntologyFile: File,
                            ontologyIRI: OntologyIRI,
                            ontologyPrefix: OntologyPrefix,
-                           umlClasses: Map[ClassId, UmlClass])
+                           umlClasses: UmlClasses)
 object UmlClassDiagram:
   def apply(owlOntologyFile: File, ontologyIRI: OntologyIRI, ontologyPrefix: OntologyPrefix) =
-    new UmlClassDiagram(owlOntologyFile,ontologyIRI, ontologyPrefix, Map())
+    new UmlClassDiagram(owlOntologyFile,ontologyIRI, ontologyPrefix, UmlClasses(Map()))
