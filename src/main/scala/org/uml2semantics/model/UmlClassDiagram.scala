@@ -64,11 +64,11 @@ case class ClassDefinition(definition: String = "")
 sealed trait Cardinality
 object Cardinality:
   extension (c1: Cardinality)
-    def >(c2: Cardinality): Boolean = (c1, c2) match
+    def >= (c2: Cardinality): Boolean = (c1, c2) match
       case (t1, t2): (InfiniteCardinality, InfiniteCardinality) => false
       case (t1, t2): (InfiniteCardinality, NonNegativeCardinality) => true
       case (t1, t2): (NonNegativeCardinality, InfiniteCardinality) => false
-      case (t1, t2): (NonNegativeCardinality, NonNegativeCardinality) => t1 > t2
+      case (t1, t2): (NonNegativeCardinality, NonNegativeCardinality) => t1 >= t2
       case (t1, t2): (_, _) =>
         println(s"Unexpected case t1=$t1 and t2=$t2")
         false
@@ -94,7 +94,7 @@ case class Multiplicity (min: Cardinality,
 object Multiplicity:
   @tailrec
   def apply (min: Cardinality, max: Cardinality): Multiplicity =
-    require(max > min, "max cardinality must be greater than min cardinality")
+    require(max >= min, "max cardinality must be greater or equal than min cardinality")
     Multiplicity(min, max)
 
 case class ClassIdentity(classShortName: ClassShortName,
