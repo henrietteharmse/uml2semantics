@@ -1,3 +1,5 @@
 ShortName	Name	Definition	ParentIds
-c1		def	
-	na		1|3|5
+	Resource	Resource published or curated by a single agent.	
+	Dataset	A collection of data, published or curated by a single agent, and available for access or download in one or more representations.	Resource
+	DataService	A collection of operations that provides access to one or more datasets or data processing functions.	Resource
+	Catalog	A curated collection of metadata about resources (e.g., datasets and data services in the context of a data catalog)	Dataset|DataService

@@ -14,7 +14,7 @@ import scala.collection.mutable.ListBuffer
 import scala.util.Try
 
 
-class OWLWriter(val umlClassDiagram: UmlClassDiagram):
+class UmlToOWLWriter(val umlClassDiagram: UmlClassDiagram):
   private val logger = Logger(this.getClass)
   private val manager = OWLManager.createOWLOntologyManager
   logger.trace(s"umlClassDiagram.owlOntologyFile=${umlClassDiagram.owlOntologyFile}")
@@ -55,11 +55,11 @@ class OWLWriter(val umlClassDiagram: UmlClassDiagram):
             errorMessages.addOne(s"Could not add axiom ${owlClass.getIRI} subClassOf owl:Thing")
         else
           umlClass.classParentIds.setOfParentIds.foreach(parentClassId => {
-            logger.trace(s"parentId=$parentClassId")
+            logger.trace(s"parentId=${parentClassId.id}")
             val addAxiomChangeApplied = manager.addAxiom(ontology, dataFactory.getOWLSubClassOfAxiom(
-              owlClass, dataFactory.getOWLClass(umlClassDiagram.ontologyPrefix.ontologyPrefix + parentClassId.uncertainId)))
+              owlClass, dataFactory.getOWLClass(umlClassDiagram.ontologyPrefix.ontologyPrefix + parentClassId.id)))
             if addAxiomChangeApplied != SUCCESSFULLY then
-              errorMessages.addOne(s"Could not add axiom ${owlClass.getIRI} subClassOf $parentClassId")
+              errorMessages.addOne(s"Could not add axiom ${owlClass.getIRI} subClassOf ${parentClassId.id}")
           })
     })
     errorMessages
@@ -76,4 +76,4 @@ class OWLWriter(val umlClassDiagram: UmlClassDiagram):
       case e: OWLOntologyStorageException => Left(e.getMessage)
   end generateOWL
 
-end OWLWriter
+end UmlToOWLWriter

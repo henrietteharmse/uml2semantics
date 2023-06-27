@@ -1,7 +1,7 @@
 package org.uml2semantics
 
 import org.uml2semantics.model.{OntologyIRI, OntologyPrefix}
-import org.uml2semantics.owl.OWLWriter
+import org.uml2semantics.owl.UmlToOWLWriter
 //import org.uml2semantics.owl.OWLWriter
 import scopt.OParser
 
@@ -14,7 +14,7 @@ case class InputParameters(classesTsv: Option[File] = None,
                            enumerationsTsv: Option[File] = None,
                            owlOntologyFile: Option[File] = None,
                            ontologyIRI: String = "https://uml2semantics.com/ontology",
-                           ontologyPrefix: String = "uml2ont:https://uml2semantics.com/ontology#")
+                           ontologyPrefix: String = "uml2ont:https://uml2semantics.com/ontology/")
 
 
 
@@ -49,10 +49,10 @@ val argParser =
       .action((a, c) => c.copy(ontologyIRI = a))
       .text("The IRI of the ontology, e.g.: https://example.com/ontology"),
     opt[String]('p', "ontologyPrefix").required()
-      .withFallback(() => "uml2ont:https://uml2semantics.com/ontology#")
+      .withFallback(() => "uml2ont:https://uml2semantics.com/ontology/")
       .valueName("<ontology-prefix>")
       .action((a, c) => c.copy(ontologyPrefix = a))
-      .text("The prefix to use with your ontology, e.g.: ex:https://example.com/ontology#")
+      .text("The prefix to use with your ontology, e.g.: ex:https://example.com/ontology/")
   )
 
 
@@ -61,7 +61,7 @@ val argParser =
     case Some(input) =>
 //      println("Process classes: input = " + _)
       val umlClassDiagram = parseUMLClassDiagram(input)
-      val owlWriter = new OWLWriter(umlClassDiagram)
+      val owlWriter = new UmlToOWLWriter(umlClassDiagram)
       owlWriter.generateOWL match
         case Left(exceptionMsg) => println(s"An exception occurred:$exceptionMsg")
         case Right(warnings) =>

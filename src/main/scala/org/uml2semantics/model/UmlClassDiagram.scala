@@ -1,127 +1,199 @@
 package org.uml2semantics.model
 import java.io.File
 import com.typesafe.scalalogging.Logger
+import org.uml2semantics.model.UmlCardinality.>=
 
 import scala.annotation.{tailrec, targetName}
 import scala.collection.mutable
 
-sealed trait ClassId:
+sealed trait UmlClassId:
   def id: String
-case class ClassName(name: String = "") extends ClassId:
+case class UmlClassName(name: String = "") extends UmlClassId:
   def nonEmpty: Boolean = name.nonEmpty
   override def id: String = name
 
-case class ClassShortName(shortName: String = "") extends ClassId:
+
+/**
+ *
+ * @param shortName I.e., GO_0043226
+ */
+case class UmlClassShortName(shortName: String = "") extends UmlClassId:
   def nonEmpty: Boolean = shortName.nonEmpty
   override def id: String = shortName
 
 /*
 @Todo: Add support for Curies
 */
+//case class ClassCurie(curie: String = "") /*extends ClassId*/:
+//  def nonEmpty: Boolean = curie.nonEmpty
+//  override def id: String = curie
 
-case class UncertainClassId(uncertainId: String) extends ClassId:
-  override def id: String = uncertainId
 
-sealed trait AttributeId:
+sealed trait UmlClassAttributeId:
   def id: String
-case class AttributeName(name: String = "") extends AttributeId:
-  def nonEmpty: Boolean = name.nonEmpty
-  override def id: String = name
+case class UmlClassAttributeName(classId: UmlClassId, name: String = "") extends UmlClassAttributeId:
+  require(classId.id.nonEmpty && name.nonEmpty || name.isEmpty, "classId cannot be empty.")
+  def nonEmpty: Boolean = classId.id.nonEmpty && name.nonEmpty
+  override def id: String = classId.id +"#" + name
 
-case class AttributeShortName(shortName: String = "") extends AttributeId:
-  def nonEmpty: Boolean = shortName.nonEmpty
-  override def id: String = shortName
+case class UmlClassAttributeShortName(classId: UmlClassId, shortName: String = "") extends UmlClassAttributeId:
+  require(classId.id.nonEmpty && shortName.nonEmpty || shortName.isEmpty, "classId cannot be empty.")
+  def nonEmpty: Boolean = classId.id.nonEmpty && shortName.nonEmpty
+  override def id: String = classId.id +"#" + shortName
+
+case class UmlClassAttributeIdentity(attributeShortName: UmlClassAttributeShortName,
+                                     attributeName: UmlClassAttributeName,
+                                     ontologyPrefix: OntologyPrefix):
+  require(attributeShortName.nonEmpty || attributeName.nonEmpty, "An attribute must have a name or short name.")
+  var tmpAttributeId: UmlClassAttributeId = _
+  if attributeShortName.nonEmpty then
+    tmpAttributeId = attributeShortName
+  else if attributeName.nonEmpty then
+    tmpAttributeId = attributeName
+  val attributeIRI: UmlClassAttributeIRI = UmlClassAttributeIRI(ontologyPrefix, tmpAttributeId)
 
 /*
 @Todo: Add support for Curies
 */
-case class ClassParentIds(setOfParentIds: Set[UncertainClassId])
-object ClassParentIds:
-  private val logger = Logger[ClassParentIds]
+case class UmlClassParentIds(setOfParentIds: Set[UmlClassId])
+object UmlClassParentIds:
+  private val logger = Logger[UmlClassParentIds]
   @targetName("fromSetOfStrings")
-  def apply(setOfParentIds: Set[String]): ClassParentIds =
+  def apply(setOfParentIds: Set[String]): UmlClassParentIds =
     logger.trace(s"setOfParentIds=$setOfParentIds")
     logger.trace(s"setOfParentIds.isEmpty=${setOfParentIds.isEmpty}")
     val setOfParentUncertainClassIds = setOfParentIds
       .filterNot(s => s.isEmpty)
-      .map(m => UncertainClassId(m))
-    ClassParentIds(setOfParentUncertainClassIds)
+      .map(m => UmlClassIdentity.findClassId(m).classId)
+    new UmlClassParentIds(setOfParentUncertainClassIds)
 
-case class UmlClasses(mapOfUmlClasses: Map[ClassId, UmlClass])
+case class UmlClasses(mapOfUmlClasses: Map[UmlClassId, UmlClass])
 
+case class UmlClassAttributes(mapOfUmlClassAttributes: Map[UmlClassAttributeId, UmlClassAttribute])
 
-case class ClassIRI(ontologyPrefix: OntologyPrefix, classId: ClassId):
-  val iri: String = ontologyPrefix.ontologyPrefix + classId
+case class UmlClassIRI(ontologyPrefix: OntologyPrefix, classId: UmlClassId):
+  val iri: String = ontologyPrefix.ontologyPrefix + classId.id
 //  override def toString: String = ontologyPrefix.ontologyPrefix + classId
+
+case class UmlClassAttributeIRI(ontologyPrefix: OntologyPrefix, attributeId: UmlClassAttributeId):
+  val iri: String = ontologyPrefix.ontologyPrefix + attributeId.id
 
 case class OntologyIRI(ontologyIRI: String)
 case class OntologyPrefix(ontologyPrefix: String):
-  def +(classId: ClassId): ClassIRI =
-    ClassIRI(OntologyPrefix(ontologyPrefix), classId)
+  def +(classId: UmlClassId): UmlClassIRI =
+    UmlClassIRI(OntologyPrefix(ontologyPrefix), classId)
 
-case class ClassDefinition(definition: String = "")
+case class UmlClassDefinition(definition: String = "")
 
-sealed trait Cardinality
-object Cardinality:
-  extension (c1: Cardinality)
-    def >= (c2: Cardinality): Boolean = (c1, c2) match
-      case (t1, t2): (InfiniteCardinality, InfiniteCardinality) => false
-      case (t1, t2): (InfiniteCardinality, NonNegativeCardinality) => true
-      case (t1, t2): (NonNegativeCardinality, InfiniteCardinality) => false
-      case (t1, t2): (NonNegativeCardinality, NonNegativeCardinality) => t1 >= t2
-      case (t1, t2): (_, _) =>
-        println(s"Unexpected case t1=$t1 and t2=$t2")
-        false
+opaque type UmlInfinite <: Char = '*'
+
+object UmlInfinite:
+  def apply(): UmlInfinite = '*'
+
+  def unapply(s: String): Boolean = s == "*"
+
+opaque type UmlNonNegativeInteger <: Int = Int
+
+object UmlNonNegativeInteger:
+  def apply(n: Int): UmlNonNegativeInteger =
+    require(n >= 0)
+    n
+
+  def unapply(s: String): Boolean = s.toInt >= 0
+
+sealed trait UmlCardinality
+case class UmlInfiniteCardinality(infinite: UmlInfinite) extends UmlCardinality
+case class UmlNonNegativeCardinality(nonNegativeInteger: UmlNonNegativeInteger) extends UmlCardinality
+object UmlCardinality:
+  def apply(s: String): UmlCardinality =
+    s match
+      case UmlNonNegativeInteger() => UmlNonNegativeCardinality(UmlNonNegativeInteger(s.toInt))
+      case UmlInfinite() => UmlInfiniteCardinality(UmlInfinite())
+      case _ => UmlNonNegativeCardinality(UmlNonNegativeInteger(1))
+
+  def >=(c1: UmlCardinality, c2: UmlCardinality): Boolean = (c1, c2) match
+    case (UmlInfiniteCardinality(t1), UmlInfiniteCardinality(t2)) => false
+    case (UmlInfiniteCardinality(t1), UmlNonNegativeCardinality(t2)) => true
+    case (UmlNonNegativeCardinality(t1), UmlInfiniteCardinality(t2)) => false
+    case (UmlNonNegativeCardinality(t1), UmlNonNegativeCardinality(t2)) => t1 >= t2
 
 
-opaque type Infinite <: Char = '*'
+case class UmlMultiplicity(min: UmlCardinality,
+                           max: UmlCardinality)
 
-opaque type NonNegativeInteger <: Int = Int
+object UmlMultiplicity:
+  def apply (min: UmlCardinality, max: UmlCardinality): UmlMultiplicity =
+    require(>=(max, min), "max cardinality must be greater or equal than min cardinality")
+    new UmlMultiplicity(min, max)
 
-object NonNegativeInteger:
-  inline
-  def apply(inline n: Int): NonNegativeInteger =
-    inline if n < 0
-    then compiletime.error("Cannot compile NonNegativeInteger(n). n must be >= 0.")
-    else n: NonNegativeInteger
+case class UmlClassIdentity(classShortName: UmlClassShortName,
+                            className: UmlClassName,
+                            ontologyPrefix: OntologyPrefix):
+  var classIRI: UmlClassIRI = _
+  var classId: UmlClassId = _
 
-case class InfiniteCardinality(infinite: Infinite) extends Cardinality
-case class NonNegativeCardinality(nonNegativeInteger: NonNegativeInteger) extends Cardinality
+object UmlClassIdentity:
+  var classIdentityByShortName: mutable.Map[UmlClassShortName, UmlClassIdentity] = mutable.HashMap[UmlClassShortName, UmlClassIdentity]()
+  var classIdentityByName: mutable.HashMap[UmlClassName, UmlClassIdentity] = mutable.HashMap[UmlClassName, UmlClassIdentity]()
+  var classIdentityByIRI: mutable.HashMap[UmlClassIRI, UmlClassIdentity] = mutable.HashMap[UmlClassIRI, UmlClassIdentity]()
+  private val logger = Logger[UmlClassIdentity]
+  def apply(classShortName: UmlClassShortName = UmlClassShortName(),
+            className: UmlClassName = UmlClassName(),
+            ontologyPrefix: OntologyPrefix): UmlClassIdentity =
+    require(classShortName.nonEmpty || className.nonEmpty, "A class must have either a shortname or a name.")
+    val classIdentity: UmlClassIdentity = new UmlClassIdentity(classShortName, className, ontologyPrefix)
+    if classShortName.nonEmpty then
+      classIdentity.classId = classShortName
+    else if className.nonEmpty then
+      classIdentity.classId = className
+    classIdentity.classIRI = UmlClassIRI(ontologyPrefix, classIdentity.classId)
 
-case class Multiplicity (min: Cardinality,
-                         max: Cardinality)
+    if classShortName.nonEmpty then
+      classIdentityByShortName += (classShortName -> classIdentity)
 
-object Multiplicity:
-  @tailrec
-  def apply (min: Cardinality, max: Cardinality): Multiplicity =
-    require(max >= min, "max cardinality must be greater or equal than min cardinality")
-    Multiplicity(min, max)
+    if className.nonEmpty then
+      classIdentityByName += (className -> classIdentity)
 
-case class ClassIdentity(classShortName: ClassShortName,
-                         className: ClassName,
-                         ontologyPrefix: OntologyPrefix):
-  var tmpClassId: ClassId = _
-  if classShortName.nonEmpty then
-    tmpClassId = classShortName
-  else if className.nonEmpty then
-    tmpClassId = className
-  val classIRI: ClassIRI = ClassIRI(ontologyPrefix, tmpClassId)
+    classIdentityByIRI += (classIdentity.classIRI -> classIdentity)
+    classIdentity
 
+  def findClassId(string: String): UmlClassIdentity =
+    val classShortNameOption = classIdentityByShortName.get(UmlClassShortName(string))
+    val classNameOption = classIdentityByName.get(UmlClassName(string))
+    var classIdentity: UmlClassIdentity = null
+
+    if classShortNameOption.isDefined then
+      classIdentity = classShortNameOption.get
+    else if classNameOption.isDefined then
+      classIdentity = classNameOption.get
+    else
+      logger.debug(s"ClassId=$string could not be found!")
+    classIdentity
+
+end UmlClassIdentity
 
 
 sealed trait UmlClassDiagramElement
-case class UmlClass(classIdentity: ClassIdentity,
-                    classDefinition: ClassDefinition,
-                    classParentIds: ClassParentIds)
+case class UmlClass(classIdentity: UmlClassIdentity,
+                    classDefinition: UmlClassDefinition = UmlClassDefinition(),
+                    classParentIds: UmlClassParentIds = new UmlClassParentIds(Set[UmlClassId]()))
   extends UmlClassDiagramElement
-type Primitive = String
-object Primitive:
-  def apply(string: String): Primitive = string
-given CanEqual[Primitive, Primitive] = CanEqual.derived
 
-case class UmlClassAttribute(classId: ClassIdentity, attributeId: ClassIdentity,
-                             typeOfAttribute: Primitive|ClassIdentity,
-                             multiplicity: Multiplicity, definition: Option[String])
+// @todo Define a list of supported primitives
+type UmlPrimitive = String
+object UmlPrimitive:
+  def apply(string: String): UmlPrimitive = string
+  given CanEqual[UmlPrimitive, UmlPrimitive] = CanEqual.derived
+
+case class UmlClassAttributeDefinition(definition: String = "")
+enum UmlClassAttributeType:
+  case Primitive(string: String)
+  case ClassIdentity
+
+case class UmlClassAttribute(attributeId: UmlClassAttributeIdentity,
+                             typeOfAttribute: UmlPrimitive|UmlClassIdentity,
+                             multiplicity: UmlMultiplicity,
+                             definition: UmlClassAttributeDefinition = UmlClassAttributeDefinition())
   extends UmlClassDiagramElement
 
 case class UmlClassDiagram(owlOntologyFile: File,
