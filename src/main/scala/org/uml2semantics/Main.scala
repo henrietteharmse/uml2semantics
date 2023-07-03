@@ -1,5 +1,6 @@
 package org.uml2semantics
 
+import com.typesafe.scalalogging.Logger
 import org.uml2semantics.model.{OntologyIRI, OntologyPrefix}
 import org.uml2semantics.owl.UmlToOWLWriter
 //import org.uml2semantics.owl.OWLWriter
@@ -35,7 +36,7 @@ val argParser =
         .text("A TSV file containing UML class information"),
     opt[Option[File]]('a', "attributes")
         .valueName("<csv-attributes-file>")
-        .action((a, c) => c.copy(associationsTsv = a))
+        .action((a, c) => c.copy(attributesTsv = a))
         .text("A TSV file containing UML class attribute information"),
     opt[Option[File]]('o', "ontology")
       .required()
@@ -57,9 +58,16 @@ val argParser =
 
 
 @main def uml2owl (arguments: String*): Unit =
+  val logger = Logger("uml2owl")
   OParser.parse(argParser, arguments, InputParameters()) match
     case Some(input) =>
-//      println("Process classes: input = " + _)
+//      logger.trace("### input = " + input)
+      logger.trace("### input.attributesTsv = " + input.attributesTsv)
+      logger.trace("### input.associationsTsv = " + input.associationsTsv)
+      logger.trace("### input.associationsByRoleTsv = " + input.associationsByRoleTsv)
+      logger.trace("### input.enumerationsTsv = " + input.enumerationsTsv)
+      logger.trace("### input.ontologyPrefix = " + input.ontologyPrefix)
+      logger.trace("### input.ontologyIRI = " + input.ontologyIRI)
       val umlClassDiagram = parseUMLClassDiagram(input)
       val owlWriter = new UmlToOWLWriter(umlClassDiagram)
       owlWriter.generateOWL match

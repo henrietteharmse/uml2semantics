@@ -7,9 +7,10 @@ import scala.annotation.{tailrec, targetName}
 import scala.collection.mutable
 
 sealed trait UmlClassId:
+  def nonEmpty: Boolean
   def id: String
 case class UmlClassName(name: String = "") extends UmlClassId:
-  def nonEmpty: Boolean = name.nonEmpty
+  override def nonEmpty: Boolean = name.nonEmpty
   override def id: String = name
 
 
@@ -18,7 +19,7 @@ case class UmlClassName(name: String = "") extends UmlClassId:
  * @param shortName I.e., GO_0043226
  */
 case class UmlClassShortName(shortName: String = "") extends UmlClassId:
-  def nonEmpty: Boolean = shortName.nonEmpty
+  override def nonEmpty: Boolean = shortName.nonEmpty
   override def id: String = shortName
 
 /*
@@ -30,27 +31,40 @@ case class UmlClassShortName(shortName: String = "") extends UmlClassId:
 
 
 sealed trait UmlClassAttributeId:
-  def id: String
-case class UmlClassAttributeName(classId: UmlClassId, name: String = "") extends UmlClassAttributeId:
-  require(classId.id.nonEmpty && name.nonEmpty || name.isEmpty, "classId cannot be empty.")
-  def nonEmpty: Boolean = classId.id.nonEmpty && name.nonEmpty
-  override def id: String = classId.id +"#" + name
+  def id(classId: UmlClassId): String
+case class UmlClassAttributeName(name: String = "") extends UmlClassAttributeId:
+  def nonEmpty: Boolean = name.nonEmpty
+  override def id(classId: UmlClassId): String = classId.id +"#" + name
 
-case class UmlClassAttributeShortName(classId: UmlClassId, shortName: String = "") extends UmlClassAttributeId:
-  require(classId.id.nonEmpty && shortName.nonEmpty || shortName.isEmpty, "classId cannot be empty.")
-  def nonEmpty: Boolean = classId.id.nonEmpty && shortName.nonEmpty
-  override def id: String = classId.id +"#" + shortName
+case class UmlClassAttributeShortName(shortName: String = "") extends UmlClassAttributeId:
+  def nonEmpty: Boolean = shortName.nonEmpty
+  override def id(classId: UmlClassId): String = classId.id +"#" + shortName
 
-case class UmlClassAttributeIdentity(attributeShortName: UmlClassAttributeShortName,
-                                     attributeName: UmlClassAttributeName,
+case class UmlClassAttributeIdentity(classId: UmlClassId,
+                                     attributeShortName: UmlClassAttributeShortName = UmlClassAttributeShortName(),
+                                     attributeName: UmlClassAttributeName = UmlClassAttributeName(),
                                      ontologyPrefix: OntologyPrefix):
-  require(attributeShortName.nonEmpty || attributeName.nonEmpty, "An attribute must have a name or short name.")
-  var tmpAttributeId: UmlClassAttributeId = _
-  if attributeShortName.nonEmpty then
-    tmpAttributeId = attributeShortName
-  else if attributeName.nonEmpty then
-    tmpAttributeId = attributeName
-  val attributeIRI: UmlClassAttributeIRI = UmlClassAttributeIRI(ontologyPrefix, tmpAttributeId)
+  var attributeIRI: UmlClassAttributeIRI = _
+  var attributeId: UmlClassAttributeId = _
+
+object UmlClassAttributeIdentity:
+  def apply(classId: UmlClassId,
+            attributeShortName: UmlClassAttributeShortName = UmlClassAttributeShortName(),
+            attributeName: UmlClassAttributeName = UmlClassAttributeName(),
+            ontologyPrefix: OntologyPrefix): UmlClassAttributeIdentity =
+    require(classId.nonEmpty && (attributeShortName.nonEmpty || attributeName.nonEmpty),
+      "An attribute must have a classId and either a name or short name.")
+    val classAttributeIdentity: UmlClassAttributeIdentity =
+      new UmlClassAttributeIdentity(classId, attributeShortName, attributeName, ontologyPrefix)
+
+    if attributeShortName.nonEmpty then
+      classAttributeIdentity.attributeId = attributeShortName
+    else if attributeName.nonEmpty then
+      classAttributeIdentity.attributeId = attributeName
+
+    classAttributeIdentity.attributeIRI = UmlClassAttributeIRI(ontologyPrefix, classAttributeIdentity.attributeId)
+    classAttributeIdentity
+
 
 /*
 @Todo: Add support for Curies
@@ -64,7 +78,7 @@ object UmlClassParentIds:
     logger.trace(s"setOfParentIds.isEmpty=${setOfParentIds.isEmpty}")
     val setOfParentUncertainClassIds = setOfParentIds
       .filterNot(s => s.isEmpty)
-      .map(m => UmlClassIdentity.findClassId(m).classId)
+      .map(m => UmlClassIdentity.findClassId(m).get.classId)
     new UmlClassParentIds(setOfParentUncertainClassIds)
 
 case class UmlClasses(mapOfUmlClasses: Map[UmlClassId, UmlClass])
@@ -133,9 +147,9 @@ case class UmlClassIdentity(classShortName: UmlClassShortName,
   var classId: UmlClassId = _
 
 object UmlClassIdentity:
-  var classIdentityByShortName: mutable.Map[UmlClassShortName, UmlClassIdentity] = mutable.HashMap[UmlClassShortName, UmlClassIdentity]()
-  var classIdentityByName: mutable.HashMap[UmlClassName, UmlClassIdentity] = mutable.HashMap[UmlClassName, UmlClassIdentity]()
-  var classIdentityByIRI: mutable.HashMap[UmlClassIRI, UmlClassIdentity] = mutable.HashMap[UmlClassIRI, UmlClassIdentity]()
+  private var classIdentityByShortName: mutable.Map[UmlClassShortName, UmlClassIdentity] = mutable.HashMap[UmlClassShortName, UmlClassIdentity]()
+  private var classIdentityByName: mutable.HashMap[UmlClassName, UmlClassIdentity] = mutable.HashMap[UmlClassName, UmlClassIdentity]()
+  private var classIdentityByIRI: mutable.HashMap[UmlClassIRI, UmlClassIdentity] = mutable.HashMap[UmlClassIRI, UmlClassIdentity]()
   private val logger = Logger[UmlClassIdentity]
   def apply(classShortName: UmlClassShortName = UmlClassShortName(),
             className: UmlClassName = UmlClassName(),
@@ -157,18 +171,19 @@ object UmlClassIdentity:
     classIdentityByIRI += (classIdentity.classIRI -> classIdentity)
     classIdentity
 
-  def findClassId(string: String): UmlClassIdentity =
+  def findClassId(string: String): Option[UmlClassIdentity] =
     val classShortNameOption = classIdentityByShortName.get(UmlClassShortName(string))
     val classNameOption = classIdentityByName.get(UmlClassName(string))
-    var classIdentity: UmlClassIdentity = null
+    var classIdentityOption: Option[UmlClassIdentity] = None
 
     if classShortNameOption.isDefined then
-      classIdentity = classShortNameOption.get
+      classIdentityOption = Some(classShortNameOption.get)
     else if classNameOption.isDefined then
-      classIdentity = classNameOption.get
-    else
-      logger.debug(s"ClassId=$string could not be found!")
-    classIdentity
+      classIdentityOption = Some(classNameOption.get)
+
+    classIdentityOption
+
+  def unapply(s: String): Option[UmlClassIdentity] = findClassId(s)
 
 end UmlClassIdentity
 
@@ -179,19 +194,22 @@ case class UmlClass(classIdentity: UmlClassIdentity,
                     classParentIds: UmlClassParentIds = new UmlClassParentIds(Set[UmlClassId]()))
   extends UmlClassDiagramElement
 
-// @todo Define a list of supported primitives
-type UmlPrimitive = String
-object UmlPrimitive:
-  def apply(string: String): UmlPrimitive = string
-  given CanEqual[UmlPrimitive, UmlPrimitive] = CanEqual.derived
 
 case class UmlClassAttributeDefinition(definition: String = "")
-enum UmlClassAttributeType:
-  case Primitive(string: String)
-  case ClassIdentity
 
-case class UmlClassAttribute(attributeId: UmlClassAttributeIdentity,
-                             typeOfAttribute: UmlPrimitive|UmlClassIdentity,
+
+//sealed trait UmlClassAttributeType
+//case class UmlXMLPrimitiveDataType(attributeType: XMLPrimitiveDataType) extends UmlClassAttributeType
+//case class UmlClassIdentityType(attributeType: UmlClassIdentity) extends UmlClassAttributeType
+//
+//object UmlClassAttributeType:
+//  def apply(s: String): UmlClassAttributeType =
+//    s match
+//      case UmlXMLPrimitiveDataType() => XMLPrimitiveDataType.valueOf(s)
+//      case UmlClassIdentityType() => UmlClassIdentityType(s)
+
+case class UmlClassAttribute(attributeIdentity: UmlClassAttributeIdentity,
+                             //                             typeOfAttribute: UmlClassAttributeType,
                              multiplicity: UmlMultiplicity,
                              definition: UmlClassAttributeDefinition = UmlClassAttributeDefinition())
   extends UmlClassDiagramElement
@@ -199,7 +217,8 @@ case class UmlClassAttribute(attributeId: UmlClassAttributeIdentity,
 case class UmlClassDiagram(owlOntologyFile: File,
                            ontologyIRI: OntologyIRI,
                            ontologyPrefix: OntologyPrefix,
-                           umlClasses: UmlClasses)
+                           umlClasses: UmlClasses,
+                           umlClassAttributes: UmlClassAttributes)
 object UmlClassDiagram:
   def apply(owlOntologyFile: File, ontologyIRI: OntologyIRI, ontologyPrefix: OntologyPrefix) =
-    new UmlClassDiagram(owlOntologyFile,ontologyIRI, ontologyPrefix, UmlClasses(Map()))
+    new UmlClassDiagram(owlOntologyFile,ontologyIRI, ontologyPrefix, UmlClasses(Map()), UmlClassAttributes(Map()))

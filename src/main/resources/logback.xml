@@ -7,8 +7,10 @@
     <logger name="UmlIdentity" level="trace" />
     <logger name="generateOWL" level="trace" />
     <logger name="parseClasses" level="trace" />
+    <logger name="parseAttributes" level="trace" />
     <logger name="ClassParentIds" level="trace" />
-    <logger name="org.uml2semantics.owl.OWLWriter" level="trace" />
+    <logger name="uml2owl" level="trace" />
+    <logger name="org.uml2semantics.owl.UmlToOWLWriter" level="trace" />
     <root level="info">
         <appender-ref ref="STDOUT"/>
     </root>
