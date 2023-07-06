@@ -1,2 +1,2 @@
-ClassId	ShortName	Name	PrimitiveType	ClassType	MinMultiplicity	MaxMultiplicity	Definition
-Resource		contactPoint			1	1	Relevant contact information for the cataloged resource. Use of vCard is recommended
+ClassId	ShortName	Name	ClassOrPrimitiveType	MinMultiplicity	MaxMultiplicity	Definition
+Catalog		hasPart	Resource	1	*	An item that is listed in the catalog.

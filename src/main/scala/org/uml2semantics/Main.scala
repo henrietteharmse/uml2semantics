@@ -1,9 +1,8 @@
 package org.uml2semantics
 
 import com.typesafe.scalalogging.Logger
-import org.uml2semantics.model.{OntologyIRI, OntologyPrefix}
+import org.uml2semantics.model.{OntologyIRI, OntologyPrefix, PrefixNamespace}
 import org.uml2semantics.owl.UmlToOWLWriter
-//import org.uml2semantics.owl.OWLWriter
 import scopt.OParser
 
 import java.io.File
@@ -15,7 +14,8 @@ case class InputParameters(classesTsv: Option[File] = None,
                            enumerationsTsv: Option[File] = None,
                            owlOntologyFile: Option[File] = None,
                            ontologyIRI: String = "https://uml2semantics.com/ontology",
-                           ontologyPrefix: String = "uml2ont:https://uml2semantics.com/ontology/")
+                           ontologyPrefix: String = "uml2ont:https://uml2semantics.com/ontology/",
+                           prefixes: Seq[String] = PrefixNamespace.predefinedPrefixNamespacesAsStrings())
 
 
 
@@ -53,7 +53,12 @@ val argParser =
       .withFallback(() => "uml2ont:https://uml2semantics.com/ontology/")
       .valueName("<ontology-prefix>")
       .action((a, c) => c.copy(ontologyPrefix = a))
-      .text("The prefix to use with your ontology, e.g.: ex:https://example.com/ontology/")
+      .text("The prefix to use with your ontology, e.g.: ex:https://example.com/ontology/"),
+    opt[Seq[String]]('x', "prefixes")
+      .withFallback(() => PrefixNamespace.predefinedPrefixNamespacesAsStrings())
+      .valueName("<prefixname:prefix>,<prefixname:prefix>...")
+      .action((a, c) => c.copy(prefixes = a))
+      .text("A list of all the prefixes used in the UML class representation")
   )
 
 

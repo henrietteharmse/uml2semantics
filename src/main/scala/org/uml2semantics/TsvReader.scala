@@ -11,7 +11,7 @@ enum ClassesHeader:
   case ShortName, Name, Definition, ParentIds
 
 enum AttributesHeader:
-  case ClassId, ShortName, Name, PrimitiveType, ClassType, MinMultiplicity, MaxMultiplicity, Definition
+  case ClassId, ShortName, Name, ClassOrPrimitiveType, MinMultiplicity, MaxMultiplicity, Definition
 
 def parseClasses(maybeTsvFile: Option[File], ontologyPrefix: OntologyPrefix): UmlClasses =
   import ClassesHeader.*
@@ -66,13 +66,14 @@ def parseAttributes(maybeTsvFile: Option[File], ontologyPrefix: OntologyPrefix):
     val classId = UmlClassIdentity.findClassId(m(AttributesHeader.ClassId.toString))
     logger.trace(s"classId = $classId")
     if classId.isDefined then
+      logger.trace(s"mClassOrPrimitiveType.toString = {${m(ClassOrPrimitiveType.toString)}}")
       val umlClassAttribute = UmlClassAttribute(
         UmlClassAttributeIdentity(classId.get.classId,
           UmlClassAttributeShortName(m(ShortName.toString)),
           UmlClassAttributeName(m(Name.toString)),
           ontologyPrefix
         ),
-//        m.get(PrimitiveType.toString).get,
+        UmlClassAttributeType(m(ClassOrPrimitiveType.toString)),
         UmlMultiplicity(UmlCardinality(m(MinMultiplicity.toString)), UmlCardinality(m(MaxMultiplicity.toString))),
         UmlClassAttributeDefinition(m(Definition.toString))
       )

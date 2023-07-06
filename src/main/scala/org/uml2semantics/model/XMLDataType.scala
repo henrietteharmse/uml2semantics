@@ -1,11 +1,45 @@
 package org.uml2semantics.model
 
-enum XMLPrimitiveDataType:
-  case `xsd:boolean` extends XMLPrimitiveDataType
-  case `xsd:float`  extends XMLPrimitiveDataType
-  case `xsd:string` extends XMLPrimitiveDataType
+import com.typesafe.scalalogging.Logger
 
-object XMLPrimitiveDataType:
-  def unapply(s: String): XMLPrimitiveDataType =
-    XMLPrimitiveDataType.valueOf(s)
+enum XMLDataType:
+  case
+    `xsd:anyURI`,
+    `xsd:base64Binary`,
+    `xsd:boolean`,
+    `xsd:byte`,
+    `xsd:dateTime`,
+    `xsd:dateTimeStamp`,
+    `xsd:decimal`,
+    `xsd:double`,
+    `xsd:float`,
+    `xsd:hexBinary`,
+    `xsd:int`,
+    `xsd:integer`,
+    `xsd:language`,
+    `xsd:long`,
+    `xsd:Name`,
+    `xsd:NCName`,
+    `xsd:negativeInteger`,
+    `xsd:NMTOKEN`,
+    `xsd:nonNegativeInteger`,
+    `xsd:nonPositiveInteger`,
+    `xsd:normalizedString`,
+    `xsd:positiveInteger`,
+    `xsd:short`,
+    `xsd:string`,
+    `xsd:token`,
+    `xsd:unsignedByte`,
+    `xsd:unsignedInt`,
+    `xsd:unsignedLong`,
+    `xsd:unsignedShort`
+
+object XMLDataType:
+  def unapply(s: String): Option[XMLDataType] =
+    try
+      val dataType: XMLDataType = XMLDataType.valueOf(s)
+      Some(dataType)
+    catch
+      case _ => None
+
 

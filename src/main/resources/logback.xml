@@ -9,6 +9,7 @@
     <logger name="parseClasses" level="trace" />
     <logger name="parseAttributes" level="trace" />
     <logger name="ClassParentIds" level="trace" />
+    <logger name="XMLPrimitiveDataType" level="trace" />
     <logger name="uml2owl" level="trace" />
     <logger name="org.uml2semantics.owl.UmlToOWLWriter" level="trace" />
     <root level="info">

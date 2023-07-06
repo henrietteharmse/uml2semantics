@@ -113,7 +113,15 @@ object UmlNonNegativeInteger:
     require(n >= 0)
     n
 
-  def unapply(s: String): Boolean = s.toInt >= 0
+  def unapply(s: String): Option[UmlNonNegativeInteger] =
+    try
+      val someInt: Int = s.toInt
+      if someInt >=0 then
+        Some(UmlNonNegativeInteger(someInt))
+      else
+        None
+    catch
+      case e: Exception => None
 
 sealed trait UmlCardinality
 case class UmlInfiniteCardinality(infinite: UmlInfinite) extends UmlCardinality
@@ -121,14 +129,14 @@ case class UmlNonNegativeCardinality(nonNegativeInteger: UmlNonNegativeInteger) 
 object UmlCardinality:
   def apply(s: String): UmlCardinality =
     s match
-      case UmlNonNegativeInteger() => UmlNonNegativeCardinality(UmlNonNegativeInteger(s.toInt))
+      case UmlNonNegativeInteger(i) => UmlNonNegativeCardinality(i)
       case UmlInfinite() => UmlInfiniteCardinality(UmlInfinite())
       case _ => UmlNonNegativeCardinality(UmlNonNegativeInteger(1))
 
   def >=(c1: UmlCardinality, c2: UmlCardinality): Boolean = (c1, c2) match
-    case (UmlInfiniteCardinality(t1), UmlInfiniteCardinality(t2)) => false
-    case (UmlInfiniteCardinality(t1), UmlNonNegativeCardinality(t2)) => true
-    case (UmlNonNegativeCardinality(t1), UmlInfiniteCardinality(t2)) => false
+    case (UmlInfiniteCardinality(_), UmlInfiniteCardinality(_)) => false
+    case (UmlInfiniteCardinality(_), UmlNonNegativeCardinality(_)) => true
+    case (UmlNonNegativeCardinality(_), UmlInfiniteCardinality(_)) => false
     case (UmlNonNegativeCardinality(t1), UmlNonNegativeCardinality(t2)) => t1 >= t2
 
 
@@ -137,7 +145,9 @@ case class UmlMultiplicity(min: UmlCardinality,
 
 object UmlMultiplicity:
   def apply (min: UmlCardinality, max: UmlCardinality): UmlMultiplicity =
-    require(>=(max, min), "max cardinality must be greater or equal than min cardinality")
+    require(>=(max, min),
+      s"""Max cardinality must be greater or equal than min cardinality,
+         but "min=$min" and "max=$max" found.""")
     new UmlMultiplicity(min, max)
 
 case class UmlClassIdentity(classShortName: UmlClassShortName,
@@ -147,9 +157,9 @@ case class UmlClassIdentity(classShortName: UmlClassShortName,
   var classId: UmlClassId = _
 
 object UmlClassIdentity:
-  private var classIdentityByShortName: mutable.Map[UmlClassShortName, UmlClassIdentity] = mutable.HashMap[UmlClassShortName, UmlClassIdentity]()
-  private var classIdentityByName: mutable.HashMap[UmlClassName, UmlClassIdentity] = mutable.HashMap[UmlClassName, UmlClassIdentity]()
-  private var classIdentityByIRI: mutable.HashMap[UmlClassIRI, UmlClassIdentity] = mutable.HashMap[UmlClassIRI, UmlClassIdentity]()
+  private val classIdentityByShortName: mutable.Map[UmlClassShortName, UmlClassIdentity] = mutable.HashMap[UmlClassShortName, UmlClassIdentity]()
+  private val classIdentityByName: mutable.HashMap[UmlClassName, UmlClassIdentity] = mutable.HashMap[UmlClassName, UmlClassIdentity]()
+  private val classIdentityByIRI: mutable.HashMap[UmlClassIRI, UmlClassIdentity] = mutable.HashMap[UmlClassIRI, UmlClassIdentity]()
   private val logger = Logger[UmlClassIdentity]
   def apply(classShortName: UmlClassShortName = UmlClassShortName(),
             className: UmlClassName = UmlClassName(),
@@ -197,19 +207,28 @@ case class UmlClass(classIdentity: UmlClassIdentity,
 
 case class UmlClassAttributeDefinition(definition: String = "")
 
+sealed trait UmlClassAttributeType
+case class UmlXMLPrimitiveDataType(attributeType: XMLDataType) extends UmlClassAttributeType
+case class UmlClassIdentityType(attributeType: UmlClassIdentity) extends UmlClassAttributeType
+object UmlClassAttributeType:
+  private val logger = Logger[UmlClassAttributeType]
 
-//sealed trait UmlClassAttributeType
-//case class UmlXMLPrimitiveDataType(attributeType: XMLPrimitiveDataType) extends UmlClassAttributeType
-//case class UmlClassIdentityType(attributeType: UmlClassIdentity) extends UmlClassAttributeType
-//
-//object UmlClassAttributeType:
-//  def apply(s: String): UmlClassAttributeType =
-//    s match
-//      case UmlXMLPrimitiveDataType() => XMLPrimitiveDataType.valueOf(s)
-//      case UmlClassIdentityType() => UmlClassIdentityType(s)
+  def apply(s: String): UmlClassAttributeType =
+    require(UmlClassIdentity.findClassId(s).nonEmpty || XMLDataType.unapply(s).nonEmpty,
+      s"""A class attribute must have a type that is either a class, that has been specified,
+        or an XML primitive data type. "$s" is not recognised as either a class or an XML primitive data type.""")
+    UmlClassIdentity.findClassId(s) match
+      case Some(classId) => UmlClassIdentityType(classId)
+      case None => UmlXMLPrimitiveDataType(XMLDataType.valueOf(s))
+
+  def unapply(s: String): Option[UmlClassAttributeType] = s match
+    case UmlClassIdentity(classShortName, className, ontologyPrefix) => Some(UmlClassIdentityType(
+      UmlClassIdentity(classShortName, className, ontologyPrefix)))
+    case XMLDataType(i) => Some(UmlXMLPrimitiveDataType(i))
+    case _ => None
 
 case class UmlClassAttribute(attributeIdentity: UmlClassAttributeIdentity,
-                             //                             typeOfAttribute: UmlClassAttributeType,
+                             typeOfAttribute: UmlClassAttributeType,
                              multiplicity: UmlMultiplicity,
                              definition: UmlClassAttributeDefinition = UmlClassAttributeDefinition())
   extends UmlClassDiagramElement
@@ -220,5 +239,5 @@ case class UmlClassDiagram(owlOntologyFile: File,
                            umlClasses: UmlClasses,
                            umlClassAttributes: UmlClassAttributes)
 object UmlClassDiagram:
-  def apply(owlOntologyFile: File, ontologyIRI: OntologyIRI, ontologyPrefix: OntologyPrefix) =
+  def apply(owlOntologyFile: File, ontologyIRI: OntologyIRI, ontologyPrefix: OntologyPrefix): UmlClassDiagram =
     new UmlClassDiagram(owlOntologyFile,ontologyIRI, ontologyPrefix, UmlClasses(Map()), UmlClassAttributes(Map()))
