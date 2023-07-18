@@ -16,7 +16,9 @@ case class UmlClassName(name: String = "") extends UmlClassId:
 
 /**
  *
- * @param shortName I.e., GO_0043226
+ * @param shortName I.e., GO_0043226. Short names are defined at https://www.w3.org/TR/rif-dtb/#def-shortname.
+ *                  When using short names for defining UML classes etc, we will assume that IRI is formed by concatenating
+ *                  @Main.ontologyIRI + "#" + shortName.
  */
 case class UmlClassShortName(shortName: String = "") extends UmlClassId:
   override def nonEmpty: Boolean = shortName.nonEmpty
@@ -25,45 +27,101 @@ case class UmlClassShortName(shortName: String = "") extends UmlClassId:
 /*
 @Todo: Add support for Curies
 */
-//case class ClassCurie(curie: String = "") /*extends ClassId*/:
-//  def nonEmpty: Boolean = curie.nonEmpty
-//  override def id: String = curie
+case class UmlClassCurie(curieOption: Option[Curie] = None) extends UmlClassId:
+  override def nonEmpty: Boolean = curieOption.nonEmpty
+  override def id: String = curieOption.get.curie
 
+object UmlClassCurie:
+  def apply(prefixName:PrefixName, prefixReference: PrefixReference): UmlClassCurie =
+    new UmlClassCurie(Some(Curie(prefixName, prefixReference)))
 
+private val FRAGMENT_SEPARATOR: String = "#"
 sealed trait UmlClassAttributeId:
+  def nonEmpty: Boolean
   def id(classId: UmlClassId): String
 case class UmlClassAttributeName(name: String = "") extends UmlClassAttributeId:
-  def nonEmpty: Boolean = name.nonEmpty
-  override def id(classId: UmlClassId): String = classId.id +"#" + name
+  override def nonEmpty: Boolean = name.nonEmpty
+  override def id(classId: UmlClassId): String = classId.id + FRAGMENT_SEPARATOR + name
 
 case class UmlClassAttributeShortName(shortName: String = "") extends UmlClassAttributeId:
-  def nonEmpty: Boolean = shortName.nonEmpty
-  override def id(classId: UmlClassId): String = classId.id +"#" + shortName
+  override def nonEmpty: Boolean = shortName.nonEmpty
+  override def id(classId: UmlClassId): String = classId.id + FRAGMENT_SEPARATOR + shortName
+
+case class UmlClassAttributeCurie(curieOption: Option[Curie]) extends  UmlClassAttributeId:
+  override def nonEmpty: Boolean = curieOption.nonEmpty
+
+  override def id(classId: UmlClassId): String = classId.id + FRAGMENT_SEPARATOR + curieOption.get.prefixReference.reference
 
 case class UmlClassAttributeIdentity(classId: UmlClassId,
                                      attributeShortName: UmlClassAttributeShortName = UmlClassAttributeShortName(),
                                      attributeName: UmlClassAttributeName = UmlClassAttributeName(),
-                                     ontologyPrefix: OntologyPrefix):
+                                     attributeCurie: UmlClassAttributeCurie = UmlClassAttributeCurie(None),
+                                     ontologyPrefix: PrefixNamespace):
   var attributeIRI: UmlClassAttributeIRI = _
   var attributeId: UmlClassAttributeId = _
+  var attributeLabel: String = _
 
 object UmlClassAttributeIdentity:
+
+  private val attrIdentityByShortName: mutable.Map[UmlClassAttributeShortName, UmlClassAttributeIdentity] =
+    mutable.HashMap[UmlClassAttributeShortName, UmlClassAttributeIdentity]()
+  private val attrIdentityByName: mutable.HashMap[UmlClassAttributeName, UmlClassAttributeIdentity] =
+    mutable.HashMap[UmlClassAttributeName, UmlClassAttributeIdentity]()
+  private val attrIdentityByIRI: mutable.HashMap[UmlClassAttributeIRI, UmlClassAttributeIdentity] =
+    mutable.HashMap[UmlClassAttributeIRI, UmlClassAttributeIdentity]()
+  private val attrIdentityByCurie: mutable.HashMap[UmlClassAttributeCurie, UmlClassAttributeIdentity] =
+    mutable.HashMap[UmlClassAttributeCurie, UmlClassAttributeIdentity]()
+
   def apply(classId: UmlClassId,
             attributeShortName: UmlClassAttributeShortName = UmlClassAttributeShortName(),
             attributeName: UmlClassAttributeName = UmlClassAttributeName(),
-            ontologyPrefix: OntologyPrefix): UmlClassAttributeIdentity =
-    require(classId.nonEmpty && (attributeShortName.nonEmpty || attributeName.nonEmpty),
+            attributeCurie: UmlClassAttributeCurie = UmlClassAttributeCurie(None),
+            ontologyPrefix: PrefixNamespace): UmlClassAttributeIdentity =
+    require(classId.nonEmpty && (attributeShortName.nonEmpty || attributeName.nonEmpty || attributeCurie.nonEmpty ),
       "An attribute must have a classId and either a name or short name.")
     val classAttributeIdentity: UmlClassAttributeIdentity =
-      new UmlClassAttributeIdentity(classId, attributeShortName, attributeName, ontologyPrefix)
+      new UmlClassAttributeIdentity(classId, attributeShortName, attributeName, attributeCurie, ontologyPrefix)
 
-    if attributeShortName.nonEmpty then
-      classAttributeIdentity.attributeId = attributeShortName
-    else if attributeName.nonEmpty then
-      classAttributeIdentity.attributeId = attributeName
+    (attributeShortName, attributeName, attributeCurie.curieOption) match
+      case (UmlClassAttributeShortName(""), UmlClassAttributeName(""), Some(curie)) =>
+        populate(attributeCurie, ontologyPrefix, classAttributeIdentity, curie.prefixReference.reference)
+        attrIdentityByCurie += (attributeCurie -> classAttributeIdentity)
+      case (UmlClassAttributeShortName(""), UmlClassAttributeName(strAttributeName), Some(curie)) =>
+        populate(attributeCurie, ontologyPrefix, classAttributeIdentity, strAttributeName)
+        attrIdentityByCurie += (attributeCurie -> classAttributeIdentity)
+        attrIdentityByName += (attributeName -> classAttributeIdentity)
+      case (UmlClassAttributeShortName(""), UmlClassAttributeName(strAttributeName), None) =>
+        populate(attributeName, ontologyPrefix, classAttributeIdentity, strAttributeName)
+        attrIdentityByName += (attributeName -> classAttributeIdentity)
+      case (UmlClassAttributeShortName(strAttributeShortName), UmlClassAttributeName(""), None) =>
+        populate(attributeShortName, ontologyPrefix, classAttributeIdentity, strAttributeShortName)
+        attrIdentityByShortName += (attributeShortName -> classAttributeIdentity)
+      case (UmlClassAttributeShortName(strAttributeShortName), UmlClassAttributeName(""), Some(curie)) =>
+        populate(attributeCurie, ontologyPrefix, classAttributeIdentity, strAttributeShortName)
+        attrIdentityByCurie += (attributeCurie -> classAttributeIdentity)
+        attrIdentityByShortName += (attributeShortName -> classAttributeIdentity)
+      case (UmlClassAttributeShortName(strAttributeShortName), UmlClassAttributeName(strAttributeName), None) =>
+        populate(attributeShortName, ontologyPrefix, classAttributeIdentity, strAttributeName)
+        attrIdentityByName += (attributeName -> classAttributeIdentity)
+        attrIdentityByShortName += (attributeShortName -> classAttributeIdentity)
+      case (UmlClassAttributeShortName(strAttributeShortName), UmlClassAttributeName(strAttributeName), Some(curie)) =>
+        populate(attributeCurie, ontologyPrefix, classAttributeIdentity, strAttributeName)
+        attrIdentityByCurie += (attributeCurie -> classAttributeIdentity)
+        attrIdentityByName += (attributeName -> classAttributeIdentity)
+        attrIdentityByShortName += (attributeShortName -> classAttributeIdentity)
 
-    classAttributeIdentity.attributeIRI = UmlClassAttributeIRI(ontologyPrefix, classAttributeIdentity.attributeId)
+      attrIdentityByIRI += (classAttributeIdentity.attributeIRI -> classAttributeIdentity)
+
     classAttributeIdentity
+
+  private def populate(attributeId: UmlClassAttributeId, ontologyPrefix: PrefixNamespace,
+                       attributeIdentity: UmlClassAttributeIdentity,
+                       label: String): Unit = {
+    val attributeIRI: UmlClassAttributeIRI = UmlClassAttributeIRI(ontologyPrefix, attributeId)
+    attributeIdentity.attributeId = attributeId
+    attributeIdentity.attributeIRI = attributeIRI
+    attributeIdentity.attributeLabel = label
+  }
 
 
 /*
@@ -85,17 +143,23 @@ case class UmlClasses(mapOfUmlClasses: Map[UmlClassId, UmlClass])
 
 case class UmlClassAttributes(mapOfUmlClassAttributes: Map[UmlClassAttributeId, UmlClassAttribute])
 
-case class UmlClassIRI(ontologyPrefix: OntologyPrefix, classId: UmlClassId):
-  val iri: String = ontologyPrefix.ontologyPrefix + classId.id
-//  override def toString: String = ontologyPrefix.ontologyPrefix + classId
+case class UmlClassIRI(iri: String)
 
-case class UmlClassAttributeIRI(ontologyPrefix: OntologyPrefix, attributeId: UmlClassAttributeId):
-  val iri: String = ontologyPrefix.ontologyPrefix + attributeId.id
+object UmlClassIRI:
+  private val logger = Logger[UmlClassIRI]
+  def apply(ontologyPrefix: PrefixNamespace, classId: UmlClassId): UmlClassIRI = classId match
+    case classIdType: UmlClassCurie =>
+      new UmlClassIRI(PrefixNamespace.getPrefixNamespace(classIdType.curieOption.get.prefixName).get.prefixIRI.iri +
+        classIdType.curieOption.get.prefixReference.reference)
+    case _ =>  UmlClassIRI(ontologyPrefix.prefixIRI.iri + classId.id)
+
+case class UmlClassAttributeIRI(ontologyPrefix: PrefixNamespace, attributeId: UmlClassAttributeId):
+  val iri: String = ontologyPrefix.prefixIRI.iri + attributeId.id
 
 case class OntologyIRI(ontologyIRI: String)
-case class OntologyPrefix(ontologyPrefix: String):
-  def +(classId: UmlClassId): UmlClassIRI =
-    UmlClassIRI(OntologyPrefix(ontologyPrefix), classId)
+//case class OntologyPrefix(ontologyPrefix: String):
+//  def +(classId: UmlClassId): UmlClassIRI =
+//    UmlClassIRI(OntologyPrefix(ontologyPrefix), classId)
 
 case class UmlClassDefinition(definition: String = "")
 
@@ -152,34 +216,74 @@ object UmlMultiplicity:
 
 case class UmlClassIdentity(classShortName: UmlClassShortName,
                             className: UmlClassName,
-                            ontologyPrefix: OntologyPrefix):
+                            classCurie: UmlClassCurie,
+                            ontologyPrefix: PrefixNamespace):
   var classIRI: UmlClassIRI = _
   var classId: UmlClassId = _
+  var classLabel: String = _
 
 object UmlClassIdentity:
   private val classIdentityByShortName: mutable.Map[UmlClassShortName, UmlClassIdentity] = mutable.HashMap[UmlClassShortName, UmlClassIdentity]()
   private val classIdentityByName: mutable.HashMap[UmlClassName, UmlClassIdentity] = mutable.HashMap[UmlClassName, UmlClassIdentity]()
   private val classIdentityByIRI: mutable.HashMap[UmlClassIRI, UmlClassIdentity] = mutable.HashMap[UmlClassIRI, UmlClassIdentity]()
+  private val classIdentityByCurie: mutable.HashMap[UmlClassCurie, UmlClassIdentity] = mutable.HashMap[UmlClassCurie, UmlClassIdentity]()
   private val logger = Logger[UmlClassIdentity]
+
+  /**
+   *
+   * @param classShortName
+   * @param className
+   * @param classCurie
+   * @param ontologyPrefix
+   * @return
+   */
   def apply(classShortName: UmlClassShortName = UmlClassShortName(),
             className: UmlClassName = UmlClassName(),
-            ontologyPrefix: OntologyPrefix): UmlClassIdentity =
-    require(classShortName.nonEmpty || className.nonEmpty, "A class must have either a shortname or a name.")
-    val classIdentity: UmlClassIdentity = new UmlClassIdentity(classShortName, className, ontologyPrefix)
-    if classShortName.nonEmpty then
-      classIdentity.classId = classShortName
-    else if className.nonEmpty then
-      classIdentity.classId = className
-    classIdentity.classIRI = UmlClassIRI(ontologyPrefix, classIdentity.classId)
+            classCurie: UmlClassCurie = UmlClassCurie(),
+            ontologyPrefix: PrefixNamespace): UmlClassIdentity =
+    logger.trace(s"classShortName = $classShortName, className = $className and classCurie=$classCurie")
+    require(classCurie.nonEmpty || classShortName.nonEmpty || className.nonEmpty, "A class must have either a curie, shortname or a name.")
+    val classIdentity: UmlClassIdentity = new UmlClassIdentity(classShortName, className, classCurie, ontologyPrefix)
+    (classShortName, className, classCurie.curieOption) match
+      case (UmlClassShortName(""), UmlClassName(""), Some(curie)) =>
+        populate(classCurie, ontologyPrefix, classIdentity, curie.prefixReference.reference )
+        classIdentityByCurie += (classCurie -> classIdentity)
+      case (UmlClassShortName(""), UmlClassName(strClassName), Some(curie)) =>
+        populate(classCurie, ontologyPrefix, classIdentity, strClassName)
+        classIdentityByCurie += (classCurie -> classIdentity)
+        classIdentityByName += (className -> classIdentity)
+      case (UmlClassShortName(""), UmlClassName(strClassName), None) =>
+        populate(className, ontologyPrefix, classIdentity, strClassName)
+        classIdentityByName += (className -> classIdentity)
+      case (UmlClassShortName(strClassShortName), UmlClassName(""), None) =>
+        populate(classShortName, ontologyPrefix, classIdentity, strClassShortName)
+        classIdentityByShortName += (classShortName -> classIdentity)
+      case (UmlClassShortName(strClassShortName), UmlClassName(""), Some(curie)) =>
+        populate(classCurie, ontologyPrefix, classIdentity, strClassShortName)
+        classIdentityByCurie += (classCurie -> classIdentity)
+        classIdentityByShortName += (classShortName -> classIdentity)
+      case (UmlClassShortName(strClassShortName), UmlClassName(strClassName), None) =>
+        populate(classShortName, ontologyPrefix, classIdentity, strClassName)
+        classIdentityByName += (className -> classIdentity)
+        classIdentityByShortName += (classShortName -> classIdentity)
+      case (UmlClassShortName(strClassShortName), UmlClassName(strClassName), Some(curie)) =>
+        populate(classCurie, ontologyPrefix, classIdentity, strClassName)
+        classIdentityByCurie += (classCurie -> classIdentity)
+        classIdentityByName += (className -> classIdentity)
+        classIdentityByShortName += (classShortName -> classIdentity)
 
-    if classShortName.nonEmpty then
-      classIdentityByShortName += (classShortName -> classIdentity)
+      classIdentityByIRI += (classIdentity.classIRI -> classIdentity)
 
-    if className.nonEmpty then
-      classIdentityByName += (className -> classIdentity)
-
-    classIdentityByIRI += (classIdentity.classIRI -> classIdentity)
     classIdentity
+
+
+  private def populate(classId: UmlClassId, ontologyPrefix: PrefixNamespace, classIdentity: UmlClassIdentity,
+                       label: String): Unit = {
+    val classIRI: UmlClassIRI = UmlClassIRI(ontologyPrefix, classId)
+    classIdentity.classId = classId
+    classIdentity.classIRI = classIRI
+    classIdentity.classLabel = label
+  }
 
   def findClassId(string: String): Option[UmlClassIdentity] =
     val classShortNameOption = classIdentityByShortName.get(UmlClassShortName(string))
@@ -187,9 +291,11 @@ object UmlClassIdentity:
     var classIdentityOption: Option[UmlClassIdentity] = None
 
     if classShortNameOption.isDefined then
-      classIdentityOption = Some(classShortNameOption.get)
+      classIdentityOption = classShortNameOption
     else if classNameOption.isDefined then
-      classIdentityOption = Some(classNameOption.get)
+      classIdentityOption = classNameOption
+    else if Curie.isPossibleCurie(string) then
+      classIdentityOption = classIdentityByCurie.get(UmlClassCurie(Some(Curie(string))))
 
     classIdentityOption
 
@@ -208,7 +314,7 @@ case class UmlClass(classIdentity: UmlClassIdentity,
 case class UmlClassAttributeDefinition(definition: String = "")
 
 sealed trait UmlClassAttributeType
-case class UmlXMLPrimitiveDataType(attributeType: XMLDataType) extends UmlClassAttributeType
+case class UmlXMLDataType(attributeType: XMLDataType) extends UmlClassAttributeType
 case class UmlClassIdentityType(attributeType: UmlClassIdentity) extends UmlClassAttributeType
 object UmlClassAttributeType:
   private val logger = Logger[UmlClassAttributeType]
@@ -216,15 +322,15 @@ object UmlClassAttributeType:
   def apply(s: String): UmlClassAttributeType =
     require(UmlClassIdentity.findClassId(s).nonEmpty || XMLDataType.unapply(s).nonEmpty,
       s"""A class attribute must have a type that is either a class, that has been specified,
-        or an XML primitive data type. "$s" is not recognised as either a class or an XML primitive data type.""")
+        or an XML data type. "$s" is not recognised as either a class or an XML data type.""")
     UmlClassIdentity.findClassId(s) match
       case Some(classId) => UmlClassIdentityType(classId)
-      case None => UmlXMLPrimitiveDataType(XMLDataType.valueOf(s))
+      case None => UmlXMLDataType(XMLDataType.valueOf(s))
 
   def unapply(s: String): Option[UmlClassAttributeType] = s match
-    case UmlClassIdentity(classShortName, className, ontologyPrefix) => Some(UmlClassIdentityType(
-      UmlClassIdentity(classShortName, className, ontologyPrefix)))
-    case XMLDataType(i) => Some(UmlXMLPrimitiveDataType(i))
+    case UmlClassIdentity(classShortName, className, classCurie, ontologyPrefix) => Some(UmlClassIdentityType(
+      UmlClassIdentity(classShortName, className, classCurie, ontologyPrefix)))
+    case XMLDataType(i) => Some(UmlXMLDataType(i))
     case _ => None
 
 case class UmlClassAttribute(attributeIdentity: UmlClassAttributeIdentity,
@@ -235,9 +341,9 @@ case class UmlClassAttribute(attributeIdentity: UmlClassAttributeIdentity,
 
 case class UmlClassDiagram(owlOntologyFile: File,
                            ontologyIRI: OntologyIRI,
-                           ontologyPrefix: OntologyPrefix,
+                           ontologyPrefix: PrefixNamespace,
                            umlClasses: UmlClasses,
                            umlClassAttributes: UmlClassAttributes)
 object UmlClassDiagram:
-  def apply(owlOntologyFile: File, ontologyIRI: OntologyIRI, ontologyPrefix: OntologyPrefix): UmlClassDiagram =
+  def apply(owlOntologyFile: File, ontologyIRI: OntologyIRI, ontologyPrefix: PrefixNamespace): UmlClassDiagram =
     new UmlClassDiagram(owlOntologyFile,ontologyIRI, ontologyPrefix, UmlClasses(Map()), UmlClassAttributes(Map()))

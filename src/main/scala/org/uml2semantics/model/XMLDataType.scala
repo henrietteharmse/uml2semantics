@@ -35,6 +35,7 @@ enum XMLDataType:
     `xsd:unsignedShort`
 
 object XMLDataType:
+  private val prefixName: PrefixName = PrefixName("xsd")
   def unapply(s: String): Option[XMLDataType] =
     try
       val dataType: XMLDataType = XMLDataType.valueOf(s)
@@ -42,4 +43,5 @@ object XMLDataType:
     catch
       case _ => None
 
-
+  def getIRI(dataType: XMLDataType): String =
+    PrefixNamespace.getPrefixNamespace(prefixName).get.prefixIRI.iri + dataType

@@ -1,5 +1,10 @@
-ShortName	Name	Definition	ParentIds
-	Resource	Resource published or curated by a single agent.	
-	Dataset	A collection of data, published or curated by a single agent, and available for access or download in one or more representations.	Resource
-	DataService	A collection of operations that provides access to one or more datasets or data processing functions.	Resource
-	Catalog	A curated collection of metadata about resources (e.g., datasets and data services in the context of a data catalog)	Dataset|DataService
+Curie	ShortName	Name	Definition	ParentIds
+dcat:Resource		Resource	Resource published or curated by a single agent.	
+dcat:Dataset		Dataset	A collection of data, published or curated by a single agent, and available for access or download in one or more representations.	Resource
+dcat:DataService		DataService	A collection of operations that provides access to one or more datasets or data processing functions.	Resource
+dcat:Catalog			A curated collection of metadata about resources (e.g., datasets and data services in the context of a data catalog)	Dataset|DataService
+dcat:Relationship			An association class for attaching additional information to a relationship between DCAT Resources	
+		Distribution		
+	DCAT_00001			
+skos:Concept	SKOS_00009	Konsep		
+skos:ConceptScheme	SKOS_000010			

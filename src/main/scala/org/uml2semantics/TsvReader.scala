@@ -8,12 +8,12 @@ import scala.collection.mutable
 import scala.collection.mutable.Set
 
 enum ClassesHeader:
-  case ShortName, Name, Definition, ParentIds
+  case ShortName, Name, Curie, Definition, ParentIds
 
 enum AttributesHeader:
-  case ClassId, ShortName, Name, ClassOrPrimitiveType, MinMultiplicity, MaxMultiplicity, Definition
+  case ClassId, Curie, ShortName, Name, ClassOrPrimitiveType, MinMultiplicity, MaxMultiplicity, Definition
 
-def parseClasses(maybeTsvFile: Option[File], ontologyPrefix: OntologyPrefix): UmlClasses =
+def parseClasses(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespace): UmlClasses =
   import ClassesHeader.*
   val logger = Logger("parseClasses")
   implicit object TsvFormat extends TSVFormat {}
@@ -32,10 +32,16 @@ def parseClasses(maybeTsvFile: Option[File], ontologyPrefix: OntologyPrefix): Um
       else ""
     .split('|').map(_.trim).toSet
 
+    val curieOption: Option[Curie] = if m(Curie.toString).contains(":") then
+      Some(org.uml2semantics.model.Curie(m(Curie.toString)))
+    else
+      None
+
     val umlClass = UmlClass(
       UmlClassIdentity(
         UmlClassShortName(m(ShortName.toString)),
         UmlClassName(m(Name.toString)),
+        UmlClassCurie(curieOption),
         ontologyPrefix
         ),
       UmlClassDefinition(m(Definition.toString)),
@@ -51,7 +57,7 @@ def parseClasses(maybeTsvFile: Option[File], ontologyPrefix: OntologyPrefix): Um
 end parseClasses
 
 
-def parseAttributes(maybeTsvFile: Option[File], ontologyPrefix: OntologyPrefix): UmlClassAttributes =
+def parseAttributes(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespace): UmlClassAttributes =
   import AttributesHeader.*
   val logger = Logger("parseAttributes")
   implicit object TsvFormat extends TSVFormat {}
@@ -67,10 +73,15 @@ def parseAttributes(maybeTsvFile: Option[File], ontologyPrefix: OntologyPrefix):
     logger.trace(s"classId = $classId")
     if classId.isDefined then
       logger.trace(s"mClassOrPrimitiveType.toString = {${m(ClassOrPrimitiveType.toString)}}")
+      val curieOption: Option[Curie] = if m(Curie.toString).contains(":") then
+        Some(org.uml2semantics.model.Curie(m(Curie.toString)))
+      else
+        None
       val umlClassAttribute = UmlClassAttribute(
         UmlClassAttributeIdentity(classId.get.classId,
           UmlClassAttributeShortName(m(ShortName.toString)),
           UmlClassAttributeName(m(Name.toString)),
+          UmlClassAttributeCurie(curieOption),
           ontologyPrefix
         ),
         UmlClassAttributeType(m(ClassOrPrimitiveType.toString)),
@@ -90,9 +101,9 @@ def parseUMLClassDiagram(input: InputParameters): UmlClassDiagram =
   UmlClassDiagram(
     input.owlOntologyFile.get,
     OntologyIRI(input.ontologyIRI),
-    OntologyPrefix(input.ontologyPrefix),
-    parseClasses(input.classesTsv, OntologyPrefix(input.ontologyPrefix)),
-    parseAttributes(input.attributesTsv, OntologyPrefix(input.ontologyPrefix)))
+    PrefixNamespace(input.ontologyPrefix),
+    parseClasses(input.classesTsv, PrefixNamespace(input.ontologyPrefix)),
+    parseAttributes(input.attributesTsv, PrefixNamespace(input.ontologyPrefix)))
 
 
 

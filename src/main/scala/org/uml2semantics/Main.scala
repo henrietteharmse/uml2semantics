@@ -1,7 +1,7 @@
 package org.uml2semantics
 
 import com.typesafe.scalalogging.Logger
-import org.uml2semantics.model.{OntologyIRI, OntologyPrefix, PrefixNamespace}
+import org.uml2semantics.model.{OntologyIRI, PrefixNamespace}
 import org.uml2semantics.owl.UmlToOWLWriter
 import scopt.OParser
 
@@ -73,6 +73,9 @@ val argParser =
       logger.trace("### input.enumerationsTsv = " + input.enumerationsTsv)
       logger.trace("### input.ontologyPrefix = " + input.ontologyPrefix)
       logger.trace("### input.ontologyIRI = " + input.ontologyIRI)
+      logger.trace("### input.prefixes = " + input.prefixes)
+
+      PrefixNamespace.cachePrefixes(input.prefixes)
       val umlClassDiagram = parseUMLClassDiagram(input)
       val owlWriter = new UmlToOWLWriter(umlClassDiagram)
       owlWriter.generateOWL match

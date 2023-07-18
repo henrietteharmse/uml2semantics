@@ -4,12 +4,14 @@
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} -%kvp- %msg%n</pattern>
         </encoder>
     </appender>
-    <logger name="UmlIdentity" level="trace" />
+    <logger name="org.uml2semantics.model.UmlClassIdentity" level="trace" />
+    <logger name="org.uml2semantics.model.UmlClassIRI" level="trace" />
     <logger name="generateOWL" level="trace" />
     <logger name="parseClasses" level="trace" />
     <logger name="parseAttributes" level="trace" />
     <logger name="ClassParentIds" level="trace" />
-    <logger name="XMLPrimitiveDataType" level="trace" />
+    <logger name="org.uml2semantics.model.XMLPrimitiveDataType" level="trace" />
+    <logger name="org.uml2semantics.model.PrefixNamespace" level="trace" />
     <logger name="uml2owl" level="trace" />
     <logger name="org.uml2semantics.owl.UmlToOWLWriter" level="trace" />
     <root level="info">

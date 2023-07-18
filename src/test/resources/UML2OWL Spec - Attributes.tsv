@@ -1,2 +1,2 @@
-ClassId	ShortName	Name	ClassOrPrimitiveType	MinMultiplicity	MaxMultiplicity	Definition
-Catalog		hasPart	Resource	1	*	An item that is listed in the catalog.
+ClassId	Curie	ShortName	Name	ClassOrPrimitiveType	MinMultiplicity	MaxMultiplicity	Definition
+dcat:Catalog			hasPart	dcat:Resource	1	*	An item that is listed in the catalog.

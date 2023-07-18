@@ -22,47 +22,102 @@
     
 
 
-    <!-- uml2ont:https://uml2semantics.com/ontology/Catalog -->
+    <!-- http://www.w3.org/2004/02/skos/core#Concept -->
 
 
-    <owl:Class rdf:about="uml2ont:https://uml2semantics.com/ontology/Catalog">
-        <rdfs:subClassOf rdf:resource="uml2ont:https://uml2semantics.com/ontology/DataService"/>
-        <rdfs:subClassOf rdf:resource="uml2ont:https://uml2semantics.com/ontology/Dataset"/>
+    <owl:Class rdf:about="http://www.w3.org/2004/02/skos/core#Concept">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+        <rdfs:comment></rdfs:comment>
+        <rdfs:label>Konsep</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/2004/02/skos/core#ConceptScheme -->
+
+
+    <owl:Class rdf:about="http://www.w3.org/2004/02/skos/core#ConceptScheme">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+        <rdfs:comment></rdfs:comment>
+        <rdfs:label>SKOS_000010</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/ns/dcat#Catalog -->
+
+
+    <owl:Class rdf:about="http://www.w3.org/ns/dcat#Catalog">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/ns/dcat#DataService"/>
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/ns/dcat#Dataset"/>
         <rdfs:comment>A curated collection of metadata about resources (e.g., datasets and data services in the context of a data catalog)</rdfs:comment>
         <rdfs:label>Catalog</rdfs:label>
     </owl:Class>
     
 
 
-    <!-- uml2ont:https://uml2semantics.com/ontology/DataService -->
+    <!-- http://www.w3.org/ns/dcat#DataService -->
 
 
-    <owl:Class rdf:about="uml2ont:https://uml2semantics.com/ontology/DataService">
-        <rdfs:subClassOf rdf:resource="uml2ont:https://uml2semantics.com/ontology/Resource"/>
+    <owl:Class rdf:about="http://www.w3.org/ns/dcat#DataService">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/ns/dcat#Resource"/>
         <rdfs:comment>A collection of operations that provides access to one or more datasets or data processing functions.</rdfs:comment>
         <rdfs:label>DataService</rdfs:label>
     </owl:Class>
     
 
 
-    <!-- uml2ont:https://uml2semantics.com/ontology/Dataset -->
+    <!-- http://www.w3.org/ns/dcat#Dataset -->
 
 
-    <owl:Class rdf:about="uml2ont:https://uml2semantics.com/ontology/Dataset">
-        <rdfs:subClassOf rdf:resource="uml2ont:https://uml2semantics.com/ontology/Resource"/>
+    <owl:Class rdf:about="http://www.w3.org/ns/dcat#Dataset">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/ns/dcat#Resource"/>
         <rdfs:comment>A collection of data, published or curated by a single agent, and available for access or download in one or more representations.</rdfs:comment>
         <rdfs:label>Dataset</rdfs:label>
     </owl:Class>
     
 
 
-    <!-- uml2ont:https://uml2semantics.com/ontology/Resource -->
+    <!-- http://www.w3.org/ns/dcat#Relationship -->
 
 
-    <owl:Class rdf:about="uml2ont:https://uml2semantics.com/ontology/Resource">
+    <owl:Class rdf:about="http://www.w3.org/ns/dcat#Relationship">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+        <rdfs:comment>An association class for attaching additional information to a relationship between DCAT Resources</rdfs:comment>
+        <rdfs:label>Relationship</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/ns/dcat#Resource -->
+
+
+    <owl:Class rdf:about="http://www.w3.org/ns/dcat#Resource">
         <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
         <rdfs:comment>Resource published or curated by a single agent.</rdfs:comment>
         <rdfs:label>Resource</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://uml2semantics.com/ontology/DCAT_00001 -->
+
+
+    <owl:Class rdf:about="https://uml2semantics.com/ontology/DCAT_00001">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+        <rdfs:comment></rdfs:comment>
+        <rdfs:label>DCAT_00001</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://uml2semantics.com/ontology/Distribution -->
+
+
+    <owl:Class rdf:about="https://uml2semantics.com/ontology/Distribution">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+        <rdfs:comment></rdfs:comment>
+        <rdfs:label>Distribution</rdfs:label>
     </owl:Class>
 </rdf:RDF>
 
