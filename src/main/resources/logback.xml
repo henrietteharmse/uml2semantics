@@ -6,6 +6,7 @@
     </appender>
     <logger name="org.uml2semantics.model.UmlClassIdentity" level="trace" />
     <logger name="org.uml2semantics.model.UmlClassIRI" level="trace" />
+    <logger name="org.uml2semantics.model.UmlClassAttributeIRI" level="trace" />
     <logger name="generateOWL" level="trace" />
     <logger name="parseClasses" level="trace" />
     <logger name="parseAttributes" level="trace" />
