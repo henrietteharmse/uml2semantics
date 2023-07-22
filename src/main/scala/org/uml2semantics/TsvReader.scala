@@ -8,10 +8,10 @@ import scala.collection.mutable
 import scala.collection.mutable.Set
 
 enum ClassesHeader:
-  case ShortName, Name, Curie, Definition, ParentIds
+  case Name, Curie, Definition, ParentIds
 
 enum AttributesHeader:
-  case ClassId, Curie, ShortName, Name, ClassOrPrimitiveType, MinMultiplicity, MaxMultiplicity, Definition
+  case ClassId, Curie, Name, ClassOrPrimitiveType, MinMultiplicity, MaxMultiplicity, Definition
 
 def parseClasses(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespace): UmlClasses =
   import ClassesHeader.*
@@ -40,7 +40,6 @@ def parseClasses(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespace): U
 
     val umlClass = UmlClass(
       UmlClassIdentity(
-        UmlClassShortName(m(ShortName.toString)),
         UmlClassName(m(Name.toString)),
         UmlClassCurie(curieOption),
         ontologyPrefix
@@ -81,7 +80,6 @@ def parseAttributes(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespace)
         None
       val umlClassAttribute = UmlClassAttribute(
         UmlClassAttributeIdentity(classId.get.classId,
-          UmlClassAttributeShortName(m(ShortName.toString)),
           UmlClassAttributeName(m(Name.toString)),
           UmlClassAttributeCurie(curieOption),
           ontologyPrefix

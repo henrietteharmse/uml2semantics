@@ -190,19 +190,17 @@ class UmlToOWLWriter(val umlClassDiagram: UmlClassDiagram):
       if umlClassOption.isDefined then
         val umlClass = umlClassOption.get
         val owlClass = createAndAnnotateOWLClass(umlClass, errorMessages)
-
         if umlClass.classParentIds.setOfParentIds.isEmpty then
           logger.trace("ParentIds is EMPTY")
           if manager.addAxiom(ontology, dataFactory.getOWLSubClassOfAxiom(owlClass, dataFactory.getOWLThing)) != SUCCESSFULLY then
             errorMessages :+ s"Could not add axiom ${owlClass.getIRI} subClassOf owl:Thing"
-          else
-            umlClass.classParentIds.setOfParentIds.foreach(parentClassId => {
-              logger.trace(s"parentId=${parentClassId.id}")
-              val parentClassIdentityOption = UmlClassIdentity.findClassId(parentClassId.id)
-              if parentClassIdentityOption.isDefined then
-
-                if manager.addAxiom(ontology, dataFactory.getOWLSubClassOfAxiom(owlClass,
-                  dataFactory.getOWLClass(parentClassIdentityOption.get.classIRI.iri))) != SUCCESSFULLY then
+        else
+          umlClass.classParentIds.setOfParentIds.foreach(parentClassId => {
+            logger.trace(s"parentId=${parentClassId.id}")
+            val parentClassIdentityOption = UmlClassIdentity.findClassId(parentClassId.id)
+            if parentClassIdentityOption.isDefined then
+              if manager.addAxiom(ontology, dataFactory.getOWLSubClassOfAxiom(owlClass,
+                dataFactory.getOWLClass(parentClassIdentityOption.get.classIRI.iri))) != SUCCESSFULLY then
                   errorMessages :+ s"Could not add axiom ${owlClass.getIRI} subClassOf ${parentClassId.id}"
             })
     })
