@@ -15,7 +15,8 @@ enum AttributesHeader:
 
 def parseClasses(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespace): UmlClasses =
   import ClassesHeader.*
-  val logger = Logger("parseClasses")
+  val logger = Logger("TsvReader: parseClasses")
+  logger.info("Start")
   implicit object TsvFormat extends TSVFormat {}
 
   val reader = CSVReader.open(maybeTsvFile.get)
@@ -53,19 +54,20 @@ def parseClasses(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespace): U
   reader.close()
   val umlClassesById = umlClasses.map(umlClass => (umlClass.classIdentity.classId, umlClass)).toMap
   logger.trace(s"umlClassesById = $umlClassesById")
+  logger.info("Done")
   UmlClasses(umlClassesById)
 end parseClasses
 
 
 def parseAttributes(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespace): UmlClassAttributes =
   import AttributesHeader.*
-  val logger = Logger("parseAttributes")
+  val logger = Logger("TsvReader: parseAttributes")
   implicit object TsvFormat extends TSVFormat {}
 
   val reader = CSVReader.open(maybeTsvFile.get)
   val umlClassAttributes = mutable.Set[UmlClassAttribute]()
 
-  logger.trace("########## parseAttributes")
+  logger.info("Start")
   reader.allWithHeaders().foreach(m => {
     logger.trace(s"m = $m")
 
@@ -88,12 +90,12 @@ def parseAttributes(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespace)
         UmlMultiplicity(UmlCardinality(m(MinMultiplicity.toString)), UmlCardinality(m(MaxMultiplicity.toString))),
         UmlClassAttributeDefinition(m(Definition.toString))
       )
-      logger.trace(s"umlClassAttributes.getClass.hasCode=${umlClassAttributes.getClass.hashCode()}")
       umlClassAttributes += umlClassAttribute
   })
   reader.close()
   val umlClassAttributesById = umlClassAttributes.map(umlClassAttribute => (umlClassAttribute.attributeIdentity.attributeId, umlClassAttribute)).toMap
   logger.trace(s"umlClassAttributesById = $umlClassAttributesById")
+  logger.info("Done")
   UmlClassAttributes(umlClassAttributesById)
 end parseAttributes
 

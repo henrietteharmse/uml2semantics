@@ -8,3 +8,4 @@ dcat:Relationship			An association class for attaching additional information to
 	DCAT_00001			
 skos:Concept	SKOS_00009	Konsep		
 skos:ConceptScheme	SKOS_000010			
+		CatalogRecord	Represents a metadata item in the catalog, primarily concerning the registration information, such as who added the item and when	

@@ -1,6 +1,7 @@
 package org.uml2semantics
 
 import com.typesafe.scalalogging.Logger
+import org.uml2semantics.inline.Code
 import org.uml2semantics.model.{OntologyIRI, PrefixNamespace}
 import org.uml2semantics.owl.UmlToOWLWriter
 import scopt.OParser
@@ -18,26 +19,25 @@ case class InputParameters(classesTsv: Option[File] = None,
                            prefixes: Seq[String] = PrefixNamespace.predefinedPrefixNamespacesAsStrings())
 
 
-
 val builder = OParser.builder[InputParameters]
 val argParser =
   import builder.*
   OParser.sequence(
     programName("uml2semantics"),
-//    head("uml2owl","v0.0.1"),
+    //    head("uml2owl","v0.0.1"),
     opt[Option[File]]('c', "classes")
-        .required()
-        .valueName("<csv-classes-file>")
-        .action((a, c) => c.copy(classesTsv = a))
-        .validate(o =>
-            if (o.exists(f => f.exists()) || o.isEmpty) success
-            else failure (s"The file \"${o.get}\" does not exist.")
-        )
-        .text("A TSV file containing UML class information"),
+      .required()
+      .valueName("<csv-classes-file>")
+      .action((a, c) => c.copy(classesTsv = a))
+      .validate(o =>
+        if (o.exists(f => f.exists()) || o.isEmpty) success
+        else failure(s"The file \"${o.get}\" does not exist.")
+      )
+      .text("A TSV file containing UML class information"),
     opt[Option[File]]('a', "attributes")
-        .valueName("<csv-attributes-file>")
-        .action((a, c) => c.copy(attributesTsv = a))
-        .text("A TSV file containing UML class attribute information"),
+      .valueName("<csv-attributes-file>")
+      .action((a, c) => c.copy(attributesTsv = a))
+      .text("A TSV file containing UML class attribute information"),
     opt[Option[File]]('o', "ontology")
       .required()
       .valueName("<owl-ontology-file>")
@@ -62,28 +62,21 @@ val argParser =
   )
 
 
-@main def uml2owl (arguments: String*): Unit =
-  val logger = Logger("uml2owl")
+@main def uml2owl(arguments: String*): Unit =
+  val logger = Logger[this.type]
+  logger.info("Start")
+  logger.debug(s"arguments = $arguments ${Code.source}")
   OParser.parse(argParser, arguments, InputParameters()) match
     case Some(input) =>
-//      logger.trace("### input = " + input)
-      logger.trace("### input.attributesTsv = " + input.attributesTsv)
-      logger.trace("### input.associationsTsv = " + input.associationsTsv)
-      logger.trace("### input.associationsByRoleTsv = " + input.associationsByRoleTsv)
-      logger.trace("### input.enumerationsTsv = " + input.enumerationsTsv)
-      logger.trace("### input.ontologyPrefix = " + input.ontologyPrefix)
-      logger.trace("### input.ontologyIRI = " + input.ontologyIRI)
-      logger.trace("### input.prefixes = " + input.prefixes)
-
       PrefixNamespace.cachePrefixes(input.prefixes)
+      PrefixNamespace.cachePrefix(input.ontologyPrefix)
       val umlClassDiagram = parseUMLClassDiagram(input)
       val owlWriter = new UmlToOWLWriter(umlClassDiagram)
       owlWriter.generateOWL match
         case Left(exceptionMsg) => println(s"An exception occurred:$exceptionMsg")
         case Right(warnings) =>
           if warnings.nonEmpty then
-            println("During processing of the UMLClassdiagram the following potential problem were found:")
+            logger.warn("During processing of the UMLClassdiagram the following potential problem were found ${Code.sourceDetail}:")
             warnings.foreach(w => println(s"$w"))
-    case _ => println("Unexpected case")
-
-  println("Done")
+    case _ => logger.error("Unexpected case ${Code.sourceDetail}")
+  logger.info("Done")

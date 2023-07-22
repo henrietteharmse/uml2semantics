@@ -1,0 +1,6 @@
+run -c "/home/henriette007/projects/uml2semantics/src/test/resources/UML2OWL Spec - Classes.tsv" \
+-a "/home/henriette007/projects/uml2semantics/src/test/resources/UML2OWL Spec - Attributes.tsv" \
+-o "/home/henriette007/projects/uml2semantics/src/test/resources/test.owl" \
+-i "https://www.w3.org/TR/vocab-dcat-2/" \
+-p "dcat:http://www.w3.org/ns/dcat#" \
+-x "foaf:http://xmlns.com/foaf/0.1/,skos:http://www.w3.org/2004/02/skos/core#"

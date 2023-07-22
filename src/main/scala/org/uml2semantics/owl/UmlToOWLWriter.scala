@@ -2,28 +2,30 @@ package org.uml2semantics.owl
 
 import com.typesafe.scalalogging.Logger
 import org.semanticweb.owlapi.apibinding.OWLManager
-import org.semanticweb.owlapi.model.{AddAxiom, IRI, OWLAnnotation, OWLAnnotationAssertionAxiom, OWLAxiom, OWLClass, OWLDataProperty, OWLDatatype, OWLNamedObject, OWLObjectProperty, OWLOntologyStorageException, OWLProperty, OWLSubClassOfAxiom}
 import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat
 import org.semanticweb.owlapi.model.parameters.ChangeApplied
 import org.semanticweb.owlapi.model.parameters.ChangeApplied.{NO_OPERATION, SUCCESSFULLY}
+import org.semanticweb.owlapi.model.*
+import org.semanticweb.owlapi.vocab.OWL2Datatype
 import org.uml2semantics.model.XMLDataType.getIRI
-import org.uml2semantics.model.{UmlClass, UmlClassAttribute, UmlClassAttributeIRI, UmlClassAttributeIdentity, UmlClassDiagram, UmlClassIdentity, UmlClassIdentityType, UmlInfiniteCardinality, UmlMultiplicity, UmlNonNegativeCardinality, UmlXMLDataType, XMLDataType}
+import org.uml2semantics.model.*
+import org.uml2semantics.inline.Code
 
-import scala.collection.mutable.{ArrayBuffer, ListBuffer, Seq}
 import java.io.File
+import scala.collection.mutable
+import scala.collection.mutable.{ArrayBuffer, ListBuffer, Seq}
 import scala.util.Try
 
 
 class UmlToOWLWriter(val umlClassDiagram: UmlClassDiagram):
   private val logger = Logger(this.getClass)
   private val manager = OWLManager.createOWLOntologyManager
-  logger.trace(s"umlClassDiagram.owlOntologyFile=${umlClassDiagram.owlOntologyFile}")
   private val ontology = manager.createOntology(IRI.create(umlClassDiagram.ontologyIRI.ontologyIRI))
   private val dataFactory = manager.getOWLDataFactory
 
   private def createDefinitionAnnotation(owlNamedObject: OWLNamedObject, definition: String,
-                                         errorMessages: Seq[String]): Unit =
-    logger.trace(s"definition=$definition")
+                                         errorMessages: mutable.Seq[String]): Unit =
+    logger.debug(s"createDefinitionAnnotation: owlNamedObject=$owlNamedObject, definition=$definition, errorMessages=$errorMessages ${Code.source}")
     if definition.nonEmpty then
       val owlClassDefinitionAnnotationAxiom = dataFactory.getOWLAnnotationAssertionAxiom(owlNamedObject.getIRI,
         dataFactory.getOWLAnnotation(dataFactory.getRDFSComment(), dataFactory.getOWLLiteral(definition)))
@@ -31,7 +33,8 @@ class UmlToOWLWriter(val umlClassDiagram: UmlClassDiagram):
         errorMessages :+ s"Could not add definition=$definition for ${owlNamedObject.getIRI}"
 
 
-  private def createLabelAnnotation(owlNamedObject: OWLNamedObject, label: String, errorMessages: Seq[String]): Unit =
+  private def createLabelAnnotation(owlNamedObject: OWLNamedObject, label: String, errorMessages: mutable.Seq[String]): Unit =
+    logger.debug(s"createLabelAnnotation: owlNamedObject=$owlNamedObject, label=$label, errorMessages=$errorMessages ${Code.source}")
     if label.nonEmpty then
       val owlLabelAnnotationAxiom = dataFactory.getOWLAnnotationAssertionAxiom(owlNamedObject.getIRI,
         dataFactory.getOWLAnnotation(dataFactory.getRDFSLabel(), dataFactory.getOWLLiteral(label)))
@@ -39,7 +42,8 @@ class UmlToOWLWriter(val umlClassDiagram: UmlClassDiagram):
         errorMessages :+ s"Could not add label=$label for ${owlNamedObject.getIRI}"
 
 
-  private def createAndAnnotateOWLClass(umlClass: UmlClass, errorMessages: Seq[String]): OWLClass =
+  private def createAndAnnotateOWLClass(umlClass: UmlClass, errorMessages: mutable.Seq[String]): OWLClass =
+    logger.debug(s"createAndAnnotateOWLClass: umlClass=$umlClass, errorMessages=$errorMessages ${Code.source}")
     val owlClass = dataFactory.getOWLClass(umlClass.classIdentity.classIRI.iri)
     createDefinitionAnnotation(owlClass, umlClass.classDefinition.definition, errorMessages)
     createLabelAnnotation(owlClass, umlClass.classIdentity.classLabel, errorMessages)
@@ -51,9 +55,11 @@ class UmlToOWLWriter(val umlClassDiagram: UmlClassDiagram):
    * or UML class.
    *
    * @param umlClassAttribute
+   * @param errorMessages
    * @return A sequence of error messages if any errors were encountered. If no errors occurred, an empty sequence is returned.
    */
-  private def createAndAnnotateOWLProperty(umlClassAttribute: UmlClassAttribute, errorMessages: Seq[String]): OWLProperty =
+  private def createAndAnnotateOWLProperty(umlClassAttribute: UmlClassAttribute, errorMessages: mutable.Seq[String]): OWLProperty =
+    logger.debug(s"createAndAnnotateOWLProperty: umlClassAttribute=$umlClassAttribute, errorMessages=$errorMessages ${Code.source}")
     val umlClassIdentity: UmlClassIdentity = UmlClassIdentity.findClassId(umlClassAttribute.attributeIdentity.classId.id).get
     val domain = dataFactory.getOWLClass(IRI.create(umlClassIdentity.classIRI.iri))
     var owlProperty: OWLProperty = null
@@ -78,8 +84,10 @@ class UmlToOWLWriter(val umlClassDiagram: UmlClassDiagram):
    * @param domain
    * @return The OWL object property that was created.
    */
-  private def createOWLObjectProperty(umlClassAttribute: UmlClassAttribute, errorMessages: Seq[String],
+  private def createOWLObjectProperty(umlClassAttribute: UmlClassAttribute, errorMessages: mutable.Seq[String],
                                       domain: OWLClass, umlClassIdentity: UmlClassIdentity): OWLObjectProperty =
+    logger.debug(s"createOWLObjectProperty: umlClassAttribute=$umlClassAttribute, errorMessages = $errorMessages, " +
+      s"domain=$domain, umlClassIdentity=$umlClassIdentity ${Code.source}")
     val objectProperty = dataFactory.getOWLObjectProperty(umlClassAttribute.attributeIdentity.attributeIRI.iri)
     val domainChangeApplied = manager.addAxiom(ontology, dataFactory.getOWLObjectPropertyDomainAxiom(objectProperty, domain))
     if domainChangeApplied != SUCCESSFULLY then
@@ -92,22 +100,32 @@ class UmlToOWLWriter(val umlClassDiagram: UmlClassDiagram):
         s"${umlClassAttribute.attributeIdentity.attributeIRI.iri}"
     umlClassAttribute.multiplicity match
       case UmlMultiplicity(UmlNonNegativeCardinality(minCardinality), UmlNonNegativeCardinality(maxCardinality)) =>
-        val axiom = dataFactory.getOWLSubClassOfAxiom(domain,
-          dataFactory.getOWLObjectIntersectionOf(
-            dataFactory.getOWLObjectMinCardinality(minCardinality, objectProperty,
-              dataFactory.getOWLClass(umlClassIdentity.classIRI.iri)),
-            dataFactory.getOWLObjectMaxCardinality(maxCardinality, objectProperty,
-              dataFactory.getOWLClass(umlClassIdentity.classIRI.iri))))
+        logger.trace(s"minCardinality=$minCardinality ${Code.source}")
+        val axiom =
+          if minCardinality == maxCardinality && minCardinality != 0 then
+            dataFactory.getOWLSubClassOfAxiom(domain, dataFactory.getOWLObjectExactCardinality(maxCardinality, objectProperty,
+              dataFactory.getOWLClass(umlClassIdentity.classIRI.iri)))
+          else if minCardinality > 0 then
+            dataFactory.getOWLSubClassOfAxiom(domain,
+              dataFactory.getOWLObjectIntersectionOf(
+                dataFactory.getOWLObjectMinCardinality(minCardinality, objectProperty,
+                  dataFactory.getOWLClass(umlClassIdentity.classIRI.iri)),
+                dataFactory.getOWLObjectMaxCardinality(maxCardinality, objectProperty,
+                  dataFactory.getOWLClass(umlClassIdentity.classIRI.iri))))
+          else
+            dataFactory.getOWLSubClassOfAxiom(domain, dataFactory.getOWLObjectMaxCardinality(maxCardinality, objectProperty,
+              dataFactory.getOWLClass(umlClassIdentity.classIRI.iri)))
         if manager.addAxiom(ontology, axiom) != SUCCESSFULLY then
           errorMessages :+ s"Could not add subclass axiom representing cardinalities [$minCardinality, $maxCardinality] for " +
             s"${umlClassAttribute.attributeIdentity.attributeLabel}"
       case UmlMultiplicity(UmlNonNegativeCardinality(minCardinality), UmlInfiniteCardinality(_)) =>
-        val axiom = dataFactory.getOWLSubClassOfAxiom(domain,
-          dataFactory.getOWLObjectMinCardinality(minCardinality, objectProperty,
-            dataFactory.getOWLClass(umlClassIdentity.classIRI.iri)))
-        if manager.addAxiom(ontology, axiom) != SUCCESSFULLY then
-          errorMessages :+ s"Could not add subclass axiom representing cardinalities for [$minCardinality, *]" +
-            s"${umlClassAttribute.attributeIdentity.attributeLabel}"
+        if minCardinality > 0 then
+          val axiom = dataFactory.getOWLSubClassOfAxiom(domain,
+            dataFactory.getOWLObjectMinCardinality(minCardinality, objectProperty,
+              dataFactory.getOWLClass(umlClassIdentity.classIRI.iri)))
+          if manager.addAxiom(ontology, axiom) != SUCCESSFULLY then
+            errorMessages :+ s"Could not add subclass axiom representing cardinalities for [$minCardinality, *]" +
+              s"${umlClassAttribute.attributeIdentity.attributeLabel}"
       case UmlMultiplicity(UmlInfiniteCardinality(_), UmlNonNegativeCardinality(maxCardinality)) =>
         errorMessages :+ s"Multiplicity error found with multiplicity = [*, $maxCardinality] for attribute = " +
           s"${umlClassAttribute.attributeIdentity.attributeLabel}."
@@ -124,41 +142,49 @@ class UmlToOWLWriter(val umlClassDiagram: UmlClassDiagram):
    * @param attributeType
    * @return The OWL data property that was created.
    */
-  private def createOWLDataProperty(umlClassAttribute: UmlClassAttribute, errorMessages: Seq[String],
-                                                    domain: OWLClass, attributeType: XMLDataType): OWLDataProperty =
+  private def createOWLDataProperty(umlClassAttribute: UmlClassAttribute, errorMessages: mutable.Seq[String],
+                                    domain: OWLClass, attributeType: XMLDataType): OWLDataProperty =
+    logger.debug(s"createOWLDataProperty: umlClassAttribute=$umlClassAttribute, errorMessages=$errorMessages, " +
+      s"domain=$domain, attributeType=$attributeType ${Code.source}")
     val dataProperty = dataFactory.getOWLDataProperty(umlClassAttribute.attributeIdentity.attributeIRI.iri)
     val domainChangeApplied = manager.addAxiom(ontology, dataFactory.getOWLDataPropertyDomainAxiom(dataProperty, domain))
     if domainChangeApplied != SUCCESSFULLY then
       errorMessages :+ s"Domain axiom for data property ${dataProperty.getIRI} could not be added for " +
         s"${umlClassAttribute.attributeIdentity.attributeIRI.iri}"
-    val dataType: OWLDatatype = dataFactory.getOWLDatatype(getIRI(attributeType))
+    val dataType: OWL2Datatype = OWL2Datatype.getDatatype(IRI.create(getIRI(attributeType)))
     val rangeChangeApplied = manager.addAxiom(ontology, dataFactory.getOWLDataPropertyRangeAxiom(dataProperty, dataType))
     if rangeChangeApplied != SUCCESSFULLY then
       errorMessages :+ s"Range axiom for data property ${dataProperty.getIRI} could not be added for " +
         s"${umlClassAttribute.attributeIdentity.attributeIRI.iri}"
     umlClassAttribute.multiplicity match
       case UmlMultiplicity(UmlNonNegativeCardinality(minCardinality), UmlNonNegativeCardinality(maxCardinality)) =>
-        val axiom = dataFactory.getOWLSubClassOfAxiom(domain,
-          dataFactory.getOWLObjectIntersectionOf(
-            dataFactory.getOWLDataMinCardinality(minCardinality, dataProperty),
-            dataFactory.getOWLDataMaxCardinality(maxCardinality, dataProperty)))
+        val axiom =
+          if minCardinality == maxCardinality && minCardinality != 0 then
+            dataFactory.getOWLSubClassOfAxiom(domain, dataFactory.getOWLDataExactCardinality(maxCardinality, dataProperty, dataType))
+          else if minCardinality > 0 then
+            dataFactory.getOWLSubClassOfAxiom(domain, dataFactory.getOWLObjectIntersectionOf(
+              dataFactory.getOWLDataMinCardinality(minCardinality, dataProperty, dataType),
+              dataFactory.getOWLDataMaxCardinality(maxCardinality, dataProperty, dataType)))
+          else
+            dataFactory.getOWLSubClassOfAxiom(domain, dataFactory.getOWLDataMaxCardinality(maxCardinality, dataProperty, dataType))
         if manager.addAxiom(ontology, axiom) != SUCCESSFULLY then
           errorMessages :+ s"Could not add subclass axiom representing cardinalities [$minCardinality, $maxCardinality] for " +
             s"${umlClassAttribute.attributeIdentity.attributeLabel}"
       case UmlMultiplicity(UmlNonNegativeCardinality(minCardinality), UmlInfiniteCardinality(_)) =>
-        val axiom = dataFactory.getOWLSubClassOfAxiom(domain, dataFactory.getOWLDataMinCardinality(minCardinality, dataProperty))
-        if manager.addAxiom(ontology, axiom) != SUCCESSFULLY then
-          errorMessages :+ s"Could not add subclass axiom representing cardinalities for [$minCardinality, *]" +
-            s"${umlClassAttribute.attributeIdentity.attributeLabel}"
+        if minCardinality > 0 then
+          val axiom = dataFactory.getOWLSubClassOfAxiom(domain, dataFactory.getOWLDataMinCardinality(minCardinality, dataProperty, dataType))
+          if manager.addAxiom(ontology, axiom) != SUCCESSFULLY then
+            errorMessages :+ s"Could not add subclass axiom representing cardinalities for [$minCardinality, *]" +
+              s"${umlClassAttribute.attributeIdentity.attributeLabel}"
       case UmlMultiplicity(UmlInfiniteCardinality(_), UmlNonNegativeCardinality(maxCardinality)) =>
         errorMessages :+ s"Multiplicity error found with multiplicity = [*, $maxCardinality] for attribute = " +
           s"${umlClassAttribute.attributeIdentity.attributeLabel}."
       case UmlMultiplicity(UmlInfiniteCardinality(_), UmlInfiniteCardinality(_)) =>
     dataProperty
 
-  private def processUmlClasses: Seq[String] =
-    logger.trace("processUmlClasses")
-    val errorMessages: Seq[String] = new ArrayBuffer[String]()
+  private def processUmlClasses: mutable.Seq[String] =
+    logger.info("processUmlClasses: Start")
+    val errorMessages: mutable.Seq[String] = new ArrayBuffer[String]()
     umlClassDiagram.umlClasses.mapOfUmlClasses.keySet.foreach(id => {
       val umlClassOption = umlClassDiagram.umlClasses.mapOfUmlClasses.get(id)
       if umlClassOption.isDefined then
@@ -169,22 +195,23 @@ class UmlToOWLWriter(val umlClassDiagram: UmlClassDiagram):
           logger.trace("ParentIds is EMPTY")
           if manager.addAxiom(ontology, dataFactory.getOWLSubClassOfAxiom(owlClass, dataFactory.getOWLThing)) != SUCCESSFULLY then
             errorMessages :+ s"Could not add axiom ${owlClass.getIRI} subClassOf owl:Thing"
-        else
-          umlClass.classParentIds.setOfParentIds.foreach(parentClassId => {
-            logger.trace(s"parentId=${parentClassId.id}")
-            val parentClassIdentityOption = UmlClassIdentity.findClassId(parentClassId.id)
-            if parentClassIdentityOption.isDefined then
+          else
+            umlClass.classParentIds.setOfParentIds.foreach(parentClassId => {
+              logger.trace(s"parentId=${parentClassId.id}")
+              val parentClassIdentityOption = UmlClassIdentity.findClassId(parentClassId.id)
+              if parentClassIdentityOption.isDefined then
 
-              if manager.addAxiom(ontology, dataFactory.getOWLSubClassOfAxiom(owlClass,
-                dataFactory.getOWLClass(parentClassIdentityOption.get.classIRI.iri))) != SUCCESSFULLY then
-                errorMessages :+ s"Could not add axiom ${owlClass.getIRI} subClassOf ${parentClassId.id}"
-          })
+                if manager.addAxiom(ontology, dataFactory.getOWLSubClassOfAxiom(owlClass,
+                  dataFactory.getOWLClass(parentClassIdentityOption.get.classIRI.iri))) != SUCCESSFULLY then
+                  errorMessages :+ s"Could not add axiom ${owlClass.getIRI} subClassOf ${parentClassId.id}"
+            })
     })
+    logger.info("processUmlClasses: Done")
     errorMessages
   end processUmlClasses
 
-  private def processClassAttributes: Seq[String] =
-    logger.trace("processUmlClasses")
+  private def processClassAttributes: mutable.Seq[String] =
+    logger.info("processClassAttributes: Start")
     val errorMessages: ArrayBuffer[String] = new ArrayBuffer[String]()
     umlClassDiagram.umlClassAttributes.mapOfUmlClassAttributes.keySet.foreach(id => {
       val umlClassAttributeOption = umlClassDiagram.umlClassAttributes.mapOfUmlClassAttributes.get(id)
@@ -192,20 +219,24 @@ class UmlToOWLWriter(val umlClassDiagram: UmlClassDiagram):
         val umlClassAttribute = umlClassAttributeOption.get
         val owlProperty = createAndAnnotateOWLProperty(umlClassAttribute, errorMessages)
     })
+    logger.info("processClassAttributes: Done")
     errorMessages
   end processClassAttributes
 
 
   def generateOWL: Either[String, ListBuffer[String]] =
-    logger.trace("generateOWL")
+    logger.info("generateOWL: Start")
     val errorMessages = new ListBuffer[String]()
     errorMessages.appendAll(processUmlClasses)
     errorMessages.appendAll(processClassAttributes)
     try
       manager.saveOntology(ontology, new RDFXMLDocumentFormat(), IRI.create(umlClassDiagram.owlOntologyFile))
+      logger.info("generateOWL: Done")
       Right(errorMessages)
     catch
-      case e: OWLOntologyStorageException => Left(e.getMessage)
+      case e: OWLOntologyStorageException =>
+        logger.info("generateOWL: Done")
+        Left(e.getMessage)
   end generateOWL
 
 end UmlToOWLWriter
