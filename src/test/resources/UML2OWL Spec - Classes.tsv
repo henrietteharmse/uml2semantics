@@ -1,4 +1,4 @@
-Curie	Name	Definition	ParentIds
+Curie	Name	Definition	ParentNames
 dcat:Resource	Resource	Resource published or curated by a single agent.	
 dcat:Dataset	Dataset	A collection of data, published or curated by a single agent, and available for access or download in one or more representations.	Resource
 dcat:DataService	DataService	A collection of operations that provides access to one or more datasets or data processing functions.	Resource

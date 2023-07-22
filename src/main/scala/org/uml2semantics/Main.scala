@@ -3,7 +3,7 @@ package org.uml2semantics
 import com.typesafe.scalalogging.Logger
 import org.uml2semantics.inline.Code
 import org.uml2semantics.model.{OntologyIRI, PrefixNamespace}
-import org.uml2semantics.owl.UmlToOWLWriter
+import org.uml2semantics.owl.UML2OWLWriter
 import scopt.OParser
 
 import java.io.File
@@ -71,7 +71,7 @@ val argParser =
       PrefixNamespace.cachePrefixes(input.prefixes)
       PrefixNamespace.cachePrefix(input.ontologyPrefix)
       val umlClassDiagram = parseUMLClassDiagram(input)
-      val owlWriter = new UmlToOWLWriter(umlClassDiagram)
+      val owlWriter = new UML2OWLWriter(umlClassDiagram)
       owlWriter.generateOWL match
         case Left(exceptionMsg) => println(s"An exception occurred:$exceptionMsg")
         case Right(warnings) =>

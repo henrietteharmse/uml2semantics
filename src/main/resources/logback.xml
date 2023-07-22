@@ -8,23 +8,23 @@
     <!-- org.uml2semantics.Main.scala -->
     <logger name="org.uml2semantics.Main" level="debug" />
 
-    <!-- org.uml2semantics.TsvReader.scala -->
+    <!-- org.uml2semantics.TSVReader.scala -->
     <logger name="parseClasses" level="trace" />
     <logger name="parseAttributes" level="trace" />
 
-    <!-- org.uml2semantics.model.UmlClassDiagram.scala -->
-    <logger name="org.uml2semantics.model.UmlClassCurie" level="error" />
-    <logger name="org.uml2semantics.model.UmlClassAttributeName" level="error" />
-    <logger name="org.uml2semantics.model.UmlClassAttributeCurie" level="error" />
-    <logger name="org.uml2semantics.model.UmlClassParentIds" level="trace" />
-    <logger name="org.uml2semantics.model.UmlClassAttributeIdentity" level="error" />
-    <logger name="org.uml2semantics.model.UmlClassIRI" level="error" />
-    <logger name="org.uml2semantics.model.UmlClassAttributeIRI" level="error" />
-    <logger name="org.uml2semantics.model.UmlCardinality" level="error" />
-    <logger name="org.uml2semantics.model.UmlMultiplicity" level="error" />
-    <logger name="org.uml2semantics.model.UmlClassIdentity" level="error" />
-    <logger name="org.uml2semantics.model.UmlClassAttributeType" level="error" />
-    <logger name="org.uml2semantics.model.UmlClassDiagram" level="trace" />
+    <!-- org.uml2semantics.model.UMLClassDiagram.scala -->
+    <logger name="org.uml2semantics.model.UMLClassCurie" level="error" />
+    <logger name="org.uml2semantics.model.UMLClassAttributeName" level="error" />
+    <logger name="org.uml2semantics.model.UMLClassAttributeCurie" level="error" />
+    <logger name="org.uml2semantics.model.UMLClassParentNamedElements" level="trace" />
+    <logger name="org.uml2semantics.model.UMLClassAttributeIdentity" level="error" />
+    <logger name="org.uml2semantics.model.UMLClassIRI" level="error" />
+    <logger name="org.uml2semantics.model.UMLClassAttributeIRI" level="error" />
+    <logger name="org.uml2semantics.model.UMLCardinality" level="error" />
+    <logger name="org.uml2semantics.model.UMLMultiplicity" level="error" />
+    <logger name="org.uml2semantics.model.UMLClassIdentity" level="error" />
+    <logger name="org.uml2semantics.model.UMLClassAttributeType" level="error" />
+    <logger name="org.uml2semantics.model.UMLClassDiagram" level="trace" />
 
     <!-- org.uml2semantics.model.XMLDataType.scala -->
     <logger name="org.uml2semantics.model.XMLDataType" level="error" />
@@ -35,7 +35,7 @@
 
 
     <!-- org.uml2semantics.model.owl.UmlToOWLWriter.scala -->
-    <logger name="org.uml2semantics.owl.UmlToOWLWriter" level="trace" />
+    <logger name="org.uml2semantics.owl.UML2OWLWriter" level="trace" />
 
 <!--    <logger name="org.uml2semantics.model." level="debug" />-->
 
