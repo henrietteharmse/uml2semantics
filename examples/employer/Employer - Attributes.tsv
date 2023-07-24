@@ -1,0 +1,6 @@
+ClassName	Curie	Name	ClassOrPrimitiveType	MinMultiplicity	MaxMultiplicity	Definition
+Person		name	xsd:string			
+Person		surname	xsd:string			
+Person		dateOfBirth	xsd:dateTime			
+Employee		employedBy	Employer	1	1	
+Employer		employes	Employee	1	*	
