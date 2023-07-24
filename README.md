@@ -63,21 +63,17 @@ Save the classes and attributes tabs as TSV files.
 Assuming you have download uml2semantics to a`$uml2semantics` directory and saved the .tsv files to this directory as well,
 you can run it as follows:
 
-``
+```
+
 java -jar uml2semantics.jar \ 
-
 -c "$uml2semantics/Employer - Classes.tsv" \
-
 -a "$uml2semantics/Employer - Attributes.tsv" \
-
 -o "$uml2semantics/employer.owl" \
-
 -p "emp:http://uml2semantics.org/examples/employer#" \
-
 -i "http://uml2semantics.org/examples/employer/v.0.1"
-
 org.uml2semantics.uml2owl
-``
+
+```
 
 This will cause the ontology to be written out to `$uml2semantics/employer.owl`. An example of this file can be seen 
 [here](./examples/employer/employer.owl)
