@@ -65,11 +65,17 @@ you can run it as follows:
 
 ``
 java -jar uml2semantics.jar \ 
+
 -c "$uml2semantics/Employer - Classes.tsv" \
+
 -a "$uml2semantics/Employer - Attributes.tsv" \
+
 -o "$uml2semantics/employer.owl" \
+
 -p "emp:http://uml2semantics.org/examples/employer#" \
+
 -i "http://uml2semantics.org/examples/employer/v.0.1"
+
 org.uml2semantics.uml2owl
 ``
 
