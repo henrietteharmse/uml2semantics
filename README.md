@@ -26,7 +26,7 @@ employer and an employer has 1 or more employees.
 
 ![Employer Example](./docs/SimpleEmployerExample.png)
 
-## TSV representation
+### TSV representation
 Classes and attributes are created using 2 separate TSV files. First create
 the TSV file for your classes. It has the following format:
 
@@ -47,7 +47,7 @@ To specify attributes we use the following format.
 |------------|-------|-------------|------------------|-----------------|-----------------|------------|
 | Person     |       | name        | xsd:string       |                 |                 |            |
 | Person     |       | surname     | xsd:string       |                 |                 |            |
-| Person     |       | dateOfBirth | Person           | xsd:dateTime    |                 |            | 
+| Person     |       | dateOfBirth | xsd:dateTime     |                 |                 |            |
 | Employee   |       | employedBy  | Employer         | 1               | 1               |            |
 | Employer   |       | employes    | Employee         | 1               | *               |            |
 
@@ -59,7 +59,7 @@ types used in [Protege Desktop](https://protege.stanford.edu/) as data types are
 A Google spreadsheet for this UML class diagram can be found [here](https://docs.google.com/spreadsheets/d/1FXpbc52Ag24Htj3Qq36Z743QB5SzlShzjeg98uxd2Xo/edit?usp=sharing).
 Save the classes and attributes tabs as TSV files.
 
-## Run uml2semantics
+### Run uml2semantics
 Assuming you have download uml2semantics to a`$uml2semantics` directory and saved the .tsv files to this directory as well,
 you can run it as follows:
 
@@ -68,12 +68,16 @@ you can run it as follows:
 java -jar uml2semantics.jar \ 
 -c "$uml2semantics/Employer - Classes.tsv" \
 -a "$uml2semantics/Employer - Attributes.tsv" \
--o "$uml2semantics/employer.owl" \
+-o "$uml2semantics/employer.rdf" \
 -p "emp:http://uml2semantics.org/examples/employer#" \
--i "http://uml2semantics.org/examples/employer/v.0.1"
-org.uml2semantics.uml2owl
+-i "http://uml2semantics.org/examples/employer/v.0.1" 
 
 ```
 
 This will cause the ontology to be written out to `$uml2semantics/employer.owl`. An example of this file can be seen 
-[here](./examples/employer/employer.owl)
+[here](./examples/employer/employer.rdf)
+
+## DCAT version 2 Example
+
+
+
