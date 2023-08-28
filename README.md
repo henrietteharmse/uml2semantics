@@ -15,7 +15,7 @@ This tool assumes that the UML class diagrams are conceptual models and as such 
 details like interfaces, access modifiers or operations.
 
 # Downloading
-Download the [latest binary](https://github.com/henrietteharmse/uml2semantics/releases/latest/uml2semantics.jar).
+Download `uml2semantics.jar` from [latest release](https://github.com/henrietteharmse/uml2semantics/releases/latest).
 
 # Quick Start
 ## Employer and Employee example 
