@@ -1,0 +1,7 @@
+Curie	Name	Definition	ParentNames
+	Resource	Resource published or curated by a single agent.	
+	Dataset	A collection of data, published or curated by a single agent, and available for access or download in one or more representations.	Resource
+	Catalog	A curated collection of metadata about resources (e.g., datasets and data services in the context of a data catalog)	Dataset
+	DataService	A collection of operations that provides access to one or more datasets or data processing functions.	Resource
+	CatalogRecord	Represents a metadata item in the catalog, primarily concerning the registration information, such as who added the item and when	
+	Relationship	An association class for attaching additional information to a relationship between DCAT Resources.	

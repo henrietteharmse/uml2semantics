@@ -1,0 +1,7 @@
+ClassName	Curie	Name	ClassOrPrimitiveType	MinMultiplicity	MaxMultiplicity	Definition
+Relationship		hadRole	dcat:Relationship			The function of an entity or agent with respect to another entity or resource
+Relationship		dct:relation				dct:relation SHOULD be used where the nature of the relationship between a cataloged item and related resources is not known. A more specific sub-property SHOULD be used if the nature of the relationship of the link is known. The property dcat:distribution SHOULD be used to link from a dcat:Dataset to a representation of the dataset, described as a dcat:Distribution
+Resource		contactPoint	vcard:Kind			Relevant contact information for the cataloged resource
+Resource		keyword	rdfs:Literal			A keyword or tag describing the resource.
+Resource		landingPage	foaf:Document			A Web page that can be navigated to in a Web browser to gain access to the catalog, a dataset, its distributions and/or additional information.
+Catalog		catalog	Catalog			

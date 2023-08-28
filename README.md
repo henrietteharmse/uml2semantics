@@ -78,6 +78,7 @@ This will cause the ontology to be written out to `$uml2semantics/employer.owl`.
 [here](./examples/employer/employer.rdf)
 
 ## DCAT version 2 Example
+Initial DCAT version 2 example is defined [here](./examples/dcat2/README.md). 
 
 
 

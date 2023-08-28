@@ -309,7 +309,7 @@ object UMLClassIdentity:
     if classNameOption.isDefined then
       logger.debug(s"classNameOption=${classNameOption.get} ${Code.source}")
       classIdentityOption = classNameOption
-    else if Curie.isPossibleCurie(s) then
+    else if Curie.isCurieBasedOnConfiguredPrefix(s) then
       logger.debug(s"s=$s ${Code.source}")
       classIdentityOption = classIdentityByCurie.get(UMLClassCurie(Some(Curie(s))))
 
@@ -333,28 +333,43 @@ case class UMLClassAttributeDefinition(definition: String = "")
 
 sealed trait UMLClassAttributeType
 
-case class UMLXMLDataType(attributeType: XMLDataType) extends UMLClassAttributeType
+case class UMLXMLDataType(attributeType: SupportedDataType) extends UMLClassAttributeType
 
 case class UMLClassIdentityType(attributeType: UMLClassIdentity) extends UMLClassAttributeType
+
+
+case class CurieBasedUMLClassAttributeType(attributeType: Curie) extends UMLClassAttributeType
+
+//case class UndefinedUMLClassAttributeType() extends UMLClassAttributeType
+object UndefinedUMLClassAttributeType extends UMLClassAttributeType
+
 
 object UMLClassAttributeType:
   private val logger = Logger[this.type]
 
   def apply(s: String): UMLClassAttributeType =
     logger.debug(s"s=$s ${Code.source}")
-    require(UMLClassIdentity.findClassNamedElement(s).nonEmpty || XMLDataType.unapply(s).nonEmpty,
+    require(UMLClassIdentity.findClassNamedElement(s).nonEmpty || SupportedDataType.unapply(s).nonEmpty
+      || Curie.isCurieBasedOnConfiguredPrefix(s) || s.isEmpty,
       s"""A class attribute must have a type that is either a class, that has been specified,
-        or an XML data type. "$s" is not recognised as either a class or an XML data type.""")
+        or an XML data type or an curie based on a known prefix. Prefixes are specified using the -x option when running uml2semantics.
+        "$s" is not recognised as either a class or an XML data type.""")
     UMLClassIdentity.findClassNamedElement(s) match
       case Some(classNamedElement) => UMLClassIdentityType(classNamedElement)
-      case None => UMLXMLDataType(XMLDataType.valueOf(s))
+      case None => SupportedDataType.unapply(s) match
+        case Some(x) => UMLXMLDataType(x)
+        case None =>
+          val curieOption: Option[Curie] = Curie.unapply(s)
+          curieOption match
+            case Some(curie) => CurieBasedUMLClassAttributeType(curie)
+            case None => UndefinedUMLClassAttributeType
 
   def unapply(s: String): Option[UMLClassAttributeType] =
     logger.debug(s"s=$s ${Code.source}")
     s match
       case UMLClassIdentity(className, classCurie, ontologyPrefix) => Some(UMLClassIdentityType(
         UMLClassIdentity(className, classCurie, ontologyPrefix)))
-      case XMLDataType(i) => Some(UMLXMLDataType(i))
+      case SupportedDataType(i) => Some(UMLXMLDataType(i))
       case _ => None
 
 case class UMLClassAttribute(attributeIdentity: UMLClassAttributeIdentity,

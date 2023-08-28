@@ -56,7 +56,7 @@ val argParser =
       .withFallback(() => PrefixNamespace.predefinedPrefixNamespacesAsStrings())
       .valueName("<prefixname:prefix>,<prefixname:prefix>...")
       .action((a, c) => c.copy(prefixes = a))
-      .text("A list of all the prefixes used in the UML class representation")
+      .text("A list of all the prefixes used in the UML class representation separated by commas.")
   )
 
 

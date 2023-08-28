@@ -1,0 +1,242 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://www.w3.org/ns/dcat#v2#"
+     xml:base="http://www.w3.org/ns/dcat#v2"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    <owl:Ontology rdf:about="http://www.w3.org/ns/dcat#v2"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    
+
+
+    <!-- http://www.w3.org/ns/dcat#Catalog/catalog -->
+
+
+    <owl:ObjectProperty rdf:about="http://www.w3.org/ns/dcat#Catalog/catalog">
+        <rdfs:domain rdf:resource="http://www.w3.org/ns/dcat#Catalog"/>
+        <rdfs:range rdf:resource="http://www.w3.org/ns/dcat#Catalog"/>
+        <rdfs:label>catalog</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.w3.org/ns/dcat#Relationship/hadRole -->
+
+
+    <owl:ObjectProperty rdf:about="http://www.w3.org/ns/dcat#Relationship/hadRole">
+        <rdfs:domain rdf:resource="http://www.w3.org/ns/dcat#Relationship"/>
+        <rdfs:range rdf:resource="http://www.w3.org/ns/dcat#Relationship"/>
+        <rdfs:comment>The function of an entity or agent with respect to another entity or resource</rdfs:comment>
+        <rdfs:label>hadRole</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.w3.org/ns/dcat#Relationship/dct:relation -->
+
+
+    <owl:ObjectProperty rdf:about="http://www.w3.org/ns/dcat#Relationship/dct:relation">
+        <rdfs:domain rdf:resource="http://www.w3.org/ns/dcat#Relationship"/>
+        <rdfs:comment>dct:relation SHOULD be used where the nature of the relationship between a cataloged item and related resources is not known. A more specific sub-property SHOULD be used if the nature of the relationship of the link is known. The property dcat:distribution SHOULD be used to link from a dcat:Dataset to a representation of the dataset, described as a dcat:Distribution</rdfs:comment>
+        <rdfs:label>dct:relation</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.w3.org/ns/dcat#Resource/contactPoint -->
+
+
+    <owl:ObjectProperty rdf:about="http://www.w3.org/ns/dcat#Resource/contactPoint">
+        <rdfs:domain rdf:resource="http://www.w3.org/ns/dcat#Resource"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2006/vcard/ns#Kind"/>
+        <rdfs:comment>Relevant contact information for the cataloged resource</rdfs:comment>
+        <rdfs:label>contactPoint</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.w3.org/ns/dcat#Resource/landingPage -->
+
+
+    <owl:ObjectProperty rdf:about="http://www.w3.org/ns/dcat#Resource/landingPage">
+        <rdfs:domain rdf:resource="http://www.w3.org/ns/dcat#Resource"/>
+        <rdfs:range rdf:resource="http://xmlns.com/foaf/0.1/Document"/>
+        <rdfs:comment>A Web page that can be navigated to in a Web browser to gain access to the catalog, a dataset, its distributions and/or additional information.</rdfs:comment>
+        <rdfs:label>landingPage</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    
+
+
+    <!-- http://www.w3.org/ns/dcat#Resource/keyword -->
+
+
+    <owl:DatatypeProperty rdf:about="http://www.w3.org/ns/dcat#Resource/keyword">
+        <rdfs:domain rdf:resource="http://www.w3.org/ns/dcat#Resource"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+        <rdfs:comment>A keyword or tag describing the resource.</rdfs:comment>
+        <rdfs:label>keyword</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    
+
+
+    <!-- http://www.w3.org/2006/vcard/ns#Kind -->
+
+
+    <owl:Class rdf:about="http://www.w3.org/2006/vcard/ns#Kind"/>
+    
+
+
+    <!-- http://www.w3.org/ns/dcat#Catalog -->
+
+
+    <owl:Class rdf:about="http://www.w3.org/ns/dcat#Catalog">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/ns/dcat#Dataset"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.w3.org/ns/dcat#Catalog/catalog"/>
+                <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onClass rdf:resource="http://www.w3.org/ns/dcat#Catalog"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment>A curated collection of metadata about resources (e.g., datasets and data services in the context of a data catalog)</rdfs:comment>
+        <rdfs:label>Catalog</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/ns/dcat#CatalogRecord -->
+
+
+    <owl:Class rdf:about="http://www.w3.org/ns/dcat#CatalogRecord">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+        <rdfs:comment>Represents a metadata item in the catalog, primarily concerning the registration information, such as who added the item and when</rdfs:comment>
+        <rdfs:label>CatalogRecord</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/ns/dcat#DataService -->
+
+
+    <owl:Class rdf:about="http://www.w3.org/ns/dcat#DataService">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/ns/dcat#Resource"/>
+        <rdfs:comment>A collection of operations that provides access to one or more datasets or data processing functions.</rdfs:comment>
+        <rdfs:label>DataService</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/ns/dcat#Dataset -->
+
+
+    <owl:Class rdf:about="http://www.w3.org/ns/dcat#Dataset">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/ns/dcat#Resource"/>
+        <rdfs:comment>A collection of data, published or curated by a single agent, and available for access or download in one or more representations.</rdfs:comment>
+        <rdfs:label>Dataset</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/ns/dcat#Relationship -->
+
+
+    <owl:Class rdf:about="http://www.w3.org/ns/dcat#Relationship">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.w3.org/ns/dcat#Relationship/hadRole"/>
+                <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onClass rdf:resource="http://www.w3.org/ns/dcat#Relationship"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.w3.org/ns/dcat#Relationship/dct:relation"/>
+                <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:cardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment>An association class for attaching additional information to a relationship between DCAT Resources.</rdfs:comment>
+        <rdfs:label>Relationship</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/ns/dcat#Resource -->
+
+
+    <owl:Class rdf:about="http://www.w3.org/ns/dcat#Resource">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.w3.org/ns/dcat#Resource/contactPoint"/>
+                <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onClass rdf:resource="http://www.w3.org/2006/vcard/ns#Kind"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.w3.org/ns/dcat#Resource/landingPage"/>
+                <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onClass rdf:resource="http://xmlns.com/foaf/0.1/Document"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.w3.org/ns/dcat#Resource/keyword"/>
+                <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:cardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment>Resource published or curated by a single agent.</rdfs:comment>
+        <rdfs:label>Resource</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://xmlns.com/foaf/0.1/Document -->
+
+
+    <owl:Class rdf:about="http://xmlns.com/foaf/0.1/Document"/>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 5.5.0.2023-01-14T12:41:38Z) https://github.com/owlcs/owlapi/ -->
+
+

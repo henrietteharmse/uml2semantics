@@ -63,8 +63,7 @@ object PrefixNamespace:
       val prefixNamespace: PrefixNamespace = PrefixNamespace(prefix)
       logger.debug(s"prefixNamespace.prefixName = $prefixNamespace ${Code.source}")
       prefixMap += (prefixNamespace.prefixName -> prefixNamespace)
-    }
-    )
+    })
 
   def cachePrefix(prefix: String): Unit =
     logger.debug(s"prefix=$prefix ${Code.source}")
@@ -84,10 +83,14 @@ case class PrefixReference(reference: String)
 private val SEPARATOR: String = ":"
 
 case class Curie(curie: String):
-  require(curie.contains(SEPARATOR), s"String = '$curie' does not contain a ':'.")
-  private val args: Array[String] = curie.split(":")
+  private val logger = Logger[this.type]
+  require(Curie.isCurieBasedOnConfiguredPrefix(curie), s"Curie=$curie is not using a known prefix. To specify prefix, use -x option.")
+  private val args: Array[String] = curie.split(SEPARATOR)
   val prefixName: PrefixName = PrefixName(args(0))
+  logger.debug(s"prefixName=$prefixName ${Code.source}")
   val prefixReference: PrefixReference = PrefixReference(args(1))
+  logger.debug(s"prefixReference=$prefixReference ${Code.source}")
+
 
   def toIRI: String =
     require(PrefixNamespace.getPrefixNamespace(prefixName).nonEmpty, s"Prefix name = '$prefixName' is undefined. Please define it.")
@@ -108,13 +111,19 @@ object Curie:
 
   def unapply(s: String): Option[Curie] =
     logger.debug(s"s=$s ${Code.source}")
-    if isPossibleCurie(s) then
+    if isCurieBasedOnConfiguredPrefix(s) then
       Some(Curie(s))
     else None
 
-  def isPossibleCurie(s: String): Boolean =
+  def isCurieBasedOnConfiguredPrefix(s: String): Boolean =
     logger.debug(s"s=$s ${Code.source}")
     if s.contains(SEPARATOR) then
-      true
+      val stringArray: Array[String] = s.split(SEPARATOR)
+      val possiblePrefixName: String = stringArray(0)
+      val optionPrefixNamespace: Option[PrefixNamespace] = PrefixNamespace.getPrefixNamespace(PrefixName(possiblePrefixName))
+      optionPrefixNamespace match
+        case Some(_) => true
+        case None => false
     else
       false
+
