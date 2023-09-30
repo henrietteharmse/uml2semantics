@@ -3,7 +3,7 @@ ThisBuild / version := "v0.0.2"
 ThisBuild / scalaVersion := "3.2.2"
 
 scalacOptions ++= Seq(// use ++= to add to existing options
-//    "-explaintypes"
+    "-explaintypes"
 )
 lazy val root = (project in file("."))
   .settings(

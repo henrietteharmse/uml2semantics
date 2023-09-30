@@ -1,8 +1,10 @@
-package org.uml2semantics
+package org.uml2semantics.reader
 
 import com.github.tototoshi.csv.*
 import com.typesafe.scalalogging.Logger
+import org.uml2semantics.*
 import org.uml2semantics.model.*
+
 import java.io.File
 import scala.collection.mutable
 import scala.collection.mutable.Set
@@ -12,6 +14,9 @@ enum ClassesHeader:
 
 enum AttributesHeader:
   case ClassName, Curie, Name, ClassOrPrimitiveType, MinMultiplicity, MaxMultiplicity, Definition
+
+enum EnumerationsHeader:
+  case Name, Curie, Definition
 
 def parseClasses(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespace): UMLClasses =
   import ClassesHeader.*

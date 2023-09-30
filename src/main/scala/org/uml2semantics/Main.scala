@@ -1,20 +1,14 @@
 package org.uml2semantics
 
 import com.typesafe.scalalogging.Logger
+import org.uml2semantics.InputParameters
 import org.uml2semantics.inline.Code
 import org.uml2semantics.model.{OntologyIRI, PrefixNamespace}
+import org.uml2semantics.reader.parseUMLClassDiagram
 import org.uml2semantics.owl.UML2OWLWriter
 import scopt.OParser
 
 import java.io.File
-
-case class InputParameters(classesTsv: Option[File] = None,
-                           attributesTsv: Option[File] = None,
-//                           enumerationsTsv: Option[File] = None,
-                           owlOntologyFile: Option[File] = None,
-                           ontologyIRI: String = "https://uml2semantics.com/ontology",
-                           ontologyPrefix: String = "uml2ont:https://uml2semantics.com/ontology/",
-                           prefixes: Seq[String] = PrefixNamespace.predefinedPrefixNamespacesAsStrings())
 
 
 val builder = OParser.builder[InputParameters]
@@ -36,6 +30,19 @@ val argParser =
       .valueName("<csv-attributes-file>")
       .action((a, c) => c.copy(attributesTsv = a))
       .text("A TSV file containing UML class attribute information"),
+    opt[Option[File]]('e', "enumerations")
+      .required()
+      .valueName("<csv-enumerations-file>")
+      .action((a, c) => c.copy(enumerationsTsv = a))
+      .validate(o =>
+        if (o.exists(f => f.exists()) || o.isEmpty) success
+        else failure(s"The file \"${o.get}\" does not exist.")
+      )
+      .text("A TSV file containing UML enumerations"),
+    opt[Option[File]]('n', "enumeration named values")
+      .valueName("<csv-enumeration-named-values-file>")
+      .action((a, c) => c.copy(enumerationsNamedValuesTsv = a))
+      .text("A TSV file containing UML enumeration named values"),
     opt[Option[File]]('o', "ontology")
       .required()
       .valueName("<owl-ontology-file>")
