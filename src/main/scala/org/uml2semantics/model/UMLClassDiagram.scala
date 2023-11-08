@@ -30,6 +30,7 @@ case class UMLClassCurie(curieOption: Option[Curie] = None) extends UMLClassName
 
   override def getName: String = curieOption.get.curie
 
+
 private val FRAGMENT_SEPARATOR: String = "/"
 
 sealed trait UMLClassAttributeNamedElement extends UMLNamedElement:
@@ -136,9 +137,6 @@ object UMLClassAttributeIdentity:
   }
 
 
-/*
-@Todo: Add support for Curies
-*/
 case class UMLClassParentNamedElements(setOfParentNamedElements: Set[UMLClassNamedElement])
 
 object UMLClassParentNamedElements:
@@ -155,7 +153,9 @@ object UMLClassParentNamedElements:
 
 case class UMLClasses(mapOfUMLClasses: Map[UMLClassNamedElement, UMLClass])
 
-case class UMLClassAttributes(mapOfUmlClassAttributes: Map[UMLClassAttributeNamedElement, UMLClassAttribute])
+case class UMLClassAttributes(mapOfUMLClassAttributes: Map[UMLClassAttributeNamedElement, UMLClassAttribute])
+
+case class UMLEnumerations(mapOfUMLEnumerations: Map[UMLEnumerationNamedElement, UMLEnumeration])
 
 
 sealed trait UMLElementIRI:
@@ -205,7 +205,6 @@ object UMLEnumerationIRI:
         new UMLEnumerationIRI(PrefixNamespace.getPrefixNamespace(prefixNamespace.prefixName).get.prefixIRI.iri +
           enumerationNamedElementType.curieOption.get.prefixReference.reference)
       case _ => new UMLEnumerationIRI(ontologyPrefix.prefixIRI.iri + enumerationNamedElement.getName)
-
 
 
 case class OntologyIRI(ontologyIRI: String)
@@ -484,15 +483,24 @@ case class UMLClassAttribute(attributeIdentity: UMLClassAttributeIdentity,
                              definition: UMLClassAttributeDefinition = UMLClassAttributeDefinition())
   extends UMLClassDiagramElement
 
+case class UMLEnumerationDefinition(definition: String = "")
+
+case class UMLEnumeration(enumeratonIdentity: UMLEnumerationIdentity,
+                          enumerationDefinition: UMLEnumerationDefinition = UMLEnumerationDefinition())
+  extends UMLClassDiagramElement
+
 case class UMLClassDiagram(owlOntologyFile: File,
                            ontologyIRI: OntologyIRI,
                            ontologyPrefix: PrefixNamespace,
                            umlClasses: UMLClasses,
-                           umlClassAttributes: UMLClassAttributes)
+                           umlClassAttributes: UMLClassAttributes,
+                           umlEnumerations: UMLEnumerations)
 
 object UMLClassDiagram:
   private val logger = Logger[this.type]
 
   def apply(owlOntologyFile: File, ontologyIRI: OntologyIRI, ontologyPrefix: PrefixNamespace): UMLClassDiagram =
     logger.debug(s"owlOntologyFile=$owlOntologyFile, ontologyIRI=$ontologyIRI, ontologyPrefix=$ontologyPrefix ${Code.source}")
-    new UMLClassDiagram(owlOntologyFile, ontologyIRI, ontologyPrefix, UMLClasses(Map()), UMLClassAttributes(Map()))
+    new UMLClassDiagram(owlOntologyFile, ontologyIRI, ontologyPrefix, UMLClasses(Map()), UMLClassAttributes(Map()),
+      UMLEnumerations(Map()))
+

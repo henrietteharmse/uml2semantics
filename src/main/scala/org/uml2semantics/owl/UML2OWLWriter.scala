@@ -321,8 +321,8 @@ class UML2OWLWriter(val umlClassDiagram: UMLClassDiagram):
   private def processUMLClassAttributes: mutable.Seq[String] =
     logger.info("processUMLClassAttributes: Start")
     val errorMessages: ArrayBuffer[String] = new ArrayBuffer[String]()
-    umlClassDiagram.umlClassAttributes.mapOfUmlClassAttributes.keySet.foreach(id => {
-      val umlClassAttributeOption = umlClassDiagram.umlClassAttributes.mapOfUmlClassAttributes.get(id)
+    umlClassDiagram.umlClassAttributes.mapOfUMLClassAttributes.keySet.foreach(id => {
+      val umlClassAttributeOption = umlClassDiagram.umlClassAttributes.mapOfUMLClassAttributes.get(id)
       if umlClassAttributeOption.isDefined then
         val umlClassAttribute = umlClassAttributeOption.get
         val owlProperty = createAndAnnotateOWLProperty(umlClassAttribute, errorMessages)

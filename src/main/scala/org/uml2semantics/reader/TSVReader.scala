@@ -102,13 +102,52 @@ def parseAttributes(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespace)
   UMLClassAttributes(umlClassAttributesById)
 end parseAttributes
 
+def parseEnumerations(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespace): UMLEnumerations =
+  import EnumerationsHeader.*
+  val logger = Logger("TsvReader: parseEnumerations")
+  logger.info("Start")
+  implicit object TsvFormat extends TSVFormat {}
+
+  val reader = CSVReader.open(maybeTsvFile.get)
+  val umlEnumerations = mutable.Set[UMLEnumeration]()
+
+  reader.allWithHeaders().foreach(m => {
+    logger.trace(s"m = $m")
+
+    val curieOption: Option[Curie] = if m(Curie.toString).contains(":") then
+      Some(org.uml2semantics.model.Curie(m(Curie.toString)))
+    else
+      None
+
+    val umlEnumeration = UMLEnumeration(
+      UMLEnumerationIdentity(
+        UMLEnumerationName(m(Name.toString)),
+        UMLEnumerationCurie(curieOption),
+        ontologyPrefix
+      ),
+      UMLEnumerationDefinition(m(Definition.toString))
+    )
+    logger.trace(s"umlEnumeration.getClass.hasCode=${umlEnumeration.getClass.hashCode}")
+    umlEnumerations += umlEnumeration
+  })
+  reader.close()
+  val umlEnumerationByNamedElement = umlEnumerations.map(
+    umlEnumeration => (umlEnumeration.enumeratonIdentity.enumerationNamedElement, umlEnumeration)).toMap
+  logger.trace(s"umlEnumerationByNamedElement = $umlEnumerationByNamedElement")
+  logger.info("Done")
+  UMLEnumerations(umlEnumerationByNamedElement)
+end parseEnumerations
+
+
+
 def parseUMLClassDiagram(input: InputParameters): UMLClassDiagram =
   UMLClassDiagram(
     input.owlOntologyFile.get,
     OntologyIRI(input.ontologyIRI),
     PrefixNamespace(input.ontologyPrefix),
     parseClasses(input.classesTsv, PrefixNamespace(input.ontologyPrefix)),
-    parseAttributes(input.attributesTsv, PrefixNamespace(input.ontologyPrefix)))
+    parseAttributes(input.attributesTsv, PrefixNamespace(input.ontologyPrefix)),
+    parseEnumerations(input.enumerationsTsv, PrefixNamespace(input.ontologyPrefix)))
 
 
 
