@@ -49,6 +49,12 @@ class UML2OWLWriter(val umlClassDiagram: UMLClassDiagram):
     createLabelAnnotation(owlClass, umlClass.classIdentity.classLabel, errorMessages)
     owlClass
 
+  private def createAndAnnotateOWLEnumeration(umlEnumeration: UMLEnumeration, errorMessages: mutable.Seq[String]): OWLClass =
+    logger.debug(s"createAndAnnotateOWLEnumeration: umlEnumeration=$umlEnumeration, errorMessages=$errorMessages ${Code.source}")
+    val owlClass = dataFactory.getOWLClass(umlEnumeration.enumeratonIdentity.enumerationIRI.iri)
+    createDefinitionAnnotation(owlClass, umlEnumeration.enumerationDefinition.definition, errorMessages)
+    createLabelAnnotation(owlClass, umlEnumeration.enumeratonIdentity.enumerationLabel, errorMessages)
+    owlClass
 
   /**
    * Creates OWL a data- or object property depending on whether the type of the UML class attribute is a UML primitive
@@ -332,11 +338,26 @@ class UML2OWLWriter(val umlClassDiagram: UMLClassDiagram):
   end processUMLClassAttributes
 
 
+  private def processUMLEnumerations: mutable.Seq[String] =
+    logger.info("processUMLEnumerations: Start")
+    val errorMessages: mutable.Seq[String] = new ArrayBuffer[String]()
+    umlClassDiagram.umlEnumerations.mapOfUMLEnumerations.keySet.foreach(id => {
+      val umlEnumerationOption = umlClassDiagram.umlEnumerations.mapOfUMLEnumerations.get(id)
+      if umlEnumerationOption.isDefined then
+        val umlEnumeration = umlEnumerationOption.get
+        val owlClass = createAndAnnotateOWLEnumeration(umlEnumeration, errorMessages)
+    })
+    logger.info("processUMLEnumerations: Done")
+    errorMessages
+  end processUMLEnumerations
+
+
   def generateOWL: Either[String, ListBuffer[String]] =
     logger.info("generateOWL: Start")
     val errorMessages = new ListBuffer[String]()
     errorMessages.appendAll(processUMLClasses)
     errorMessages.appendAll(processUMLClassAttributes)
+    errorMessages.appendAll(processUMLEnumerations)
     try
       manager.saveOntology(ontology, new RDFXMLDocumentFormat(), IRI.create(umlClassDiagram.owlOntologyFile))
       logger.info("generateOWL: Done")

@@ -12,11 +12,14 @@ import scala.collection.mutable.Set
 enum ClassesHeader:
   case Name, Curie, Definition, ParentNames
 
-enum AttributesHeader:
+enum ClassAttributesHeader:
   case ClassName, Curie, Name, ClassOrPrimitiveType, MinMultiplicity, MaxMultiplicity, Definition
 
 enum EnumerationsHeader:
   case Name, Curie, Definition
+
+enum EnumerationValuesHeader:
+  case EnumerationName, Name, Curie, Definition
 
 def parseClasses(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespace): UMLClasses =
   import ClassesHeader.*
@@ -64,38 +67,39 @@ end parseClasses
 
 
 def parseAttributes(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespace): UMLClassAttributes =
-  import AttributesHeader.*
+  import ClassAttributesHeader.*
   val logger = Logger("TsvReader: parseAttributes")
   implicit object TsvFormat extends TSVFormat {}
-
-  val reader = CSVReader.open(maybeTsvFile.get)
   val umlClassAttributes = mutable.Set[UMLClassAttribute]()
 
-  logger.info("Start")
-  reader.allWithHeaders().foreach(m => {
-    logger.trace(s"m = $m")
+  if maybeTsvFile.isDefined then
+    val reader = CSVReader.open(maybeTsvFile.get)
+    logger.info("Start")
+    reader.allWithHeaders().foreach(m => {
+      logger.trace(s"m = $m")
 
-    val classNamedElement = UMLClassIdentity.findClassNamedElement(m(AttributesHeader.ClassName.toString))
-    logger.trace(s"classNamedElement = $classNamedElement")
-    if classNamedElement.isDefined then
-      logger.trace(s"mClassOrPrimitiveType.toString = {${m(ClassOrPrimitiveType.toString)}}")
-      val curieOption: Option[Curie] = if m(Curie.toString).contains(":") then
-        Some(org.uml2semantics.model.Curie(m(Curie.toString)))
-      else
-        None
-      val umlClassAttribute = UMLClassAttribute(
-        UMLClassAttributeIdentity(classNamedElement.get.classNamedElement,
-          UMLClassAttributeName(m(Name.toString)),
-          UMLClassAttributeCurie(curieOption),
-          ontologyPrefix
-        ),
-        UMLClassAttributeType(m(ClassOrPrimitiveType.toString)),
-        UMLMultiplicity(UMLCardinality(m(MinMultiplicity.toString)), UMLCardinality(m(MaxMultiplicity.toString))),
-        UMLClassAttributeDefinition(m(Definition.toString))
-      )
-      umlClassAttributes += umlClassAttribute
-  })
-  reader.close()
+      val classNamedElement = UMLClassIdentity.findClassNamedElement(m(ClassAttributesHeader.ClassName.toString))
+      logger.trace(s"classNamedElement = $classNamedElement")
+      if classNamedElement.isDefined then
+        logger.trace(s"mClassOrPrimitiveType.toString = {${m(ClassOrPrimitiveType.toString)}}")
+        val curieOption: Option[Curie] = if m(Curie.toString).contains(":") then
+          Some(org.uml2semantics.model.Curie(m(Curie.toString)))
+        else
+          None
+        val umlClassAttribute = UMLClassAttribute(
+          UMLClassAttributeIdentity(classNamedElement.get.classNamedElement,
+            UMLClassAttributeName(m(Name.toString)),
+            UMLClassAttributeCurie(curieOption),
+            ontologyPrefix
+          ),
+          UMLClassAttributeType(m(ClassOrPrimitiveType.toString)),
+          UMLMultiplicity(UMLCardinality(m(MinMultiplicity.toString)), UMLCardinality(m(MaxMultiplicity.toString))),
+          UMLClassAttributeDefinition(m(Definition.toString))
+        )
+        umlClassAttributes += umlClassAttribute
+    })
+    reader.close()
+
   val umlClassAttributesById = umlClassAttributes.map(umlClassAttribute => (umlClassAttribute.attributeIdentity.attributeNamedElement, umlClassAttribute)).toMap
   logger.trace(s"umlClassAttributesById = $umlClassAttributesById")
   logger.info("Done")
@@ -108,29 +112,32 @@ def parseEnumerations(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespac
   logger.info("Start")
   implicit object TsvFormat extends TSVFormat {}
 
-  val reader = CSVReader.open(maybeTsvFile.get)
   val umlEnumerations = mutable.Set[UMLEnumeration]()
+  if maybeTsvFile.isDefined then
+    val reader = CSVReader.open(maybeTsvFile.get)
 
-  reader.allWithHeaders().foreach(m => {
-    logger.trace(s"m = $m")
 
-    val curieOption: Option[Curie] = if m(Curie.toString).contains(":") then
-      Some(org.uml2semantics.model.Curie(m(Curie.toString)))
-    else
-      None
+    reader.allWithHeaders().foreach(m => {
+      logger.trace(s"m = $m")
 
-    val umlEnumeration = UMLEnumeration(
-      UMLEnumerationIdentity(
-        UMLEnumerationName(m(Name.toString)),
-        UMLEnumerationCurie(curieOption),
-        ontologyPrefix
-      ),
-      UMLEnumerationDefinition(m(Definition.toString))
-    )
-    logger.trace(s"umlEnumeration.getClass.hasCode=${umlEnumeration.getClass.hashCode}")
-    umlEnumerations += umlEnumeration
-  })
-  reader.close()
+      val curieOption: Option[Curie] = if m(Curie.toString).contains(":") then
+        Some(org.uml2semantics.model.Curie(m(Curie.toString)))
+      else
+        None
+
+      val umlEnumeration = UMLEnumeration(
+        UMLEnumerationIdentity(
+          UMLEnumerationName(m(Name.toString)),
+          UMLEnumerationCurie(curieOption),
+          ontologyPrefix
+        ),
+        UMLEnumerationDefinition(m(Definition.toString))
+      )
+      logger.trace(s"umlEnumeration.getClass.hasCode=${umlEnumeration.getClass.hashCode}")
+      umlEnumerations += umlEnumeration
+    })
+    reader.close()
+
   val umlEnumerationByNamedElement = umlEnumerations.map(
     umlEnumeration => (umlEnumeration.enumeratonIdentity.enumerationNamedElement, umlEnumeration)).toMap
   logger.trace(s"umlEnumerationByNamedElement = $umlEnumerationByNamedElement")
@@ -138,7 +145,42 @@ def parseEnumerations(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespac
   UMLEnumerations(umlEnumerationByNamedElement)
 end parseEnumerations
 
+def parseEnumerationValues(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespace): UMLEnumerationValues =
+  import EnumerationValuesHeader.*
+  val logger = Logger("TsvReader: parseEnumerationValues")
+  implicit object TsvFormat extends TSVFormat {}
 
+  val reader = CSVReader.open(maybeTsvFile.get)
+  val umlEnumerationValues = mutable.Set[UMLEnumerationValue]()
+
+  logger.info("Start")
+  reader.allWithHeaders().foreach(m => {
+    logger.trace(s"m = $m")
+
+    val enumerationNamedElement = UMLEnumerationIdentity.findEnumerationNamedElement(
+      m(EnumerationValuesHeader.EnumerationName.toString))
+    logger.trace(s"enumerationNamedElement = $enumerationNamedElement")
+    if enumerationNamedElement.isDefined then
+      val curieOption: Option[Curie] = if m(Curie.toString).contains(":") then
+        Some(org.uml2semantics.model.Curie(m(Curie.toString)))
+      else
+        None
+      val umlEnumerationValue = UMLEnumerationValue(
+        UMLEnumerationValueIdentity(enumerationNamedElement.get.enumerationNamedElement,
+          UMLEnumerationValueName(m(Name.toString)),
+          UMLEnumerationValueCurie(curieOption),
+          ontologyPrefix
+        ),
+        UMLEnumerationValueDefinition(m(Definition.toString))
+      )
+      umlEnumerationValues += umlEnumerationValue
+    })
+  reader.close()
+  val umlEnumerationValuesById = umlEnumerationValues.map(umlEnumerationValue => (umlEnumerationValue.valueIdentity.valueNamedElement, umlEnumerationValue)).toMap
+  logger.trace(s"umlEnumerationValuesById = $umlEnumerationValuesById")
+  logger.info("Done")
+  UMLEnumerationValues(umlEnumerationValuesById)
+end parseEnumerationValues
 
 def parseUMLClassDiagram(input: InputParameters): UMLClassDiagram =
   UMLClassDiagram(
@@ -147,7 +189,8 @@ def parseUMLClassDiagram(input: InputParameters): UMLClassDiagram =
     PrefixNamespace(input.ontologyPrefix),
     parseClasses(input.classesTsv, PrefixNamespace(input.ontologyPrefix)),
     parseAttributes(input.attributesTsv, PrefixNamespace(input.ontologyPrefix)),
-    parseEnumerations(input.enumerationsTsv, PrefixNamespace(input.ontologyPrefix)))
+    parseEnumerations(input.enumerationsTsv, PrefixNamespace(input.ontologyPrefix)),
+    parseEnumerationValues(input.enumerationsValuesTsv, PrefixNamespace(input.ontologyPrefix)))
 
 
 

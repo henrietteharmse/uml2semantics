@@ -31,7 +31,6 @@ val argParser =
       .action((a, c) => c.copy(attributesTsv = a))
       .text("A TSV file containing UML class attribute information"),
     opt[Option[File]]('e', "enumerations")
-      .required()
       .valueName("<csv-enumerations-file>")
       .action((a, c) => c.copy(enumerationsTsv = a))
       .validate(o =>
@@ -39,10 +38,10 @@ val argParser =
         else failure(s"The file \"${o.get}\" does not exist.")
       )
       .text("A TSV file containing UML enumerations"),
-    opt[Option[File]]('n', "enumeration named values")
-      .valueName("<csv-enumeration-named-values-file>")
-      .action((a, c) => c.copy(enumerationsNamedValuesTsv = a))
-      .text("A TSV file containing UML enumeration named values"),
+    opt[Option[File]]('n', "enumeration values")
+      .valueName("<csv-enumeration-values-file>")
+      .action((a, c) => c.copy(enumerationsValuesTsv = a))
+      .text("A TSV file containing UML enumeration values"),
     opt[Option[File]]('o', "ontology")
       .required()
       .valueName("<owl-ontology-file>")
