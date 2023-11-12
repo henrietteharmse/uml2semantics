@@ -150,36 +150,42 @@ def parseEnumerationValues(maybeTsvFile: Option[File], ontologyPrefix: PrefixNam
   val logger = Logger("TsvReader: parseEnumerationValues")
   implicit object TsvFormat extends TSVFormat {}
 
-  val reader = CSVReader.open(maybeTsvFile.get)
-  val umlEnumerationValues = mutable.Set[UMLEnumerationValue]()
+  if maybeTsvFile.isDefined then
+    val reader = CSVReader.open(maybeTsvFile.get)
+    val umlEnumerationValues = mutable.Set[UMLEnumerationValue]()
 
-  logger.info("Start")
-  reader.allWithHeaders().foreach(m => {
-    logger.trace(s"m = $m")
+    logger.info("Start")
+    reader.allWithHeaders().foreach(m => {
+      logger.trace(s"m = $m")
 
-    val enumerationNamedElement = UMLEnumerationIdentity.findEnumerationNamedElement(
-      m(EnumerationValuesHeader.EnumerationName.toString))
-    logger.trace(s"enumerationNamedElement = $enumerationNamedElement")
-    if enumerationNamedElement.isDefined then
-      val curieOption: Option[Curie] = if m(Curie.toString).contains(":") then
-        Some(org.uml2semantics.model.Curie(m(Curie.toString)))
-      else
-        None
-      val umlEnumerationValue = UMLEnumerationValue(
-        UMLEnumerationValueIdentity(enumerationNamedElement.get.enumerationNamedElement,
+      val enumerationIdentityOption = UMLEnumerationIdentity.findEnumerationNamedElement(
+        m(EnumerationValuesHeader.EnumerationName.toString))
+      logger.trace(s"enumerationNamedElement = $enumerationIdentityOption")
+      if enumerationIdentityOption.isDefined then
+        val enumerationIdentity = enumerationIdentityOption.get
+        val curieOption: Option[Curie] = if m(Curie.toString).contains(":") then
+          Some(org.uml2semantics.model.Curie(m(Curie.toString)))
+        else
+          None
+
+        val enumerationValueIdentity = UMLEnumerationValueIdentity(enumerationIdentity.enumerationNamedElement,
           UMLEnumerationValueName(m(Name.toString)),
           UMLEnumerationValueCurie(curieOption),
           ontologyPrefix
-        ),
-        UMLEnumerationValueDefinition(m(Definition.toString))
-      )
-      umlEnumerationValues += umlEnumerationValue
-    })
-  reader.close()
-  val umlEnumerationValuesById = umlEnumerationValues.map(umlEnumerationValue => (umlEnumerationValue.valueIdentity.valueNamedElement, umlEnumerationValue)).toMap
-  logger.trace(s"umlEnumerationValuesById = $umlEnumerationValuesById")
-  logger.info("Done")
-  UMLEnumerationValues(umlEnumerationValuesById)
+        )
+        val umlEnumerationValue = UMLEnumerationValue(enumerationValueIdentity,
+          UMLEnumerationValueDefinition(m(Definition.toString))
+        )
+        UMLEnumeration.cache(enumerationIdentity, enumerationValueIdentity)
+        umlEnumerationValues += umlEnumerationValue
+      })
+    reader.close()
+    val umlEnumerationValuesById = umlEnumerationValues.map(umlEnumerationValue => (umlEnumerationValue.valueIdentity.valueNamedElement, umlEnumerationValue)).toMap
+    logger.trace(s"umlEnumerationValuesById = $umlEnumerationValuesById")
+    logger.info("Done")
+    UMLEnumerationValues(umlEnumerationValuesById)
+  else
+    UMLEnumerationValues(scala.collection.immutable.HashMap[UMLEnumerationValueNamedElement, UMLEnumerationValue]())
 end parseEnumerationValues
 
 def parseUMLClassDiagram(input: InputParameters): UMLClassDiagram =

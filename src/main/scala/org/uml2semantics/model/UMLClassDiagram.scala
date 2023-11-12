@@ -41,23 +41,23 @@ case class UMLClassAttributeName(name: String = "") extends UMLClassAttributeNam
 
   override def nonEmpty: Boolean = name.nonEmpty
 
-  override def getName(classNamedElement: UMLClassNamedElement): String =
-    logger.debug(s"classNamedElement=$classNamedElement ${Code.source}")
-    classNamedElement match
+  override def getName(namedElement: UMLClassNamedElement): String =
+    logger.debug(s"classNamedElement=$namedElement ${Code.source}")
+    namedElement match
       case UMLClassCurie(curieOption) => curieOption.get.prefixReference.reference + FRAGMENT_SEPARATOR + name
-      case _ => classNamedElement.getName + FRAGMENT_SEPARATOR + name
+      case _ => namedElement.getName + FRAGMENT_SEPARATOR + name
 
 case class UMLClassAttributeCurie(curieOption: Option[Curie]) extends UMLClassAttributeNamedElement:
   private val logger = Logger[this.type]
 
   override def nonEmpty: Boolean = curieOption.nonEmpty
 
-  override def getName(classNamedElement: UMLClassNamedElement): String =
-    logger.debug(s"classNamedElement=$classNamedElement ${Code.source}")
-    classNamedElement match
+  override def getName(namedElement: UMLClassNamedElement): String =
+    logger.debug(s"classNamedElement=$namedElement ${Code.source}")
+    namedElement match
       case UMLClassCurie(curieOption) => curieOption.get.prefixReference.reference + FRAGMENT_SEPARATOR +
         curieOption.get.prefixReference.reference
-      case _ => classNamedElement.getName + FRAGMENT_SEPARATOR + curieOption.get.prefixReference.reference
+      case _ => namedElement.getName + FRAGMENT_SEPARATOR + curieOption.get.prefixReference.reference
 
 
 sealed trait UMLEnumerationNamedElement extends UMLNamedElement:
@@ -81,23 +81,23 @@ case class UMLEnumerationValueName(name: String = "") extends UMLEnumerationValu
 
   override def nonEmpty: Boolean = name.nonEmpty
 
-  override def getName(enumerationNamedElement: UMLEnumerationNamedElement): String =
-    logger.debug(s"enumerationNamedElement=$enumerationNamedElement ${Code.source}")
-    enumerationNamedElement match
+  override def getName(namedElement: UMLEnumerationNamedElement): String =
+    logger.debug(s"enumerationNamedElement=$namedElement ${Code.source}")
+    namedElement match
       case UMLEnumerationCurie(curieOption) => curieOption.get.prefixReference.reference + FRAGMENT_SEPARATOR + name
-      case _ => enumerationNamedElement.getName + FRAGMENT_SEPARATOR + name
+      case _ => namedElement.getName + FRAGMENT_SEPARATOR + name
 
 case class UMLEnumerationValueCurie(curieOption: Option[Curie]) extends UMLEnumerationValueNamedElement:
   private val logger = Logger[this.type]
 
   override def nonEmpty: Boolean = curieOption.nonEmpty
 
-  override def getName(enumerationNamedElement: UMLEnumerationNamedElement): String =
-    logger.debug(s"enumerationNamedElement=$enumerationNamedElement ${Code.source}")
-    enumerationNamedElement match
+  override def getName(namedElement: UMLEnumerationNamedElement): String =
+    logger.debug(s"enumerationNamedElement=$namedElement ${Code.source}")
+    namedElement match
       case UMLEnumerationCurie(curieOption) => curieOption.get.prefixReference.reference + FRAGMENT_SEPARATOR +
         curieOption.get.prefixReference.reference
-      case _ => enumerationNamedElement.getName + FRAGMENT_SEPARATOR + curieOption.get.prefixReference.reference
+      case _ => namedElement.getName + FRAGMENT_SEPARATOR + curieOption.get.prefixReference.reference
 
 
 case class UMLClassAttributeIdentity(classNamedElement: UMLClassNamedElement,
@@ -149,7 +149,9 @@ object UMLClassAttributeIdentity:
 
     classAttributeIdentity
 
-  private def populate(classNamedElement: UMLClassNamedElement, attributeNamedElement: UMLClassAttributeNamedElement, ontologyPrefix: PrefixNamespace,
+  private def populate(classNamedElement: UMLClassNamedElement,
+                       attributeNamedElement: UMLClassAttributeNamedElement,
+                       ontologyPrefix: PrefixNamespace,
                        attributeIdentity: UMLClassAttributeIdentity,
                        label: String): Unit = {
     logger.debug(s"classNamedElement=$classNamedElement, attributeNamedElement=$attributeNamedElement, " +
@@ -211,7 +213,9 @@ object UMLEnumerationValueIdentity:
 
     enumerationValueIdentity
 
-  private def populate(enumerationNamedElement: UMLEnumerationNamedElement, valueNamedElement: UMLEnumerationValueNamedElement, ontologyPrefix: PrefixNamespace,
+  private def populate(enumerationNamedElement: UMLEnumerationNamedElement,
+                       valueNamedElement: UMLEnumerationValueNamedElement,
+                       ontologyPrefix: PrefixNamespace,
                        valueIdentity: UMLEnumerationValueIdentity,
                        label: String): Unit = {
     logger.debug(s"enumerationNamedElement=$enumerationNamedElement, valueNamedElement=$valueNamedElement, " +
@@ -240,13 +244,13 @@ object UMLClassParentNamedElements:
       .map(m => UMLClassIdentity.findClassNamedElement(m).get.classNamedElement)
     new UMLClassParentNamedElements(setOfParentUncertainClassNamedElements)
 
-case class UMLClasses(mapOfUMLClasses: Map[UMLClassNamedElement, UMLClass])
+case class UMLClasses(umlClasses: Map[UMLClassNamedElement, UMLClass])
 
-case class UMLClassAttributes(mapOfUMLClassAttributes: Map[UMLClassAttributeNamedElement, UMLClassAttribute])
+case class UMLClassAttributes(umlClassAttributes: Map[UMLClassAttributeNamedElement, UMLClassAttribute])
 
-case class UMLEnumerations(mapOfUMLEnumerations: Map[UMLEnumerationNamedElement, UMLEnumeration])
+case class UMLEnumerations(umlEnumerations: Map[UMLEnumerationNamedElement, UMLEnumeration])
 
-case class UMLEnumerationValues(mapOfUMLEnumerationValues: Map[UMLEnumerationValueNamedElement, UMLEnumerationValue])
+case class UMLEnumerationValues(umlEnumerationValues: Map[UMLEnumerationValueNamedElement, UMLEnumerationValue])
 
 sealed trait UMLElementIRI:
   val iri: String
@@ -256,7 +260,8 @@ case class UMLClassIRI(override val iri: String) extends UMLElementIRI
 object UMLClassIRI:
   private val logger = Logger[this.type]
 
-  def apply(ontologyPrefix: PrefixNamespace, classNamedElement: UMLClassNamedElement): UMLClassIRI =
+  def apply(ontologyPrefix: PrefixNamespace,
+            classNamedElement: UMLClassNamedElement): UMLClassIRI =
     logger.debug(s"ontologyPrefix=$ontologyPrefix, classNamedElement=$classNamedElement ${Code.source}")
     classNamedElement match
       case classNamedElementType: UMLClassCurie =>
@@ -270,7 +275,8 @@ case class UMLClassAttributeIRI(override val iri: String) extends UMLElementIRI
 object UMLClassAttributeIRI:
   private val logger = Logger[this.type]
 
-  def apply(ontologyPrefix: PrefixNamespace, classNamedElement: UMLClassNamedElement,
+  def apply(ontologyPrefix: PrefixNamespace,
+            classNamedElement: UMLClassNamedElement,
             classAttributeNamedElement: UMLClassAttributeNamedElement): UMLClassAttributeIRI =
     logger.debug(s"ontologyPrefix.prefixIRI.iri = ${ontologyPrefix.prefixIRI.iri}, " +
       s"classAttributeNamedElement.getName = ${classAttributeNamedElement.getName} ${Code.source}")
@@ -301,7 +307,8 @@ case class UMLEnumerationValueIRI(override val iri: String) extends UMLElementIR
 object UMLEnumerationValueIRI:
   private val logger = Logger[this.type]
 
-  def apply(ontologyPrefix: PrefixNamespace, enumerationNamedElement: UMLEnumerationNamedElement,
+  def apply(ontologyPrefix: PrefixNamespace,
+            enumerationNamedElement: UMLEnumerationNamedElement,
             enumerationValueNamedElement: UMLEnumerationValueNamedElement): UMLEnumerationValueIRI =
     logger.debug(s"ontologyPrefix.prefixIRI.iri = ${ontologyPrefix.prefixIRI.iri}, " +
       s"enumerationValueNamedElement.getName = ${enumerationValueNamedElement.getName} ${Code.source}")
@@ -432,8 +439,10 @@ object UMLClassIdentity:
     classIdentity
 
 
-  private def populate(classNamedElement: UMLClassNamedElement, ontologyPrefix: PrefixNamespace,
-                       classIdentity: UMLClassIdentity, label: String): Unit = {
+  private def populate(classNamedElement: UMLClassNamedElement,
+                       ontologyPrefix: PrefixNamespace,
+                       classIdentity: UMLClassIdentity,
+                       label: String): Unit = {
     logger.debug(s"classNamedElement=$classNamedElement, ontologyPrefix=$ontologyPrefix, classIdentity=$classIdentity, " +
       s"label=$label, ${Code.source}")
     val classIRI: UMLClassIRI = UMLClassIRI(ontologyPrefix, classNamedElement)
@@ -502,8 +511,10 @@ object UMLEnumerationIdentity:
     enumerationIdentity
 
 
-  private def populate(enumerationNamedElement: UMLEnumerationNamedElement, ontologyPrefix: PrefixNamespace,
-                       enumerationIdentity: UMLEnumerationIdentity, label: String): Unit = {
+  private def populate(enumerationNamedElement: UMLEnumerationNamedElement,
+                       ontologyPrefix: PrefixNamespace,
+                       enumerationIdentity: UMLEnumerationIdentity,
+                       label: String): Unit = {
     logger.debug(s"enumerationNamedElement=$enumerationNamedElement, ontologyPrefix=$ontologyPrefix, enumerationIdentity=$enumerationIdentity, " +
       s"label=$label, ${Code.source}")
     val enumerationIRI: UMLEnumerationIRI = UMLEnumerationIRI(ontologyPrefix, enumerationNamedElement)
@@ -591,14 +602,44 @@ case class UMLClassAttribute(attributeIdentity: UMLClassAttributeIdentity,
 case class UMLEnumerationDefinition(definition: String = "")
 
 case class UMLEnumeration(enumeratonIdentity: UMLEnumerationIdentity,
-                          enumerationDefinition: UMLEnumerationDefinition = UMLEnumerationDefinition())
+                          definition: UMLEnumerationDefinition = UMLEnumerationDefinition())
   extends UMLClassDiagramElement
+
+
+object UMLEnumeration:
+  private val logger = Logger[this.type]
+
+  private val enumerationsWithEnumerationValues: mutable.HashMap[UMLEnumerationIdentity, mutable.Set[UMLEnumerationValueIdentity]] =
+    mutable.HashMap[UMLEnumerationIdentity, mutable.Set[UMLEnumerationValueIdentity]]()
+
+  def cache(enumerationIdentity: UMLEnumerationIdentity, enumerationValueIdentity: UMLEnumerationValueIdentity): UMLEnumerationIRI =
+    val enumerationValues: mutable.Set[UMLEnumerationValueIdentity] =
+      enumerationsWithEnumerationValues.getOrElse(enumerationIdentity, mutable.HashSet[UMLEnumerationValueIdentity]())
+    enumerationValues += enumerationValueIdentity
+    enumerationIdentity.enumerationIRI
+
+  def find(enumerationIdentity: UMLEnumerationIdentity): Option[mutable.Set[UMLEnumerationValueIdentity]] =
+    enumerationsWithEnumerationValues.get(enumerationIdentity)
+
 
 case class UMLEnumerationValueDefinition(definition: String = "")
 
 case class UMLEnumerationValue(valueIdentity: UMLEnumerationValueIdentity,
                                definition: UMLEnumerationValueDefinition = UMLEnumerationValueDefinition())
   extends UMLClassDiagramElement
+
+object UMLEnumerationValue:
+  private val enumerationValuesByIdentity: mutable.HashMap[UMLEnumerationValueIdentity, UMLEnumerationValue] =
+    mutable.HashMap[UMLEnumerationValueIdentity, UMLEnumerationValue]()
+
+  def apply(valueIdentity: UMLEnumerationValueIdentity,
+            definition: UMLEnumerationValueDefinition): UMLEnumerationValue =
+    val umlEnumerationValue = new UMLEnumerationValue(valueIdentity, definition)
+    enumerationValuesByIdentity += (valueIdentity -> umlEnumerationValue)
+    umlEnumerationValue
+
+  def find(valueIdentity: UMLEnumerationValueIdentity): Option[UMLEnumerationValue] =
+    enumerationValuesByIdentity.get(valueIdentity)
 
 case class UMLClassDiagram(owlOntologyFile: File,
                            ontologyIRI: OntologyIRI,

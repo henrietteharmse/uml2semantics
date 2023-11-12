@@ -29,6 +29,10 @@ val argParser =
     opt[Option[File]]('a', "attributes")
       .valueName("<csv-attributes-file>")
       .action((a, c) => c.copy(attributesTsv = a))
+      .validate(o =>
+        if (o.exists(f => f.exists()) || o.isEmpty) success
+        else failure(s"The file \"${o.get}\" does not exist.")
+      )
       .text("A TSV file containing UML class attribute information"),
     opt[Option[File]]('e', "enumerations")
       .valueName("<csv-enumerations-file>")
@@ -41,6 +45,10 @@ val argParser =
     opt[Option[File]]('n', "enumeration values")
       .valueName("<csv-enumeration-values-file>")
       .action((a, c) => c.copy(enumerationsValuesTsv = a))
+      .validate(o =>
+        if (o.exists(f => f.exists()) || o.isEmpty) success
+        else failure(s"The file \"${o.get}\" does not exist.")
+      )
       .text("A TSV file containing UML enumeration values"),
     opt[Option[File]]('o', "ontology")
       .required()

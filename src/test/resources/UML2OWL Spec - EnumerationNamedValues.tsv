@@ -1,5 +1,0 @@
-EnumName	Curie	Named	Definition
-ex:SalarySchedule	ex:Daily		Employee gets paid at the end of each day
-SalarySchedule		Weekly	Employee gets paid at the end of each week on a Friday
-ex:SalarySchedule	ex:Monthly		Employee gets paid at the last day of the month
-SalarySchedule	ex:Contract	Contract	Employee gets paid at the end of the contract
