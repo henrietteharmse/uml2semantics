@@ -601,7 +601,7 @@ case class UMLClassAttribute(attributeIdentity: UMLClassAttributeIdentity,
 
 case class UMLEnumerationDefinition(definition: String = "")
 
-case class UMLEnumeration(enumeratonIdentity: UMLEnumerationIdentity,
+case class UMLEnumeration(enumerationIdentity: UMLEnumerationIdentity,
                           definition: UMLEnumerationDefinition = UMLEnumerationDefinition())
   extends UMLClassDiagramElement
 
@@ -613,6 +613,7 @@ object UMLEnumeration:
     mutable.HashMap[UMLEnumerationIdentity, mutable.Set[UMLEnumerationValueIdentity]]()
 
   def cache(enumerationIdentity: UMLEnumerationIdentity, enumerationValueIdentity: UMLEnumerationValueIdentity): UMLEnumerationIRI =
+    logger.debug(s"enumerationIdentity=$enumerationIdentity, enumerationValueIdentity=$enumerationValueIdentity ${Code.source}")
     val enumerationValues: mutable.Set[UMLEnumerationValueIdentity] =
       enumerationsWithEnumerationValues.getOrElse(enumerationIdentity, mutable.HashSet[UMLEnumerationValueIdentity]())
     enumerationValues += enumerationValueIdentity

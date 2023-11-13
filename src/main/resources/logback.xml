@@ -11,6 +11,8 @@
     <!-- org.uml2semantics.TSVReader.scala -->
     <logger name="parseClasses" level="error" />
     <logger name="parseAttributes" level="error" />
+    <logger name="parseEnumerations" level="trace" />
+    <logger name="parseEnumerationValues" level="trace" />
 
     <!-- org.uml2semantics.model.UMLClassDiagram.scala -->
     <logger name="org.uml2semantics.model.UMLClassCurie" level="error" />
@@ -24,7 +26,9 @@
     <logger name="org.uml2semantics.model.UMLMultiplicity" level="error" />
     <logger name="org.uml2semantics.model.UMLClassIdentity" level="error" />
     <logger name="org.uml2semantics.model.UMLClassAttributeType" level="error" />
+    <logger name="org.uml2semantics.model.UMLEnumeration" level="trace" />
     <logger name="org.uml2semantics.model.UMLClassDiagram" level="error" />
+
 
     <!-- org.uml2semantics.model.XMLDataType.scala -->
     <logger name="org.uml2semantics.model.SupportedDataType" level="error" />

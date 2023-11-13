@@ -1,4 +1,4 @@
 EnumerationName	Curie	Name	Definition
 emp:SalarySchedule	emp:Daily		Employee gets paid at the end of each day
-SalarySchedule		Weekly	Employee gets paid at the end of each week on a Friday
+PaymentSchedule		Weekly	Employee gets paid at the end of each week on a Friday
 emp:SalarySchedule	emp:Monthly		Employee gets paid at the last day of the month

@@ -59,11 +59,11 @@ class UML2OWLWriter(val umlClassDiagram: UMLClassDiagram):
   private def createAndAnnotateOWLClass(umlEnumeration: UMLEnumeration,
                                         errorMessages: mutable.Seq[String]): OWLClass =
     logger.debug(s"createAndAnnotateOWLEnumeration: umlEnumeration=$umlEnumeration, errorMessages=$errorMessages ${Code.source}")
-    val owlClass = dataFactory.getOWLClass(umlEnumeration.enumeratonIdentity.enumerationIRI.iri)
+    val owlClass = dataFactory.getOWLClass(umlEnumeration.enumerationIdentity.enumerationIRI.iri)
     if manager.addAxiom(ontology, dataFactory.getOWLSubClassOfAxiom(owlClass, dataFactory.getOWLThing)) != SUCCESSFULLY then
       errorMessages :+ s"Could not add axiom ${owlClass.getIRI} subClassOf owl:Thing"
     createDefinitionAnnotation(owlClass, umlEnumeration.definition.definition, errorMessages)
-    createLabelAnnotation(owlClass, umlEnumeration.enumeratonIdentity.enumerationLabel, errorMessages)
+    createLabelAnnotation(owlClass, umlEnumeration.enumerationIdentity.enumerationLabel, errorMessages)
     owlClass
 
   /**
@@ -377,7 +377,7 @@ class UML2OWLWriter(val umlClassDiagram: UMLClassDiagram):
         val owlClass = createAndAnnotateOWLClass(umlEnumeration, errorMessages)
         if manager.addAxiom(ontology, dataFactory.getOWLSubClassOfAxiom(owlClass, dataFactory.getOWLThing)) != SUCCESSFULLY then
           errorMessages :+ s"Could not add axiom ${owlClass.getIRI} subClassOf owl:Thing"
-        val umlEnumerationValueIdentitiesOption = UMLEnumeration.find(umlEnumeration.enumeratonIdentity)
+        val umlEnumerationValueIdentitiesOption = UMLEnumeration.find(umlEnumeration.enumerationIdentity)
         if umlEnumerationValueIdentitiesOption.isDefined then
           val individuals: mutable.Set[OWLIndividual] = new mutable.HashSet[OWLIndividual]()
           umlEnumerationValueIdentitiesOption.get.foreach(v => {
