@@ -44,7 +44,7 @@ val argParser =
       .text("A TSV file containing UML enumerations"),
     opt[Option[File]]('n', "enumeration values")
       .valueName("<csv-enumeration-values-file>")
-      .action((a, c) => c.copy(enumerationsValuesTsv = a))
+      .action((a, c) => c.copy(enumerationValuesTsv = a))
       .validate(o =>
         if (o.exists(f => f.exists()) || o.isEmpty) success
         else failure(s"The file \"${o.get}\" does not exist.")

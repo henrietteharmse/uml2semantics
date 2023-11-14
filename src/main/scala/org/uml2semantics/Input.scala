@@ -7,7 +7,7 @@ import java.io.File
 case class InputParameters(classesTsv: Option[File] = None,
                            attributesTsv: Option[File] = None,
                            enumerationsTsv: Option[File] = None,
-                           enumerationsValuesTsv: Option[File] = None,
+                           enumerationValuesTsv: Option[File] = None,
                            owlOntologyFile: Option[File] = None,
                            ontologyIRI: String = "https://uml2semantics.com/ontology",
                            ontologyPrefix: String = "uml2ont:https://uml2semantics.com/ontology/",

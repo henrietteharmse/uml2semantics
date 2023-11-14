@@ -47,11 +47,13 @@ class UML2OWLWriter(val umlClassDiagram: UMLClassDiagram):
 
 
   private def createAndAnnotateOWLClass(umlClass: UMLClass,
-                                        errorMessages: mutable.Seq[String]): OWLClass =
+                                        errorMessages: mutable.Seq[String],
+                                        hasParent: Boolean = false): OWLClass =
     logger.debug(s"createAndAnnotateOWLClass: umlClass=$umlClass, errorMessages=$errorMessages ${Code.source}")
     val owlClass = dataFactory.getOWLClass(umlClass.classIdentity.classIRI.iri)
-    if manager.addAxiom(ontology, dataFactory.getOWLSubClassOfAxiom(owlClass, dataFactory.getOWLThing)) != SUCCESSFULLY then
-      errorMessages :+ s"Could not add axiom ${owlClass.getIRI} subClassOf owl:Thing"
+    if !hasParent then
+      if manager.addAxiom(ontology, dataFactory.getOWLSubClassOfAxiom(owlClass, dataFactory.getOWLThing)) != SUCCESSFULLY then
+        errorMessages :+ s"Could not add axiom ${owlClass.getIRI} subClassOf owl:Thing"
     createDefinitionAnnotation(owlClass, umlClass.classDefinition.definition, errorMessages)
     createLabelAnnotation(owlClass, umlClass.classIdentity.classLabel, errorMessages)
     owlClass
@@ -315,11 +317,12 @@ class UML2OWLWriter(val umlClassDiagram: UMLClassDiagram):
     dataProperty
 
 
-  private def createAndAnnotateNamedIndividual(umlEnumerationValue: UMLEnumerationValue,
+  private def createAndAnnotateNamedIndividual(enumerationIdentity: UMLEnumerationIdentity,
+                                               umlEnumerationValue: UMLEnumerationValue,
                                                errorMessages: mutable.Seq[String]): OWLNamedIndividual =
     logger.debug(s"createAndAnnotateNamedIndividual: umlEnumerationValue=$umlEnumerationValue, " +
       s"errorMessages=$errorMessages ${Code.source}")
-    val owlClass = dataFactory.getOWLClass(umlEnumerationValue.valueIdentity.valueIRI.iri)
+    val owlClass = dataFactory.getOWLClass(enumerationIdentity.enumerationIRI.iri)
     val owlNamedIndividual = dataFactory.getOWLNamedIndividual(umlEnumerationValue.valueIdentity.valueIRI.iri)
     val axiom = dataFactory.getOWLClassAssertionAxiom(owlClass, owlNamedIndividual)
     if manager.addAxiom(ontology, axiom) != SUCCESSFULLY then
@@ -331,12 +334,12 @@ class UML2OWLWriter(val umlClassDiagram: UMLClassDiagram):
 
   private def processUMLClasses: mutable.Seq[String] =
     logger.info("processUMLClasses: Start")
-    val errorMessages: mutable.Seq[String] = new ArrayBuffer[String]()
+    var errorMessages: mutable.Seq[String] = new ArrayBuffer[String]()
     umlClassDiagram.umlClasses.umlClasses.keySet.foreach(id => {
       val umlClassOption = umlClassDiagram.umlClasses.umlClasses.get(id)
       if umlClassOption.isDefined then
         val umlClass = umlClassOption.get
-        val owlClass = createAndAnnotateOWLClass(umlClass, errorMessages)
+        val owlClass = createAndAnnotateOWLClass(umlClass, errorMessages, !umlClass.classParentIds.setOfParentNamedElements.isEmpty)
         if umlClass.classParentIds.setOfParentNamedElements.isEmpty then
           logger.trace("ParentIds is EMPTY")
         else
@@ -355,7 +358,7 @@ class UML2OWLWriter(val umlClassDiagram: UMLClassDiagram):
 
   private def processUMLClassAttributes: mutable.Seq[String] =
     logger.info("processUMLClassAttributes: Start")
-    val errorMessages: ArrayBuffer[String] = new ArrayBuffer[String]()
+    var errorMessages: ArrayBuffer[String] = new ArrayBuffer[String]()
     umlClassDiagram.umlClassAttributes.umlClassAttributes.keySet.foreach(id => {
       val umlClassAttributeOption = umlClassDiagram.umlClassAttributes.umlClassAttributes.get(id)
       if umlClassAttributeOption.isDefined then
@@ -369,19 +372,20 @@ class UML2OWLWriter(val umlClassDiagram: UMLClassDiagram):
 
   private def processUMLEnumerations: mutable.Seq[String] =
     logger.info("processUMLEnumerations: Start")
-    val errorMessages: mutable.Seq[String] = new ArrayBuffer[String]()
+    var errorMessages: mutable.Seq[String] = new ArrayBuffer[String]()
     umlClassDiagram.umlEnumerations.umlEnumerations.keySet.foreach(id => {
       val umlEnumerationOption = umlClassDiagram.umlEnumerations.umlEnumerations.get(id)
-      if umlEnumerationOption.isDefined then
+      if umlEnumerationOption.isDefined then {
         val umlEnumeration = umlEnumerationOption.get
         val owlClass = createAndAnnotateOWLClass(umlEnumeration, errorMessages)
-        if manager.addAxiom(ontology, dataFactory.getOWLSubClassOfAxiom(owlClass, dataFactory.getOWLThing)) != SUCCESSFULLY then
-          errorMessages :+ s"Could not add axiom ${owlClass.getIRI} subClassOf owl:Thing"
         val umlEnumerationValueIdentitiesOption = UMLEnumeration.find(umlEnumeration.enumerationIdentity)
         if umlEnumerationValueIdentitiesOption.isDefined then
           val individuals: mutable.Set[OWLIndividual] = new mutable.HashSet[OWLIndividual]()
           umlEnumerationValueIdentitiesOption.get.foreach(v => {
-            val individual = createAndAnnotateNamedIndividual(UMLEnumerationValue.find(v).get, errorMessages)
+            val individual = createAndAnnotateNamedIndividual(
+              umlEnumeration.enumerationIdentity,
+              UMLEnumerationValue.find(v).get,
+              errorMessages)
             individuals += individual
           })
           val owlClassExpression = dataFactory.getOWLObjectOneOf(individuals.asJava)
@@ -389,6 +393,7 @@ class UML2OWLWriter(val umlClassDiagram: UMLClassDiagram):
             dataFactory.getOWLEquivalentClassesAxiom(owlClass, owlClassExpression)
           if (manager.addAxiom(ontology, owlEquivalentClassesAxiom) != SUCCESSFULLY) then
             errorMessages :+ s"Could not add axiom ${owlClass.getIRI} equivalent to ${owlClassExpression}"
+      }
     })
     logger.info("processUMLEnumerations: Done")
     errorMessages
@@ -396,7 +401,7 @@ class UML2OWLWriter(val umlClassDiagram: UMLClassDiagram):
 
   def generateOWL: Either[String, ListBuffer[String]] =
     logger.info("generateOWL: Start")
-    val errorMessages = new ListBuffer[String]()
+    var errorMessages = new ListBuffer[String]()
     errorMessages.appendAll(processUMLClasses)
     errorMessages.appendAll(processUMLClassAttributes)
     errorMessages.appendAll(processUMLEnumerations)

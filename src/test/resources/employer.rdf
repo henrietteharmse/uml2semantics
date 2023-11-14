@@ -106,7 +106,6 @@
 
     <owl:Class rdf:about="http://uml2semantics.org/examples/employer#Employee">
         <rdfs:subClassOf rdf:resource="http://uml2semantics.org/examples/employer#Person"/>
-        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="http://uml2semantics.org/examples/employer#Employee/employedBy"/>
@@ -124,7 +123,6 @@
 
     <owl:Class rdf:about="http://uml2semantics.org/examples/employer#Employer">
         <rdfs:subClassOf rdf:resource="http://uml2semantics.org/examples/employer#Person"/>
-        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="http://uml2semantics.org/examples/employer#Employer/employes"/>
@@ -172,10 +170,64 @@
 
 
     <owl:Class rdf:about="http://uml2semantics.org/examples/employer#SalarySchedule">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:oneOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://uml2semantics.org/examples/employer#Daily"/>
+                    <rdf:Description rdf:about="http://uml2semantics.org/examples/employer#Monthly"/>
+                    <rdf:Description rdf:about="http://uml2semantics.org/examples/employer#SalarySchedule/Weekly"/>
+                </owl:oneOf>
+            </owl:Class>
+        </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
         <rdfs:comment>Defines the frequency of payments</rdfs:comment>
         <rdfs:label>PaymentSchedule</rdfs:label>
     </owl:Class>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    
+
+
+    <!-- http://uml2semantics.org/examples/employer#Daily -->
+
+
+    <owl:NamedIndividual rdf:about="http://uml2semantics.org/examples/employer#Daily">
+        <rdf:type rdf:resource="http://uml2semantics.org/examples/employer#SalarySchedule"/>
+        <rdfs:comment>Employee gets paid at the end of each day</rdfs:comment>
+        <rdfs:label>Daily</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://uml2semantics.org/examples/employer#Monthly -->
+
+
+    <owl:NamedIndividual rdf:about="http://uml2semantics.org/examples/employer#Monthly">
+        <rdf:type rdf:resource="http://uml2semantics.org/examples/employer#SalarySchedule"/>
+        <rdfs:comment>Employee gets paid at the last day of the month</rdfs:comment>
+        <rdfs:label>Monthly</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://uml2semantics.org/examples/employer#SalarySchedule/Weekly -->
+
+
+    <owl:NamedIndividual rdf:about="http://uml2semantics.org/examples/employer#SalarySchedule/Weekly">
+        <rdf:type rdf:resource="http://uml2semantics.org/examples/employer#SalarySchedule"/>
+        <rdfs:comment>Employee gets paid at the end of each week on a Friday</rdfs:comment>
+        <rdfs:label>Weekly</rdfs:label>
+    </owl:NamedIndividual>
 </rdf:RDF>
 
 

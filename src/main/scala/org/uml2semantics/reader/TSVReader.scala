@@ -28,7 +28,7 @@ def parseClasses(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespace): U
   implicit object TsvFormat extends TSVFormat {}
 
   val reader = CSVReader.open(maybeTsvFile.get)
-  val umlClasses = mutable.Set[UMLClass]()
+  var umlClasses = mutable.Set[UMLClass]()
 
   reader.allWithHeaders().foreach(m => {
     logger.trace(s"m = $m")
@@ -70,7 +70,7 @@ def parseAttributes(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespace)
   import ClassAttributesHeader.*
   val logger = Logger("TsvReader: parseAttributes")
   implicit object TsvFormat extends TSVFormat {}
-  val umlClassAttributes = mutable.Set[UMLClassAttribute]()
+  var umlClassAttributes = mutable.Set[UMLClassAttribute]()
 
   if maybeTsvFile.isDefined then
     val reader = CSVReader.open(maybeTsvFile.get)
@@ -112,7 +112,7 @@ def parseEnumerations(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespac
   logger.info("Start")
   implicit object TsvFormat extends TSVFormat {}
 
-  val umlEnumerations = mutable.Set[UMLEnumeration]()
+  var umlEnumerations = mutable.Set[UMLEnumeration]()
   if maybeTsvFile.isDefined then
     val reader = CSVReader.open(maybeTsvFile.get)
 
@@ -152,7 +152,7 @@ def parseEnumerationValues(maybeTsvFile: Option[File], ontologyPrefix: PrefixNam
 
   if maybeTsvFile.isDefined then {
     val reader = CSVReader.open(maybeTsvFile.get)
-    val umlEnumerationValues = mutable.Set[UMLEnumerationValue]()
+    var umlEnumerationValues = mutable.Set[UMLEnumerationValue]()
 
     logger.info("Start")
     reader.allWithHeaders().foreach(m => {
@@ -198,7 +198,7 @@ def parseUMLClassDiagram(input: InputParameters): UMLClassDiagram =
     parseClasses(input.classesTsv, PrefixNamespace(input.ontologyPrefix)),
     parseAttributes(input.attributesTsv, PrefixNamespace(input.ontologyPrefix)),
     parseEnumerations(input.enumerationsTsv, PrefixNamespace(input.ontologyPrefix)),
-    parseEnumerationValues(input.enumerationsValuesTsv, PrefixNamespace(input.ontologyPrefix)))
+    parseEnumerationValues(input.enumerationValuesTsv, PrefixNamespace(input.ontologyPrefix)))
 
 
 

@@ -6,6 +6,7 @@ import org.uml2semantics.model.UMLCardinality.{>=, logger}
 import sourcecode.Text
 
 import java.io.File
+import scala.:+
 import scala.annotation.{tailrec, targetName}
 import scala.collection.mutable
 
@@ -111,11 +112,11 @@ case class UMLClassAttributeIdentity(classNamedElement: UMLClassNamedElement,
 object UMLClassAttributeIdentity:
   private val logger = Logger[this.type]
 
-  private val attributeIdentityByName: mutable.HashMap[UMLClassAttributeName, UMLClassAttributeIdentity] =
+  private var attributeIdentityByName: mutable.HashMap[UMLClassAttributeName, UMLClassAttributeIdentity] =
     mutable.HashMap[UMLClassAttributeName, UMLClassAttributeIdentity]()
-  private val attributeIdentityByIRI: mutable.HashMap[UMLClassAttributeIRI, UMLClassAttributeIdentity] =
+  private var attributeIdentityByIRI: mutable.HashMap[UMLClassAttributeIRI, UMLClassAttributeIdentity] =
     mutable.HashMap[UMLClassAttributeIRI, UMLClassAttributeIdentity]()
-  private val attributeIdentityByCurie: mutable.HashMap[UMLClassAttributeCurie, UMLClassAttributeIdentity] =
+  private var attributeIdentityByCurie: mutable.HashMap[UMLClassAttributeCurie, UMLClassAttributeIdentity] =
     mutable.HashMap[UMLClassAttributeCurie, UMLClassAttributeIdentity]()
 
   def apply(classNamedElement: UMLClassNamedElement,
@@ -175,11 +176,11 @@ case class UMLEnumerationValueIdentity(enumerationNamedElement: UMLEnumerationNa
 object UMLEnumerationValueIdentity:
   private val logger = Logger[this.type]
 
-  private val valueIdentityByName: mutable.HashMap[UMLEnumerationValueName, UMLEnumerationValueIdentity] =
+  private var valueIdentityByName: mutable.HashMap[UMLEnumerationValueName, UMLEnumerationValueIdentity] =
     mutable.HashMap[UMLEnumerationValueName, UMLEnumerationValueIdentity]()
-  private val valueIdentityByIRI: mutable.HashMap[UMLEnumerationValueIRI, UMLEnumerationValueIdentity] =
+  private var valueIdentityByIRI: mutable.HashMap[UMLEnumerationValueIRI, UMLEnumerationValueIdentity] =
     mutable.HashMap[UMLEnumerationValueIRI, UMLEnumerationValueIdentity]()
-  private val valueIdentityByCurie: mutable.HashMap[UMLEnumerationValueCurie, UMLEnumerationValueIdentity] =
+  private var valueIdentityByCurie: mutable.HashMap[UMLEnumerationValueCurie, UMLEnumerationValueIdentity] =
     mutable.HashMap[UMLEnumerationValueCurie, UMLEnumerationValueIdentity]()
 
   def apply(enumerationNamedElement: UMLEnumerationNamedElement,
@@ -402,9 +403,9 @@ case class UMLClassIdentity(className: UMLClassName,
 object UMLClassIdentity:
   private val logger = Logger[this.type]
 
-  private val classIdentityByName: mutable.HashMap[UMLClassName, UMLClassIdentity] = mutable.HashMap[UMLClassName, UMLClassIdentity]()
-  private val classIdentityByIRI: mutable.HashMap[UMLClassIRI, UMLClassIdentity] = mutable.HashMap[UMLClassIRI, UMLClassIdentity]()
-  private val classIdentityByCurie: mutable.HashMap[UMLClassCurie, UMLClassIdentity] = mutable.HashMap[UMLClassCurie, UMLClassIdentity]()
+  private var classIdentityByName: mutable.HashMap[UMLClassName, UMLClassIdentity] = mutable.HashMap[UMLClassName, UMLClassIdentity]()
+  private var classIdentityByIRI: mutable.HashMap[UMLClassIRI, UMLClassIdentity] = mutable.HashMap[UMLClassIRI, UMLClassIdentity]()
+  private var classIdentityByCurie: mutable.HashMap[UMLClassCurie, UMLClassIdentity] = mutable.HashMap[UMLClassCurie, UMLClassIdentity]()
 
   /**
    *
@@ -481,9 +482,9 @@ case class UMLEnumerationIdentity(enumerationName: UMLEnumerationName,
 object UMLEnumerationIdentity:
   private val logger = Logger[this.type]
 
-  private val enumerationIdentityByName: mutable.HashMap[UMLEnumerationName, UMLEnumerationIdentity] = mutable.HashMap[UMLEnumerationName, UMLEnumerationIdentity]()
-  private val enumerationIdentityByIRI: mutable.HashMap[UMLEnumerationIRI, UMLEnumerationIdentity] = mutable.HashMap[UMLEnumerationIRI, UMLEnumerationIdentity]()
-  private val enumerationIdentityByCurie: mutable.HashMap[UMLEnumerationCurie, UMLEnumerationIdentity] = mutable.HashMap[UMLEnumerationCurie, UMLEnumerationIdentity]()
+  private var enumerationIdentityByName: mutable.HashMap[UMLEnumerationName, UMLEnumerationIdentity] = mutable.HashMap[UMLEnumerationName, UMLEnumerationIdentity]()
+  private var enumerationIdentityByIRI: mutable.HashMap[UMLEnumerationIRI, UMLEnumerationIdentity] = mutable.HashMap[UMLEnumerationIRI, UMLEnumerationIdentity]()
+  private var enumerationIdentityByCurie: mutable.HashMap[UMLEnumerationCurie, UMLEnumerationIdentity] = mutable.HashMap[UMLEnumerationCurie, UMLEnumerationIdentity]()
 
   def apply(enumerationName: UMLEnumerationName = UMLEnumerationName(),
             enumerationCurie: UMLEnumerationCurie = UMLEnumerationCurie(),
@@ -609,14 +610,15 @@ case class UMLEnumeration(enumerationIdentity: UMLEnumerationIdentity,
 object UMLEnumeration:
   private val logger = Logger[this.type]
 
-  private val enumerationsWithEnumerationValues: mutable.HashMap[UMLEnumerationIdentity, mutable.Set[UMLEnumerationValueIdentity]] =
+  private var enumerationsWithEnumerationValues: mutable.HashMap[UMLEnumerationIdentity, mutable.Set[UMLEnumerationValueIdentity]] =
     mutable.HashMap[UMLEnumerationIdentity, mutable.Set[UMLEnumerationValueIdentity]]()
-
   def cache(enumerationIdentity: UMLEnumerationIdentity, enumerationValueIdentity: UMLEnumerationValueIdentity): UMLEnumerationIRI =
     logger.debug(s"enumerationIdentity=$enumerationIdentity, enumerationValueIdentity=$enumerationValueIdentity ${Code.source}")
-    val enumerationValues: mutable.Set[UMLEnumerationValueIdentity] =
+    var enumerationValues: mutable.Set[UMLEnumerationValueIdentity] =
       enumerationsWithEnumerationValues.getOrElse(enumerationIdentity, mutable.HashSet[UMLEnumerationValueIdentity]())
     enumerationValues += enumerationValueIdentity
+    enumerationsWithEnumerationValues.put(enumerationIdentity, enumerationValues)
+    logger.trace(s"enumerationsWithEnumerationValues.size = ${enumerationsWithEnumerationValues.size}")
     enumerationIdentity.enumerationIRI
 
   def find(enumerationIdentity: UMLEnumerationIdentity): Option[mutable.Set[UMLEnumerationValueIdentity]] =
@@ -630,7 +632,7 @@ case class UMLEnumerationValue(valueIdentity: UMLEnumerationValueIdentity,
   extends UMLClassDiagramElement
 
 object UMLEnumerationValue:
-  private val enumerationValuesByIdentity: mutable.HashMap[UMLEnumerationValueIdentity, UMLEnumerationValue] =
+  private var enumerationValuesByIdentity: mutable.HashMap[UMLEnumerationValueIdentity, UMLEnumerationValue] =
     mutable.HashMap[UMLEnumerationValueIdentity, UMLEnumerationValue]()
 
   def apply(valueIdentity: UMLEnumerationValueIdentity,
