@@ -3,4 +3,7 @@ Person		name	xsd:string
 Person		surname	xsd:string			
 Person		dateOfBirth	xsd:dateTime			
 Employee		employedBy	Employer	1	1	
+Employee		renumeration	Renumeration	1	1	
 Employer		employes	Employee	1	*	
+Renumeration		rate	xsd:decimal	1	1	
+Renumeration		paymentSchedule	PaymentSchedule	1	1	

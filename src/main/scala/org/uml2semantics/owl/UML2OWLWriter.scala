@@ -87,6 +87,8 @@ class UML2OWLWriter(val umlClassDiagram: UMLClassDiagram):
         owlProperty = createOWLDataProperty(umlClassAttribute, errorMessages, domain, attributeType)
       case UMLClassIdentityType(attributeType) =>
         owlProperty = createOWLObjectProperty(umlClassAttribute, errorMessages, domain, attributeType)
+      case UMLEnumerationIdentityType(attributeType) =>
+        owlProperty = createOWLObjectProperty(umlClassAttribute, errorMessages, domain, attributeType)
       case CurieBasedUMLClassAttributeType(attributeType) =>
         owlProperty = createOWLObjectPropertyBasedOnConfiguredPrefix(umlClassAttribute, errorMessages, domain, attributeType)
       case UndefinedUMLClassAttributeType =>
@@ -148,6 +150,56 @@ class UML2OWLWriter(val umlClassDiagram: UMLClassDiagram):
           val axiom = dataFactory.getOWLSubClassOfAxiom(domain,
             dataFactory.getOWLObjectMinCardinality(minCardinality, objectProperty,
               dataFactory.getOWLClass(umlClassIdentity.classIRI.iri)))
+          if manager.addAxiom(ontology, axiom) != SUCCESSFULLY then
+            errorMessages :+ s"Could not add subclass axiom representing cardinalities for [$minCardinality, *]" +
+              s"${umlClassAttribute.attributeIdentity.attributeLabel}"
+      case UMLMultiplicity(UMLInfiniteCardinality(_), UMLNonNegativeCardinality(maxCardinality)) =>
+        errorMessages :+ s"Multiplicity error found with multiplicity = [*, $maxCardinality] for attribute = " +
+          s"${umlClassAttribute.attributeIdentity.attributeLabel}."
+      case UMLMultiplicity(UMLInfiniteCardinality(_), UMLInfiniteCardinality(_)) =>
+    objectProperty
+
+  private def createOWLObjectProperty(umlClassAttribute: UMLClassAttribute,
+                                      errorMessages: mutable.Seq[String],
+                                      domain: OWLClass,
+                                      umlEnumerationIdentity: UMLEnumerationIdentity): OWLObjectProperty =
+    logger.debug(s"createOWLObjectProperty: umlClassAttribute=$umlClassAttribute, errorMessages = $errorMessages, " +
+      s"domain=$domain, umlEnumerationIdentity=$umlEnumerationIdentity ${Code.source}")
+    val objectProperty = dataFactory.getOWLObjectProperty(umlClassAttribute.attributeIdentity.attributeIRI.iri)
+    val domainChangeApplied = manager.addAxiom(ontology, dataFactory.getOWLObjectPropertyDomainAxiom(objectProperty, domain))
+    if domainChangeApplied != SUCCESSFULLY then
+      errorMessages :+ s"Domain axiom for object property ${objectProperty.getIRI} could not be added for " +
+        s"${umlClassAttribute.attributeIdentity.attributeIRI.iri}"
+    val rangeChangeApplied = manager.addAxiom(ontology, dataFactory.getOWLObjectPropertyRangeAxiom(objectProperty,
+      dataFactory.getOWLClass(umlEnumerationIdentity.enumerationIRI.iri)))
+    if rangeChangeApplied != SUCCESSFULLY then
+      errorMessages :+ s"Range axiom for data property ${objectProperty.getIRI} could not be added for " +
+        s"${umlClassAttribute.attributeIdentity.attributeIRI.iri}"
+    umlClassAttribute.multiplicity match
+      case UMLMultiplicity(UMLNonNegativeCardinality(minCardinality), UMLNonNegativeCardinality(maxCardinality)) =>
+        logger.trace(s"minCardinality=$minCardinality ${Code.source}")
+        val axiom =
+          if minCardinality == maxCardinality && minCardinality != 0 then
+            dataFactory.getOWLSubClassOfAxiom(domain, dataFactory.getOWLObjectExactCardinality(maxCardinality, objectProperty,
+              dataFactory.getOWLClass(umlEnumerationIdentity.enumerationIRI.iri)))
+          else if minCardinality > 0 then
+            dataFactory.getOWLSubClassOfAxiom(domain,
+              dataFactory.getOWLObjectIntersectionOf(
+                dataFactory.getOWLObjectMinCardinality(minCardinality, objectProperty,
+                  dataFactory.getOWLClass(umlEnumerationIdentity.enumerationIRI.iri)),
+                dataFactory.getOWLObjectMaxCardinality(maxCardinality, objectProperty,
+                  dataFactory.getOWLClass(umlEnumerationIdentity.enumerationIRI.iri))))
+          else
+            dataFactory.getOWLSubClassOfAxiom(domain, dataFactory.getOWLObjectMaxCardinality(maxCardinality, objectProperty,
+              dataFactory.getOWLClass(umlEnumerationIdentity.enumerationIRI.iri)))
+        if manager.addAxiom(ontology, axiom) != SUCCESSFULLY then
+          errorMessages :+ s"Could not add subclass axiom representing cardinalities [$minCardinality, $maxCardinality] for " +
+            s"${umlClassAttribute.attributeIdentity.attributeLabel}"
+      case UMLMultiplicity(UMLNonNegativeCardinality(minCardinality), UMLInfiniteCardinality(_)) =>
+        if minCardinality > 0 then
+          val axiom = dataFactory.getOWLSubClassOfAxiom(domain,
+            dataFactory.getOWLObjectMinCardinality(minCardinality, objectProperty,
+              dataFactory.getOWLClass(umlEnumerationIdentity.enumerationIRI.iri)))
           if manager.addAxiom(ontology, axiom) != SUCCESSFULLY then
             errorMessages :+ s"Could not add subclass axiom representing cardinalities for [$minCardinality, *]" +
               s"${umlClassAttribute.attributeIdentity.attributeLabel}"

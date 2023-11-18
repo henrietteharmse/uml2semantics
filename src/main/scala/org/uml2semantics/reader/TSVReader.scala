@@ -79,8 +79,9 @@ def parseAttributes(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespace)
       logger.trace(s"m = $m")
 
       val classNamedElement = UMLClassIdentity.findClassNamedElement(m(ClassAttributesHeader.ClassName.toString))
+      val enumerationNamedElement = UMLEnumerationIdentity.findEnumerationNamedElement(m(ClassAttributesHeader.ClassName.toString))
       logger.trace(s"classNamedElement = $classNamedElement")
-      if classNamedElement.isDefined then
+      if classNamedElement.isDefined || enumerationNamedElement.isDefined then
         logger.trace(s"mClassOrPrimitiveType.toString = {${m(ClassOrPrimitiveType.toString)}}")
         val curieOption: Option[Curie] = if m(Curie.toString).contains(":") then
           Some(org.uml2semantics.model.Curie(m(Curie.toString)))
@@ -191,14 +192,19 @@ def parseEnumerationValues(maybeTsvFile: Option[File], ontologyPrefix: PrefixNam
 end parseEnumerationValues
 
 def parseUMLClassDiagram(input: InputParameters): UMLClassDiagram =
+  var umlClasses = parseClasses(input.classesTsv, PrefixNamespace(input.ontologyPrefix))
+  var umlEnumerations = parseEnumerations(input.enumerationsTsv, PrefixNamespace(input.ontologyPrefix))
+  var umlAttributes = parseAttributes(input.attributesTsv, PrefixNamespace(input.ontologyPrefix))
+  var umlEnumerationValues = parseEnumerationValues(input.enumerationValuesTsv, PrefixNamespace(input.ontologyPrefix))
+
   UMLClassDiagram(
     input.owlOntologyFile.get,
     OntologyIRI(input.ontologyIRI),
     PrefixNamespace(input.ontologyPrefix),
-    parseClasses(input.classesTsv, PrefixNamespace(input.ontologyPrefix)),
-    parseAttributes(input.attributesTsv, PrefixNamespace(input.ontologyPrefix)),
-    parseEnumerations(input.enumerationsTsv, PrefixNamespace(input.ontologyPrefix)),
-    parseEnumerationValues(input.enumerationValuesTsv, PrefixNamespace(input.ontologyPrefix)))
+    umlClasses,
+    umlAttributes,
+    umlEnumerations,
+    umlEnumerationValues)
 
 
 

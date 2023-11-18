@@ -33,6 +33,17 @@
     
 
 
+    <!-- http://uml2semantics.org/examples/employer#Employee/renumeration -->
+
+
+    <owl:ObjectProperty rdf:about="http://uml2semantics.org/examples/employer#Employee/renumeration">
+        <rdfs:domain rdf:resource="http://uml2semantics.org/examples/employer#Employee"/>
+        <rdfs:range rdf:resource="http://uml2semantics.org/examples/employer#Renumeration"/>
+        <rdfs:label>renumeration</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
     <!-- http://uml2semantics.org/examples/employer#Employer/employes -->
 
 
@@ -40,6 +51,17 @@
         <rdfs:domain rdf:resource="http://uml2semantics.org/examples/employer#Employer"/>
         <rdfs:range rdf:resource="http://uml2semantics.org/examples/employer#Employee"/>
         <rdfs:label>employes</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://uml2semantics.org/examples/employer#Renumeration/paymentSchedule -->
+
+
+    <owl:ObjectProperty rdf:about="http://uml2semantics.org/examples/employer#Renumeration/paymentSchedule">
+        <rdfs:domain rdf:resource="http://uml2semantics.org/examples/employer#Renumeration"/>
+        <rdfs:range rdf:resource="http://uml2semantics.org/examples/employer#SalarySchedule"/>
+        <rdfs:label>paymentSchedule</rdfs:label>
     </owl:ObjectProperty>
     
 
@@ -89,6 +111,17 @@
     
 
 
+    <!-- http://uml2semantics.org/examples/employer#Renumeration/rate -->
+
+
+    <owl:DatatypeProperty rdf:about="http://uml2semantics.org/examples/employer#Renumeration/rate">
+        <rdfs:domain rdf:resource="http://uml2semantics.org/examples/employer#Renumeration"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:label>rate</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
     <!-- 
     ///////////////////////////////////////////////////////////////////////////////////////
     //
@@ -111,6 +144,13 @@
                 <owl:onProperty rdf:resource="http://uml2semantics.org/examples/employer#Employee/employedBy"/>
                 <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
                 <owl:onClass rdf:resource="http://uml2semantics.org/examples/employer#Employer"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://uml2semantics.org/examples/employer#Employee/renumeration"/>
+                <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onClass rdf:resource="http://uml2semantics.org/examples/employer#Renumeration"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:label>Employee</rdfs:label>
@@ -162,6 +202,30 @@
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:label>Person</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://uml2semantics.org/examples/employer#Renumeration -->
+
+
+    <owl:Class rdf:about="http://uml2semantics.org/examples/employer#Renumeration">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://uml2semantics.org/examples/employer#Renumeration/paymentSchedule"/>
+                <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onClass rdf:resource="http://uml2semantics.org/examples/employer#SalarySchedule"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://uml2semantics.org/examples/employer#Renumeration/rate"/>
+                <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:label>Renumeration</rdfs:label>
     </owl:Class>
     
 

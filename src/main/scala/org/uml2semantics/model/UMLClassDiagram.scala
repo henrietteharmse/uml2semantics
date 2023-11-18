@@ -554,12 +554,9 @@ case class UMLClass(classIdentity: UMLClassIdentity,
 case class UMLClassAttributeDefinition(definition: String = "")
 
 sealed trait UMLClassAttributeType
-
 case class UMLXMLDataType(attributeType: SupportedDataType) extends UMLClassAttributeType
-
 case class UMLClassIdentityType(attributeType: UMLClassIdentity) extends UMLClassAttributeType
-
-
+case class UMLEnumerationIdentityType(attributeType: UMLEnumerationIdentity) extends UMLClassAttributeType
 case class CurieBasedUMLClassAttributeType(attributeType: Curie) extends UMLClassAttributeType
 
 //case class UndefinedUMLClassAttributeType() extends UMLClassAttributeType
@@ -571,20 +568,25 @@ object UMLClassAttributeType:
 
   def apply(s: String): UMLClassAttributeType =
     logger.debug(s"s=$s ${Code.source}")
-    require(UMLClassIdentity.findClassNamedElement(s).nonEmpty || SupportedDataType.unapply(s).nonEmpty
-      || Curie.isCurieBasedOnConfiguredPrefix(s) || s.isEmpty,
-      s"""A class attribute must have a type that is either a class, that has been specified,
+    require(UMLClassIdentity.findClassNamedElement(s).nonEmpty ||
+      UMLEnumerationIdentity.findEnumerationNamedElement(s).nonEmpty ||
+      SupportedDataType.unapply(s).nonEmpty ||
+      Curie.isCurieBasedOnConfiguredPrefix(s) ||
+      s.isEmpty,
+      s"""A class attribute must have a type that is either a class or enumeration, that has been specified,
         or an XML data type or an curie based on a known prefix. Prefixes are specified using the -x option when running uml2semantics.
-        "$s" is not recognised as either a class or an XML data type.""")
+        "$s" is not recognised as either a class or an enumeration or an XML data type.""")
     UMLClassIdentity.findClassNamedElement(s) match
       case Some(classNamedElement) => UMLClassIdentityType(classNamedElement)
-      case None => SupportedDataType.unapply(s) match
-        case Some(x) => UMLXMLDataType(x)
-        case None =>
-          val curieOption: Option[Curie] = Curie.unapply(s)
-          curieOption match
-            case Some(curie) => CurieBasedUMLClassAttributeType(curie)
-            case None => UndefinedUMLClassAttributeType
+      case None => UMLEnumerationIdentity.findEnumerationNamedElement(s) match
+        case Some(enumerationNamedElement) => UMLEnumerationIdentityType(enumerationNamedElement)
+        case None => SupportedDataType.unapply(s) match
+          case Some(x) => UMLXMLDataType(x)
+          case None =>
+            val curieOption: Option[Curie] = Curie.unapply(s)
+            curieOption match
+              case Some(curie) => CurieBasedUMLClassAttributeType(curie)
+              case None => UndefinedUMLClassAttributeType
 
   def unapply(s: String): Option[UMLClassAttributeType] =
     logger.debug(s"s=$s ${Code.source}")
