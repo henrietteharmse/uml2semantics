@@ -1,5 +1,0 @@
-ClassName	Curie	Name	ClassOrPrimitiveType	MinMultiplicity	MaxMultiplicity	Definition
-dcat:Catalog		hasPart	dcat:Resource	1	*	An item that is listed in the catalog.
-dcat:Catalog	dcat:catalog		dcat:Catalog	0	*	A catalog whose contents are of interest in the context of this catalog.
-dcat:Catalog	foaf:homepage		xsd:anyURI			A homepage of the catalog (a public Web document usually available in HTML).
-Catalog		record	CatalogRecord			
