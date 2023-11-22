@@ -13,13 +13,13 @@ enum ClassesHeader:
   case Name, Curie, Definition, ParentNames
 
 enum ClassAttributesHeader:
-  case ClassName, Curie, Name, ClassOrPrimitiveType, MinMultiplicity, MaxMultiplicity, Definition
+  case Class, Curie, Name, ClassEnumOrPrimitiveType, MinMultiplicity, MaxMultiplicity, Definition
 
 enum EnumerationsHeader:
   case Name, Curie, Definition
 
 enum EnumerationValuesHeader:
-  case EnumerationName, Name, Curie, Definition
+  case Enumeration, Name, Curie, Definition
 
 def parseClasses(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespace): UMLClasses =
   import ClassesHeader.*
@@ -78,11 +78,11 @@ def parseAttributes(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespace)
     reader.allWithHeaders().foreach(m => {
       logger.trace(s"m = $m")
 
-      val classNamedElement = UMLClassIdentity.findClassNamedElement(m(ClassAttributesHeader.ClassName.toString))
-      val enumerationNamedElement = UMLEnumerationIdentity.findEnumerationNamedElement(m(ClassAttributesHeader.ClassName.toString))
+      val classNamedElement = UMLClassIdentity.findClassNamedElement(m(ClassAttributesHeader.Class.toString))
+      val enumerationNamedElement = UMLEnumerationIdentity.findEnumerationNamedElement(m(ClassAttributesHeader.Class.toString))
       logger.trace(s"classNamedElement = $classNamedElement")
       if classNamedElement.isDefined || enumerationNamedElement.isDefined then
-        logger.trace(s"mClassOrPrimitiveType.toString = {${m(ClassOrPrimitiveType.toString)}}")
+        logger.trace(s"mClassOrPrimitiveType.toString = {${m(ClassEnumOrPrimitiveType.toString)}}")
         val curieOption: Option[Curie] = if m(Curie.toString).contains(":") then
           Some(org.uml2semantics.model.Curie(m(Curie.toString)))
         else
@@ -93,7 +93,7 @@ def parseAttributes(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespace)
             UMLClassAttributeCurie(curieOption),
             ontologyPrefix
           ),
-          UMLClassAttributeType(m(ClassOrPrimitiveType.toString)),
+          UMLClassAttributeType(m(ClassEnumOrPrimitiveType.toString)),
           UMLMultiplicity(UMLCardinality(m(MinMultiplicity.toString)), UMLCardinality(m(MaxMultiplicity.toString))),
           UMLClassAttributeDefinition(m(Definition.toString))
         )
@@ -160,7 +160,7 @@ def parseEnumerationValues(maybeTsvFile: Option[File], ontologyPrefix: PrefixNam
       logger.trace(s"m = $m")
 
       val enumerationIdentityOption = UMLEnumerationIdentity.findEnumerationNamedElement(
-        m(EnumerationValuesHeader.EnumerationName.toString))
+        m(EnumerationValuesHeader.Enumeration.toString))
       logger.trace(s"--------------- enumerationIdentityOption = $enumerationIdentityOption")
       if enumerationIdentityOption.isDefined then
         val enumerationIdentity = enumerationIdentityOption.get

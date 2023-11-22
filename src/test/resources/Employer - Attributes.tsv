@@ -1,4 +1,4 @@
-ClassName	Curie	Name	ClassOrPrimitiveType	MinMultiplicity	MaxMultiplicity	Definition
+Class	Curie	Name	ClassEnumOrPrimitiveType	MinMultiplicity	MaxMultiplicity	Definition
 Person		name	xsd:string			
 Person		surname	xsd:string			
 Person		dateOfBirth	xsd:dateTime			
