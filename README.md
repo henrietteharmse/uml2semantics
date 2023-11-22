@@ -27,7 +27,7 @@ employer and an employer has 1 or more employees.
 ![Employer Example](./docs/SimpleEmployerExample.png)
 
 ### TSV representation
-Classes and attributes are created using 2 separate TSV files. First create
+UML class diagram information can be specified using TSV files. First create
 the TSV file for your classes. It has the following format:
 
 
@@ -41,17 +41,38 @@ Here we only specify the name for each class, hence the reason we used the **Nam
 `Employee` and `Employer` both extend the `Person` class, we add `Person` to **ParentNames** column. Multiple parents are
 separated by `|`. Curie refer to compact URI based on the [W3C CURIE syntax](https://www.w3.org/TR/2010/NOTE-curie-20101216/).
 
+If you want to make use of enumerations, specify them next. The format is as follows:
+
+| Curie              | Name            | Definition                        |
+|--------------------|-----------------|-----------------------------------|
+| emp:SalarySchedule | PaymentSchedule | Defines the frequency of payments |
+
+Again you can specify a curie and/or a name to refer to your enumeration. In this case we assume there
+is a difference between the purl and the label of this concept. Definition allows you to describe this 
+enumeration.
+
+The values that an enumeration exists of, are specified in a different TSV with the following format:
+
+| Enumeration      | Curie        | Name | 	Definition                                         |
+|----------------------|--------------|------|--------------------------------------------------------|
+| emp:SalarySchedule   | emp:Daily    |      | Employee gets paid at the end of each day              |
+| PaymentSchedule      | Weekly       |      | Employee gets paid at the end of each week on a Friday |
+| emp:SalarySchedule   | emp:Monthly  |      | Employee gets paid at the last day of the month        |
+
+** Enumeration ** refers the name or curie of an enumeration. Each value of an enumeration can have a curie and/or a name
+and a definition.
+
 To specify attributes we use the following format. 
 
-| ClassName  | Curie | Name        | ClassOrPrimitive | MinMultiplicity | MaxMultiplicity | Definition | 
-|------------|-------|-------------|------------------|-----------------|-----------------|------------|
-| Person     |       | name        | xsd:string       |                 |                 |            |
-| Person     |       | surname     | xsd:string       |                 |                 |            |
-| Person     |       | dateOfBirth | xsd:dateTime     |                 |                 |            |
-| Employee   |       | employedBy  | Employer         | 1               | 1               |            |
-| Employer   |       | employes    | Employee         | 1               | *               |            |
+| Class    | Curie | Name        | ClassOrPrimitive | MinMultiplicity | MaxMultiplicity | Definition | 
+|----------|-------|-------------|------------------|-----------------|-----------------|------------|
+| Person   |       | name        | xsd:string       |                 |                 |            |
+| Person   |       | surname     | xsd:string       |                 |                 |            |
+| Person   |       | dateOfBirth | xsd:dateTime     |                 |                 |            |
+| Employee |       | employedBy  | Employer         | 1               | 1               |            |
+| Employer |       | employes    | Employee         | 1               | *               |            |
 
-**ClassName** refers to the classname for which we are defining the attributes. Attributes can also be defined using curies, 
+**Class** refers to the class for which we are defining the attributes. Attributes can also be defined using curies, 
 but we again only used names for now. The type of an attribute can be a primitive or a class. Currenlty XML primitive data
 types used in [Protege Desktop](https://protege.stanford.edu/) as data types are supported. When no multiplicity is given,
 [1..1] is assumed. `*` is to refer to infinite as per usual.
