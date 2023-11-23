@@ -89,6 +89,8 @@ you can run it as follows:
 java -jar uml2semantics.jar \ 
 -c "$uml2semantics/Employer - Classes.tsv" \
 -a "$uml2semantics/Employer - Attributes.tsv" \
+-e "$uml2semantics/Employer - Enumerations.tsv" \
+-n "$uml2semantics/Employer - EnumerationNamedValues.tsv" \
 -o "$uml2semantics/employer.rdf" \
 -p "emp:http://uml2semantics.org/examples/employer#" \
 -i "http://uml2semantics.org/examples/employer/v.0.1" 
