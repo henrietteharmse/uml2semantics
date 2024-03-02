@@ -14,6 +14,8 @@
     <logger name="parseEnumerations" level="trace" />
     <logger name="parseEnumerationValues" level="trace" />
 
+    <logger name="parseUMLClassDiagramFromXMI" level="trace" />
+
     <!-- org.uml2semantics.model.UMLClassDiagram.scala -->
     <logger name="org.uml2semantics.model.UMLClassCurie" level="error" />
     <logger name="org.uml2semantics.model.UMLClassAttributeName" level="error" />
