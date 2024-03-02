@@ -191,20 +191,22 @@ def parseEnumerationValues(maybeTsvFile: Option[File], ontologyPrefix: PrefixNam
     UMLEnumerationValues(scala.collection.immutable.HashMap[UMLEnumerationValueNamedElement, UMLEnumerationValue]())
 end parseEnumerationValues
 
-def parseUMLClassDiagram(input: InputParameters): UMLClassDiagram =
-  var umlClasses = parseClasses(input.classesTsv, PrefixNamespace(input.ontologyPrefix))
-  var umlEnumerations = parseEnumerations(input.enumerationsTsv, PrefixNamespace(input.ontologyPrefix))
-  var umlAttributes = parseAttributes(input.attributesTsv, PrefixNamespace(input.ontologyPrefix))
-  var umlEnumerationValues = parseEnumerationValues(input.enumerationValuesTsv, PrefixNamespace(input.ontologyPrefix))
+def parseUMLClassDiagram(input: InputParameters): Option[UMLClassDiagram] =
+  val umlClasses = parseClasses(input.classesTsv, PrefixNamespace(input.ontologyPrefix))
+  if umlClasses.umlClasses.isEmpty then
+    return None
+  val umlEnumerations = parseEnumerations(input.enumerationsTsv, PrefixNamespace(input.ontologyPrefix))
+  val umlAttributes = parseAttributes(input.attributesTsv, PrefixNamespace(input.ontologyPrefix))
+  val umlEnumerationValues = parseEnumerationValues(input.enumerationValuesTsv, PrefixNamespace(input.ontologyPrefix))
 
-  UMLClassDiagram(
+  Some(UMLClassDiagram(
     input.owlOntologyFile.get,
     OntologyIRI(input.ontologyIRI),
     PrefixNamespace(input.ontologyPrefix),
     umlClasses,
     umlAttributes,
     umlEnumerations,
-    umlEnumerationValues)
+    umlEnumerationValues))
 
 
 

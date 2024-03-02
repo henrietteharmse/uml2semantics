@@ -1,0 +1,5 @@
+#Get all classes
+//packagedElement[@xmi:type='uml:Class']/@name
+
+#Get all attributes for classes
+//

@@ -4,7 +4,7 @@ import com.typesafe.scalalogging.Logger
 import org.uml2semantics.InputParameters
 import org.uml2semantics.inline.Code
 import org.uml2semantics.model.{OntologyIRI, PrefixNamespace}
-import org.uml2semantics.reader.parseUMLClassDiagram
+import org.uml2semantics.reader.{parseUMLClassDiagram, parseUMLClassDiagramFromXMI}
 import org.uml2semantics.owl.UML2OWLWriter
 import scopt.OParser
 
@@ -18,7 +18,6 @@ val argParser =
     programName("uml2semantics"),
     //    head("uml2owl","v0.0.1"),
     opt[Option[File]]('c', "classes")
-      .required()
       .valueName("<csv-classes-file>")
       .action((a, c) => c.copy(classesTsv = a))
       .validate(o =>
@@ -61,6 +60,10 @@ val argParser =
       .valueName("<ontology-iri>")
       .action((a, c) => c.copy(ontologyIRI = a))
       .text("The IRI of the ontology, e.g.: https://example.com/ontology"),
+    opt[Option[File]]('m', "xmi file")
+      .valueName("<xmi-file>")
+      .action((a, c) => c.copy(xmiFile = a))
+      .text("A file adhering to the XMI specification."),
     opt[String]('p', "ontologyPrefix").required()
       .withFallback(() => "uml2ont:https://uml2semantics.com/ontology/")
       .valueName("<ontology-prefix>")
@@ -76,19 +79,29 @@ val argParser =
 
 @main def uml2owl(arguments: String*): Unit =
   val logger = Logger[this.type]
-  logger.info("Start")
-  logger.debug(s"arguments = $arguments ${Code.source}")
+  logger.info("Start !!!!")
+//  logger.debug(s"arguments = $arguments ${Code.source}")
+  var options = OParser.parse(argParser, arguments, InputParameters())
+  logger.debug(s"Work dammit!")
+  if options.isDefined then
+    logger.debug("Input is defined!")
+  else
+    logger.debug("Input is not defined")
   OParser.parse(argParser, arguments, InputParameters()) match
     case Some(input) =>
+      logger.debug(s"Some input ${Code.source}")
       PrefixNamespace.cachePrefixes(input.prefixes)
       PrefixNamespace.cachePrefix(input.ontologyPrefix)
-      val umlClassDiagram = parseUMLClassDiagram(input)
-      val owlWriter = new UML2OWLWriter(umlClassDiagram)
-      owlWriter.generateOWL match
-        case Left(exceptionMsg) => println(s"An exception occurred:$exceptionMsg")
-        case Right(warnings) =>
-          if warnings.nonEmpty then
-            logger.warn("During processing of the UMLClassdiagram the following potential problem were found ${Code.sourceDetail}:")
-            warnings.foreach(w => println(s"$w"))
+      var umlClassDiagram = parseUMLClassDiagramFromXMI(input)
+//      if umlClassDiagram.isEmpty then
+//        umlClassDiagram = parseUMLClassDiagram(input)
+//
+//      val owlWriter = new UML2OWLWriter(umlClassDiagram.get)
+//      owlWriter.generateOWL match
+//        case Left(exceptionMsg) => println(s"An exception occurred:$exceptionMsg")
+//        case Right(warnings) =>
+//          if warnings.nonEmpty then
+//            logger.warn("During processing of the UMLClassdiagram the following potential problem were found ${Code.sourceDetail}:")
+//            warnings.foreach(w => println(s"$w"))
     case _ => logger.error("Unexpected case ${Code.sourceDetail}")
   logger.info("Done")
