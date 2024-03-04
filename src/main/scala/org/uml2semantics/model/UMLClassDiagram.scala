@@ -105,10 +105,13 @@ case class UMLClassAttributeIdentity(classNamedElement: UMLClassNamedElement,
                                      attributeName: UMLClassAttributeName = UMLClassAttributeName(),
                                      attributeCurie: UMLClassAttributeCurie = UMLClassAttributeCurie(None),
                                      ontologyPrefix: PrefixNamespace):
-  var attributeIRI: UMLClassAttributeIRI = _
-  var attributeNamedElement: UMLClassAttributeNamedElement = _
-  var attributeLabel: String = _
+  private var _attributeIRI: UMLClassAttributeIRI = _
+  private var _attributeNamedElement: UMLClassAttributeNamedElement = _
+  private var _attributeLabel: String = _
 
+  def attributeIRI : UMLClassAttributeIRI = _attributeIRI
+  def attributeNamedElement: UMLClassAttributeNamedElement = _attributeNamedElement
+  def attributeLabel: String = _attributeLabel
 object UMLClassAttributeIdentity:
   private val logger = Logger[this.type]
 
@@ -159,9 +162,9 @@ object UMLClassAttributeIdentity:
       s"ontologyPrefix=$ontologyPrefix, attributeIdentity=$attributeIdentity, label=$label ${Code.source}")
     //    logger.debug(s"${Code.arguments} ${Code.source}")
     val attributeIRI: UMLClassAttributeIRI = UMLClassAttributeIRI(ontologyPrefix, classNamedElement, attributeNamedElement)
-    attributeIdentity.attributeNamedElement = attributeNamedElement
-    attributeIdentity.attributeIRI = attributeIRI
-    attributeIdentity.attributeLabel = label
+    attributeIdentity._attributeNamedElement = attributeNamedElement
+    attributeIdentity._attributeIRI = attributeIRI
+    attributeIdentity._attributeLabel = label
   }
 
 
@@ -294,7 +297,8 @@ case class UMLEnumerationIRI(override val iri: String) extends UMLElementIRI
 object UMLEnumerationIRI:
   private val logger = Logger[this.type]
 
-  def apply(ontologyPrefix: PrefixNamespace, enumerationNamedElement: UMLEnumerationNamedElement): UMLEnumerationIRI =
+  def apply(ontologyPrefix: PrefixNamespace, 
+            enumerationNamedElement: UMLEnumerationNamedElement): UMLEnumerationIRI =
     logger.debug(s"ontologyPrefix=$ontologyPrefix, enumerationNamedElement=$enumerationNamedElement ${Code.source}")
     enumerationNamedElement match
       case enumerationNamedElementType: UMLEnumerationCurie =>
@@ -396,16 +400,20 @@ object UMLMultiplicity:
 case class UMLClassIdentity(className: UMLClassName,
                             classCurie: UMLClassCurie,
                             ontologyPrefix: PrefixNamespace):
-  var classIRI: UMLClassIRI = _
-  var classNamedElement: UMLClassNamedElement = _
-  var classLabel: String = _
+  var _classIRI: UMLClassIRI = _
+  var _classNamedElement: UMLClassNamedElement = _
+  var _classLabel: String = _
+
+  def classIRI: UMLClassIRI = _classIRI
+  def classNamedElement: UMLClassNamedElement = _classNamedElement
+  def classLabel: String = _classLabel
 
 object UMLClassIdentity:
   private val logger = Logger[this.type]
 
-  private var classIdentityByName: mutable.HashMap[UMLClassName, UMLClassIdentity] = mutable.HashMap[UMLClassName, UMLClassIdentity]()
-  private var classIdentityByIRI: mutable.HashMap[UMLClassIRI, UMLClassIdentity] = mutable.HashMap[UMLClassIRI, UMLClassIdentity]()
-  private var classIdentityByCurie: mutable.HashMap[UMLClassCurie, UMLClassIdentity] = mutable.HashMap[UMLClassCurie, UMLClassIdentity]()
+  private val classIdentityByName: mutable.HashMap[UMLClassName, UMLClassIdentity] = mutable.HashMap[UMLClassName, UMLClassIdentity]()
+  private val classIdentityByIRI: mutable.HashMap[UMLClassIRI, UMLClassIdentity] = mutable.HashMap[UMLClassIRI, UMLClassIdentity]()
+  private val classIdentityByCurie: mutable.HashMap[UMLClassCurie, UMLClassIdentity] = mutable.HashMap[UMLClassCurie, UMLClassIdentity]()
 
   /**
    *
@@ -447,9 +455,9 @@ object UMLClassIdentity:
     logger.debug(s"classNamedElement=$classNamedElement, ontologyPrefix=$ontologyPrefix, classIdentity=$classIdentity, " +
       s"label=$label, ${Code.source}")
     val classIRI: UMLClassIRI = UMLClassIRI(ontologyPrefix, classNamedElement)
-    classIdentity.classNamedElement = classNamedElement
-    classIdentity.classIRI = classIRI
-    classIdentity.classLabel = label
+    classIdentity._classNamedElement = classNamedElement
+    classIdentity._classIRI = classIRI
+    classIdentity._classLabel = label
   }
 
   def findClassNamedElement(s: String): Option[UMLClassIdentity] =
