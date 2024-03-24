@@ -232,8 +232,12 @@ object UMLEnumerationValueIdentity:
   }
 
 
-
-
+/**
+ * @Todo - Add Covering parameter with permitted values {complete, incomplete}
+ * @Todo - Add Disjoint parameter with permitted values {disjoint, overlapping}
+ *
+ * @param setOfParentNamedElements
+ */
 case class UMLClassParentNamedElements(setOfParentNamedElements: Set[UMLClassNamedElement])
 
 object UMLClassParentNamedElements:

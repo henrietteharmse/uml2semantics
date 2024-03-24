@@ -92,8 +92,8 @@ val argParser =
       logger.debug(s"Some input ${Code.source}")
       PrefixNamespace.cachePrefixes(input.prefixes)
       PrefixNamespace.cachePrefix(input.ontologyPrefix)
-      val umlClassDiagram = parseUMLClassDiagram(input)
-//      var umlClassDiagram = parseUMLClassDiagramFromXMI(input)
+//      val umlClassDiagram = parseUMLClassDiagram(input)
+      var umlClassDiagram = parseUMLClassDiagramFromXMI(input)
 //      if umlClassDiagram.isEmpty then
 //        umlClassDiagram = parseUMLClassDiagram(input)
 //

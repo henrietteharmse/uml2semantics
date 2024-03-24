@@ -103,5 +103,9 @@ This will cause the ontology to be written out to `$uml2semantics/employer.owl`.
 ## DCAT version 2 Example
 Initial DCAT version 2 example is defined [here](./examples/dcat2/README.md). 
 
+# Data model
+Here is the data model underlying this implementation expressed as a UML class diagram.
+![uml2semantics data model](./docs/uml2semantics-data-model.png)
+
 
 

@@ -49,4 +49,3 @@ def parseUMLClassDiagramFromXMI(input: InputParameters): Option[UMLClassDiagram]
 
   for node <- classNodes do logger.debug(s"class = ${node.getAttributes.getNamedItem("name")}")
   None
-
