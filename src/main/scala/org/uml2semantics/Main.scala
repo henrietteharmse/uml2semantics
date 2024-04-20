@@ -64,6 +64,11 @@ val argParser =
       .valueName("<xmi-file>")
       .action((a, c) => c.copy(xmiFile = a))
       .text("A file adhering to the XMI specification."),
+    opt[String]('p', "precedence - both .tsv and .xmi can be specified. This option states when " +
+      "conflicting information is specified, which should take precedence")
+      .valueName("<precedence>")
+      .action((a, c) => c.copy(precedence = a))
+      .text("TSV or XMI"),
     opt[String]('p', "ontologyPrefix").required()
       .withFallback(() => "uml2ont:https://uml2semantics.com/ontology/")
       .valueName("<ontology-prefix>")
