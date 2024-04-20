@@ -59,7 +59,7 @@ The values that an enumeration exists of, are specified in a different TSV with 
 | PaymentSchedule      | Weekly       |      | Employee gets paid at the end of each week on a Friday |
 | emp:SalarySchedule   | emp:Monthly  |      | Employee gets paid at the last day of the month        |
 
-** Enumeration ** refers the name or curie of an enumeration. Each value of an enumeration can have a curie and/or a name
+**Enumeration** refers the name or curie of an enumeration. Each value of an enumeration can have a curie and/or a name
 and a definition.
 
 To specify attributes we use the following format. 
