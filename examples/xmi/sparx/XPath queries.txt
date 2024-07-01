@@ -1,5 +1,16 @@
+Test queries using: http://xpather.com/
+
 #Get all classes
 //packagedElement[@xmi:type='uml:Class']/@name
 
-#Get all attributes for classes
-//
+#Get all attributes for class with name 'Person'
+//packagedElement[@xmi:type='uml:Class'][@name='Person']/ownedAttribute[@xmi:type='uml:Property']/@name
+
+#Get types for attribute 'name' of class 'Person'
+1. //packagedElement[@xmi:type='uml:Class'][@name='Person']/ownedAttribute[@xmi:type='uml:Property']/type/@xmi:idref
+2. This will return:
+EAJava_xsd_string
+EAJava_xsd_string
+EAJava_xsd_dateTime
+3. Then do query:   //primitivetypes/packagedElement/packagedElement/*[@xmi:id='EAJava_xsd_string']/@name
+
