@@ -666,6 +666,7 @@ case class UMLClassDiagram(owlOntologyFile: File,
                            umlEnumerations: UMLEnumerations,
                            umlEnumerationValues: UMLEnumerationValues)
 
+
 object UMLClassDiagram:
   private val logger = Logger[this.type]
 

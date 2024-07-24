@@ -14,3 +14,6 @@ EAJava_xsd_string
 EAJava_xsd_dateTime
 3. Then do query:   //primitivetypes/packagedElement/packagedElement/*[@xmi:id='EAJava_xsd_string']/@name
 
+#Get associations for class 'Employer'
+1. //packagedElement[@xmi:type='uml:Class'][@name='Employer']/
+

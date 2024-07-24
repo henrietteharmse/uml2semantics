@@ -2,9 +2,10 @@ package org.uml2semantics
 
 import com.typesafe.scalalogging.Logger
 import org.uml2semantics.InputParameters
+import org.uml2semantics.Precedence.XMI
 import org.uml2semantics.inline.Code
 import org.uml2semantics.model.{OntologyIRI, PrefixNamespace}
-import org.uml2semantics.reader.{parseUMLClassDiagram, parseUMLClassDiagramFromXMI}
+import org.uml2semantics.reader.{TSVReader, XMIReader}
 import org.uml2semantics.owl.UML2OWLWriter
 import scopt.OParser
 
@@ -97,8 +98,8 @@ val argParser =
       logger.debug(s"Some input ${Code.source}")
       PrefixNamespace.cachePrefixes(input.prefixes)
       PrefixNamespace.cachePrefix(input.ontologyPrefix)
-//      val umlClassDiagram = parseUMLClassDiagram(input)
-      var umlClassDiagram = parseUMLClassDiagramFromXMI(input)
+      var umlClassDiagram = TSVReader.parseUMLClassDiagram(input)
+      umlClassDiagram = XMIReader.parseUMLClassDiagram(input)
 //      if umlClassDiagram.isEmpty then
 //        umlClassDiagram = parseUMLClassDiagram(input)
 //
