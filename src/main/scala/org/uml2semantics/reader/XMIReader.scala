@@ -39,15 +39,29 @@ object XMIReader:
     // Java xml
     val builderFactory: DocumentBuilderFactory = DocumentBuilderFactory.newInstance
     val builder: DocumentBuilder = builderFactory.newDocumentBuilder
-    val xmlDocument: Document = builder.parse(input.xmiFile.get)
     val xPath: XPath = XPathFactory.newInstance.newXPath
-    val expression: String = "//packagedElement[@type='uml:Class']"
-    val classNodeList: NodeList = xPath.compile(expression).evaluate(xmlDocument, XPathConstants.NODESET).asInstanceOf[NodeList]
+    val xmiDocument: Document = builder.parse(input.xmiFile.get)
+
+    val umlClassesXPath: String = "//packagedElement[@type='uml:Class']"
+    val classNodeList: NodeList = xPath.compile(umlClassesXPath)
+      .evaluate(xmiDocument, XPathConstants.NODESET)
+      .asInstanceOf[NodeList]
     logger.debug(s"classNodes = ${classNodeList.getLength}")
 
     val classNodes: Seq[Node] = IntStream.range(0, classNodeList.getLength())
       .mapToObj(classNodeList.item)
-      .collect(Collectors.toList()).asScala.toSeq
+      .collect(Collectors.toList())
+      .asScala
+      .toSeq
 
-    for node <- classNodes do logger.debug(s"class = ${node.getAttributes.getNamedItem("name")}")
+    val documentationXPath: String = "properties/@documentation"
+
+    for classNode <- classNodes do
+      val documentationNode = xPath.compile(documentationXPath)
+        .evaluate(classNode, XPathConstants.STRING)
+        .asInstanceOf[String]
+
+      logger.debug(s"Documentation for class ${classNode.getAttributes.getNamedItem("name").getNodeValue} = $documentationNode")
+
+//      logger.debug(s"class = ${classNode.getAttributes.getNamedItem("name")}")
     None

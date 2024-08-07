@@ -3,16 +3,15 @@ Test queries using: http://xpather.com/
 #Get all classes
 //packagedElement[@xmi:type='uml:Class']/@name
 
+#Get documentation for Person class
+//element[@xmi:type='uml:Class' and @name='Person']/properties/@documentation
+
 #Get all attributes for class with name 'Person'
-//packagedElement[@xmi:type='uml:Class'][@name='Person']/ownedAttribute[@xmi:type='uml:Property']/@name
+//element[@xmi:type='uml:Class' and @name='Person']//attribute/@name
 
 #Get types for attribute 'name' of class 'Person'
-1. //packagedElement[@xmi:type='uml:Class'][@name='Person']/ownedAttribute[@xmi:type='uml:Property']/type/@xmi:idref
-2. This will return:
-EAJava_xsd_string
-EAJava_xsd_string
-EAJava_xsd_dateTime
-3. Then do query:   //primitivetypes/packagedElement/packagedElement/*[@xmi:id='EAJava_xsd_string']/@name
+//element[@xmi:type='uml:Class' and @name='Person']//attribute[@name='dateOfBirth']/properties/@type
+
 
 #Get associations for class 'Employer'
 1. //packagedElement[@xmi:type='uml:Class'][@name='Employer']/

@@ -11,7 +11,6 @@ import scopt.OParser
 
 import java.io.File
 
-
 val builder = OParser.builder[InputParameters]
 val argParser =
   import builder.*
@@ -70,7 +69,7 @@ val argParser =
       .valueName("<precedence>")
       .action((a, c) => c.copy(precedence = a))
       .text("TSV or XMI"),
-    opt[String]('p', "ontologyPrefix").required()
+    opt[String]('f', "ontologyPrefix").required()
       .withFallback(() => "uml2ont:https://uml2semantics.com/ontology/")
       .valueName("<ontology-prefix>")
       .action((a, c) => c.copy(ontologyPrefix = a))
@@ -87,7 +86,7 @@ val argParser =
   val logger = Logger[this.type]
   logger.info("Start !!!!")
 //  logger.debug(s"arguments = $arguments ${Code.source}")
-  var options = OParser.parse(argParser, arguments, InputParameters())
+  val options = OParser.parse(argParser, arguments, InputParameters())
   logger.debug(s"Work dammit!")
   if options.isDefined then
     logger.debug("Input is defined!")
@@ -96,10 +95,13 @@ val argParser =
   OParser.parse(argParser, arguments, InputParameters()) match
     case Some(input) =>
       logger.debug(s"Some input ${Code.source}")
+
       PrefixNamespace.cachePrefixes(input.prefixes)
       PrefixNamespace.cachePrefix(input.ontologyPrefix)
-      var umlClassDiagram = TSVReader.parseUMLClassDiagram(input)
-      umlClassDiagram = XMIReader.parseUMLClassDiagram(input)
+
+      var umlClassDiagram = XMIReader.parseUMLClassDiagram(input)
+//      var umlClassDiagram = TSVReader.parseUMLClassDiagram(input)
+//      umlClassDiagram = XMIReader.parseUMLClassDiagram(input)
 //      if umlClassDiagram.isEmpty then
 //        umlClassDiagram = parseUMLClassDiagram(input)
 //
