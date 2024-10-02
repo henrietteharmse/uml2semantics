@@ -5,7 +5,7 @@ java -jar ./target/scala-3.3.0/uml2semantics.jar \
 -a "./src/test/resources/Employer - Attributes.tsv" \
 -e "./src/test/resources/Employer - Enumerations.tsv" \
 -n "./src/test/resources/Employer - EnumerationNamedValues.tsv" \
--o "./src/test/resources/employer.rdf" \
+-o "./src/test/resources/employer.owl" \
 -p "emp:http://uml2semantics.org/examples/employer#" \
 -i "http://uml2semantics.org/examples/employer/v.0.1"
 

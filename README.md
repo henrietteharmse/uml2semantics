@@ -64,13 +64,13 @@ and a definition.
 
 To specify attributes we use the following format. 
 
-| Class    | Curie | Name        | ClassOrPrimitive | MinMultiplicity | MaxMultiplicity | Definition | 
-|----------|-------|-------------|------------------|-----------------|-----------------|------------|
-| Person   |       | name        | xsd:string       |                 |                 |            |
-| Person   |       | surname     | xsd:string       |                 |                 |            |
-| Person   |       | dateOfBirth | xsd:dateTime     |                 |                 |            |
-| Employee |       | employedBy  | Employer         | 1               | 1               |            |
-| Employer |       | employes    | Employee         | 1               | *               |            |
+| Class    | Curie | Name        | ClassEnumOrPrimitiveType | MinMultiplicity | MaxMultiplicity | Definition | 
+|----------|-------|-------------|--------------------------|-----------------|-----------------|------------|
+| Person   |       | name        | xsd:string               |                 |                 |            |
+| Person   |       | surname     | xsd:string               |                 |                 |            |
+| Person   |       | dateOfBirth | xsd:dateTime             |                 |                 |            |
+| Employee |       | employedBy  | Employer                 | 1               | 1               |            |
+| Employer |       | employes    | Employee                 | 1               | *               |            |
 
 **Class** refers to the class for which we are defining the attributes. Attributes can also be defined using curies, 
 but we again only used names for now. The type of an attribute can be a primitive or a class. Currenlty XML primitive data
