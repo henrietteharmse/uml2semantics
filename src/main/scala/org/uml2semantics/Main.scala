@@ -64,12 +64,7 @@ val argParser =
       .valueName("<xmi-file>")
       .action((a, c) => c.copy(xmiFile = a))
       .text("A file adhering to the XMI specification."),
-    opt[String]('p', "precedence - both .tsv and .xmi can be specified. This option states when " +
-      "conflicting information is specified, which should take precedence")
-      .valueName("<precedence>")
-      .action((a, c) => c.copy(precedence = a))
-      .text("TSV or XMI"),
-    opt[String]('f', "ontologyPrefix").required()
+    opt[String]('p', "ontologyPrefix").required()
       .withFallback(() => "uml2ont:https://uml2semantics.com/ontology/")
       .valueName("<ontology-prefix>")
       .action((a, c) => c.copy(ontologyPrefix = a))
@@ -99,18 +94,18 @@ val argParser =
       PrefixNamespace.cachePrefixes(input.prefixes)
       PrefixNamespace.cachePrefix(input.ontologyPrefix)
 
-      var umlClassDiagram = XMIReader.parseUMLClassDiagram(input)
-//      var umlClassDiagram = TSVReader.parseUMLClassDiagram(input)
-//      umlClassDiagram = XMIReader.parseUMLClassDiagram(input)
-//      if umlClassDiagram.isEmpty then
-//        umlClassDiagram = parseUMLClassDiagram(input)
-//
-//      val owlWriter = new UML2OWLWriter(umlClassDiagram.get)
-//      owlWriter.generateOWL match
-//        case Left(exceptionMsg) => println(s"An exception occurred:$exceptionMsg")
-//        case Right(warnings) =>
-//          if warnings.nonEmpty then
-//            logger.warn("During processing of the UMLClassdiagram the following potential problem were found ${Code.sourceDetail}:")
-//            warnings.foreach(w => println(s"$w"))
+      var umlClassDiagram = if input.xmiFile.isDefined 
+      then
+        XMIReader.parseUMLClassDiagram(input)
+      else
+        TSVReader.parseUMLClassDiagram(input)
+
+      val owlWriter = new UML2OWLWriter(umlClassDiagram.get)
+      owlWriter.generateOWL match
+        case Left(exceptionMsg) => println(s"An exception occurred:$exceptionMsg")
+        case Right(warnings) =>
+          if warnings.nonEmpty then
+            logger.warn("During processing of the UMLClassdiagram the following potential problem were found ${Code.sourceDetail}:")
+            warnings.foreach(w => println(s"$w"))
     case _ => logger.error("Unexpected case ${Code.sourceDetail}")
   logger.info("Done")
