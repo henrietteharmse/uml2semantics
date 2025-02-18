@@ -3,11 +3,13 @@ package org.uml2semantics.model.cache
 import org.uml2semantics.model.UMLClassIdentity.ClassIdentityBuilder
 import org.uml2semantics.model.{PrefixNamespace, UMLClass, UMLClassCurie, UMLClassIdentity, UMLClassName}
 
+import scala.collection.mutable
+
 object ClassIdentityBuilderCache:
-  private val buildersByClassName = scala.collection.mutable.Map[UMLClassName, ClassIdentityBuilder]()
-  private val buildersByClassCurie = scala.collection.mutable.Map[UMLClassCurie, ClassIdentityBuilder]()
-  private val classIdentityByClassName = scala.collection.mutable.Map[UMLClassName, UMLClassIdentity]()
-  private val classIdentityByClassCurie = scala.collection.mutable.Map[UMLClassCurie, UMLClassIdentity]()
+  private val buildersByClassName = mutable.Map[UMLClassName, ClassIdentityBuilder]()
+  private val buildersByClassCurie = mutable.Map[UMLClassCurie, ClassIdentityBuilder]()
+  private val classIdentityByClassName = mutable.Map[UMLClassName, UMLClassIdentity]()
+  private val classIdentityByClassCurie = mutable.Map[UMLClassCurie, UMLClassIdentity]()
 
   def cacheUMLClassIdentity(className: UMLClassName, builder: ClassIdentityBuilder): Unit =
     if !classIdentityByClassName.contains(className) then
@@ -57,8 +59,8 @@ object ClassIdentityBuilderCache:
       case (None, None) => throw new IllegalArgumentException("ClassIdentity must have a name or curie")
 
 object ClassBuilderCache:
-  private val buildersByClassIdentity = scala.collection.mutable.Map[UMLClassIdentity, UMLClass.ClassBuilder]()
-  private val classesByClassIdentity = scala.collection.mutable.Map[UMLClassIdentity, UMLClass]()
+  private val buildersByClassIdentity = mutable.Map[UMLClassIdentity, UMLClass.ClassBuilder]()
+  private val classesByClassIdentity = mutable.Map[UMLClassIdentity, UMLClass]()
 
   def cacheUMLClass(umlClass: UMLClass, builder: UMLClass.ClassBuilder): Unit =
     buildersByClassIdentity += (umlClass.classIdentity -> builder)
@@ -70,3 +72,10 @@ object ClassBuilderCache:
 
   def getUMLClassBuilder(classIdentity: UMLClassIdentity): Option[UMLClass.ClassBuilder] =
     buildersByClassIdentity.get(classIdentity)
+
+  def getUMLClassBuilder(name: String): Option[UMLClass.ClassBuilder] =
+    ClassIdentityBuilderCache.getUMLClassIdentity(name)
+      .flatMap(getUMLClassBuilder)
+    
+  def getClasses: Set[UMLClass] = classesByClassIdentity.values.toSet
+

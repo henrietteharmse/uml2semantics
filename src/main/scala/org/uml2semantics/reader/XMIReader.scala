@@ -41,6 +41,46 @@ object XMIReader extends UMLClassDiagramReader :
       classBuilder.build
 
     populateParentsWithTheirChildren(parentToChildrenMap, ontologyPrefix)
+    parseGeneralizationSets(ontologyPrefix, xPath, xmiDocument)
+
+
+  private def parseGeneralizationSets(ontologyPrefix: PrefixNamespace, xPath: XPath, xmiDocument: Document): Unit =
+    val generalizationSetNodes = executeXPathQuery(xPath, xmiDocument, "//packagedElement[@type='uml:GeneralizationSet']")
+    for generalizationSetNode <- generalizationSetNodes do
+      val generalizationSetName = generalizationSetNode.getAttributes.getNamedItem("name").getNodeValue
+      val isCovering = generalizationSetNode.getAttributes.getNamedItem("isCovering").getNodeValue.toBoolean
+      val isDisjoint = generalizationSetNode.getAttributes.getNamedItem("isDisjoint").getNodeValue.toBoolean
+      val optionParent = findParentOfGeneralizationSet(xPath, xmiDocument, generalizationSetName)
+
+      val k = 1
+
+
+  /**
+   * We make the simplifying assumption that a class belongs to a single generalization set.
+   *
+   * @Todo: Handle the case where a single class can belong to multiple generalization sets, if we find this is indeed a
+   * case that is used in practice.
+   *
+   * @param xPath
+   * @param xmiDocument
+   * @param generalizationSetName
+   * @return
+   */
+  private def findParentOfGeneralizationSet(xPath: XPath, xmiDocument: Document, generalizationSetName: String): Option[String] =
+    executeXPathQuery(xPath, xmiDocument,
+      s"//packagedElement[@type='uml:GeneralizationSet' and @name='$generalizationSetName']/generalization/@idref")
+      .headOption
+      .flatMap { idref =>
+        executeXPathQuery(xPath, xmiDocument,
+          s"//packagedElement/generalization[@type='uml:Generalization' and @id='${idref.getNodeValue}']/@general")
+          .headOption
+          .flatMap { general =>
+            executeXPathQuery(xPath, xmiDocument,
+              s"//packagedElement[@type='uml:Class' and @id='${general.getNodeValue}']/@name")
+              .headOption
+              .map(_.getNodeValue)
+          }
+      }
 
   private def extractDefintion(xPath: XPath, xmiDocument: Document,
                                    classNode: Node, classIdentifier: String): String =
@@ -62,7 +102,10 @@ object XMIReader extends UMLClassDiagramReader :
       generalizationNodes.item(i).getAttributes.getNamedItem("general").getNodeValue)
       .to(mutable.Set)
     parentIds.flatMap { parentId =>
-      val parentNodeList = executeXPathQueryAsNodeList(xPath, document, s"//packagedElement[@id='$parentId' and @type='uml:Class']")
+
+      val parentNodeList = executeXPathQueryAsNodeList(xPath, document,
+        s"//packagedElement[@id='$parentId' and @type='uml:Class']")
+
       if parentNodeList.getLength > 0 then
         Option(parentNodeList.item(0).getAttributes.getNamedItem("name")).map(_.getNodeValue)
       else None

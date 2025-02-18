@@ -110,15 +110,10 @@ val argParser =
 
       XMIReader.parseUMLClassDiagram(input)
       val k = 0
-//      val umlClassDiagram = if input.xmiFile.isDefined
-//      then
-//        XMIReader.parseUMLClassDiagram(input)
-//      else
-//        TSVReader.parseUMLClassDiagram(input)
-//
-//      logger.debug(s"umlClassDiagram = $umlClassDiagram ${Code.source}")
 
-//      val owlWriter = new UML2OWLWriter(umlClassDiagram.get)
+      if input.owlOntologyFile.isDefined then
+        val owlWriter = new UML2OWLWriter(input.ontologyIRI, input.owlOntologyFile.get, ClassBuilderCache.getClasses)
+        owlWriter.generateOWL
 //      owlWriter.generateOWL match
 //        case Left(exceptionMsg) => println(s"An exception occurred:$exceptionMsg")
 //        case Right(warnings) =>

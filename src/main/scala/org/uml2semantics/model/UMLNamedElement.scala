@@ -5,6 +5,6 @@ trait UMLNamedElement:
   def nonEmpty: Boolean
   def getName: String
   
-  
-trait MergableBuilder[T]:
-  def merge(that: T): T
+trait UMLIdentity:
+  def getIRI: String
+  def getLabel: String

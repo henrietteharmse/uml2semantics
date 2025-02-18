@@ -25,6 +25,8 @@ the following xpath should be used: //packagedElement[@type='uml:Class']/@name
 1. //packagedElement[@xmi:type='uml:Class'][@name='Employer']/
 
 # Get generalizations
-1. //element[@xmi:type='uml:Class' and @name='Employee']/links/Generalization/@end
-2 //element[@xmi:id='EAID_C64147AF_31BF_484d_A408_A97C799E44C7']/@name
+1. //packagedElement[@xmi:type='uml:Class' and @name='Employee']/generalization/@general
+2. //packagedElement[@xmi:id='EAID_C64147AF_31BF_484d_A408_A97C799E44C7']/@name
+
+					  
 

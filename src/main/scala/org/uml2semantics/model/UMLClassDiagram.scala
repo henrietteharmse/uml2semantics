@@ -9,3 +9,5 @@ import scala.:+
 import scala.annotation.{tailrec, targetName}
 import scala.collection.mutable
 
+
+case class OntologyIRI(ontologyIRI: String)

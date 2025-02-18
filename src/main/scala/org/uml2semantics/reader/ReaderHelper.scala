@@ -8,7 +8,7 @@ import scala.collection.mutable
 
 object ReaderHelper:
   def populateParentsWithTheirChildren(parentToChildrenMap: mutable.Map[String, mutable.Set[String]],
-                                               ontologyPrefix: PrefixNamespace): Unit =
+                                       ontologyPrefix: PrefixNamespace): Unit =
 
     var classesToRebuild = scala.collection.mutable.Set[ClassBuilder]()
 
@@ -25,3 +25,4 @@ object ReaderHelper:
       val umlClass = classBuilder.build
       ClassBuilderCache.cacheUMLClass(umlClass, classBuilder)
     )
+
