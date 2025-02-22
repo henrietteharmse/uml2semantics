@@ -21,21 +21,30 @@ class UML2OWLWriter(ontologyIRI: String,
                     owlOntologyFile: File,
                     classes: Set[UMLClass]):
 
-  private val logger = Logger(this.getClass)
+  private val logger = Logger("UML2OWLWriter")
   private val manager = OWLManager.createOWLOntologyManager
   private val ontology = manager.createOntology(IRI.create(ontologyIRI))
   private val dataFactory = manager.getOWLDataFactory
 
-  private val completeDisjointClasses: mutable.Map[IRI, mutable.Set[IRI]] = mutable.Map[IRI, mutable.Set[IRI]]()
-  private val completeOverlappingClasses: mutable.Map[IRI, mutable.Set[IRI]] = mutable.Map[IRI, mutable.Set[IRI]]()
-  private val incompleteDisjointClasses: mutable.Map[IRI, mutable.Set[IRI]] = mutable.Map[IRI, mutable.Set[IRI]]()
-  private val incompleteOverlappingClasses: mutable.Map[IRI, mutable.Set[IRI]] = mutable.Map[IRI, mutable.Set[IRI]]()
+  /**
+   * All classes in a UML class diagram are that form part of a generalization set.
+   */
+  private val allCompleteDisjointOWLClasses: mutable.Set[OWLClass] = mutable.Set[OWLClass]()
+  private val allCompleteOverlappingOWLClasses: mutable.Set[OWLClass] = mutable.Set[OWLClass]()
+  private val allIncompleteDisjointOWLClasses: mutable.Set[OWLClass] = mutable.Set[OWLClass]()
+  private val allIncompleteOverlappingOWLClasses: mutable.Set[OWLClass] = mutable.Set[OWLClass]()
 
-  private val disjointClasses: mutable.Set[IRI] = mutable.Set[IRI]()
+  /**
+   * All classes in a UML class diagram are disjoint by default, unless they are part of a generalization set. For
+   * generalization sets, disjointness are defined as part of generalization set and thus dealt with when the
+   * generalization set is processed.
+   */
+  private val disjointClassesNotPartOfGeneralizationSets: mutable.Set[OWLClass] = mutable.Set[OWLClass]()
 
   /**
    * Creates an OWLClass for a UMLClass and annotates it with definition and label.
    * It also creates all children of this class.
+   *
    *
    * @param umlClass
    * @param errorMessages
@@ -43,9 +52,13 @@ class UML2OWLWriter(ontologyIRI: String,
    */
   private def createAndAnnotateOWLClass(umlClass: UMLClass,
                                         errorMessages: mutable.Seq[String]): OWLClass =
-    logger.debug(s"createAndAnnotateOWLClass: umlClass=$umlClass, errorMessages=$errorMessages ${Code.source}")
+    logger.trace(s"createAndAnnotateOWLClass: umlClass=$umlClass, errorMessages=$errorMessages ${Code.source}")
     val owlClass = createOWLClass(umlClass.classIdentity, errorMessages)
-    disjointClasses += owlClass.getIRI
+    if !allCompleteDisjointOWLClasses.contains(owlClass) && !allCompleteOverlappingOWLClasses.contains(owlClass) &&
+      !allIncompleteDisjointOWLClasses.contains(owlClass) &&  !allIncompleteOverlappingOWLClasses.contains(owlClass)
+    then
+      disjointClassesNotPartOfGeneralizationSets += owlClass
+
     umlClass.children.setOfGeneralizationSets.foreach { generalizationSet =>
       (generalizationSet.coveringConstraint, generalizationSet.disjointConstraint) match
         case (CoveringConstraint.Complete, DisjointConstraint.Disjoint) =>
@@ -61,66 +74,82 @@ class UML2OWLWriter(ontologyIRI: String,
     umlClass.classDefinition.definitionOption.foreach(definition =>
       createDefinitionAnnotation(owlClass, definition, errorMessages))
     createLabelAnnotation(owlClass, umlClass.classIdentity.getLabel, errorMessages)
+    logger.trace(s"createAndAnnotateOWLClass: Done. allIncompleteOverlappingOWLClasses=$allIncompleteOverlappingOWLClasses, " +
+      s"disjointClassesNotPartOfGeneralizationSets=$disjointClassesNotPartOfGeneralizationSets ${Code.source}")
     owlClass
 
 
   private def createCompleteDisjointChildren(owlClass: OWLClass, generalizationSet: UMLGeneralizationSet,
                                              errorMessages: Seq[String]) =
+    logger.trace(s"createCompleteDisjointChildren: owlClass=$owlClass, generalizationSet=$generalizationSet, " +
+      s"errorMessages=$errorMessages ${Code.source}")
+
     val completeDisjointClassesAsIRIs = mutable.Set[IRI]()
     val completeDisjointOWLClasses = mutable.Set[OWLClass]()
     generalizationSet.generalizationSet.foreach { child =>
       val childClass = createOWLClass(child, errorMessages)
       completeDisjointOWLClasses += childClass
+      allCompleteDisjointOWLClasses += childClass
+      disjointClassesNotPartOfGeneralizationSets -= childClass
       completeDisjointClassesAsIRIs += childClass.getIRI
       createOWLSubClassAxiom(childClass, owlClass, errorMessages)
     }
     createOWLDisjointUnionAxiom(owlClass, completeDisjointOWLClasses, errorMessages)
-    completeDisjointClasses += (owlClass.getIRI -> completeDisjointClassesAsIRIs)
 
 
   private def createCompleteOverlappingChildren(owlClass: OWLClass, generalizationSet: UMLGeneralizationSet,
                                                 errorMessages: Seq[String]) =
+    logger.trace(s"createCompleteOverlappingChildren: owlClass=$owlClass, generalizationSet=$generalizationSet, " +
+      s"errorMessages=$errorMessages ${Code.source}")
     val completeOverlappingClassesAsIRIs = mutable.Set[IRI]()
     val completeOverlappingOWLClasses = mutable.Set[OWLClass]()
     generalizationSet.generalizationSet.foreach { child =>
       val childClass: OWLClass = createOWLClass(child, errorMessages)
       completeOverlappingOWLClasses += childClass
+      allCompleteOverlappingOWLClasses += childClass
+      disjointClassesNotPartOfGeneralizationSets -= childClass
       completeOverlappingClassesAsIRIs += childClass.getIRI
       createOWLSubClassAxiom(childClass, owlClass, errorMessages)
     }
     createOWLEquivalentToUnionAxiom(owlClass, completeOverlappingOWLClasses, errorMessages)
-    completeOverlappingClasses += (owlClass.getIRI -> completeOverlappingClassesAsIRIs)
 
   private def createIncompleteDisjointChildren(owlClass: OWLClass, generalizationSet: UMLGeneralizationSet,
                                                errorMessages: Seq[String]) =
+    logger.trace(s"createIncompleteDisjointChildren: owlClass=$owlClass, generalizationSet=$generalizationSet, " +
+      s"errorMessages=$errorMessages ${Code.source}")
+
     val incompleteDisjointClassesAsIRIs = mutable.Set[IRI]()
     val incompleteDisjointOWLClasses = mutable.Set[OWLClass]()
     generalizationSet.generalizationSet.foreach { child =>
       val childClass = createOWLClass(child, errorMessages)
       incompleteDisjointOWLClasses += childClass
+      allIncompleteDisjointOWLClasses += childClass
+      disjointClassesNotPartOfGeneralizationSets -= childClass
       incompleteDisjointClassesAsIRIs += childClass.getIRI
       createOWLSubClassAxiom(childClass, owlClass, errorMessages)
     }
-    createOWLDisjointUnionAxiom(owlClass, incompleteDisjointOWLClasses, errorMessages)
-    incompleteDisjointClasses += (owlClass.getIRI -> incompleteDisjointClassesAsIRIs)
+    createOWLDisjointClassesAxiom(incompleteDisjointOWLClasses, errorMessages)
 
 
   private def createIncompleteOverlappingChildren(owlClass: OWLClass, generalizationSet: UMLGeneralizationSet,
                                                   errorMessages: Seq[String]): Unit =
+    logger.trace(s"createIncompleteOverlappingChildren: owlClass=$owlClass, generalizationSet=$generalizationSet, " +
+      s"errorMessages=$errorMessages ${Code.source}")
+
     val incompleteOverlappingClassesAsIRIs = mutable.Set[IRI]()
     generalizationSet.generalizationSet.foreach { child =>
       val childClass = createOWLClass(child, errorMessages)
+      allIncompleteOverlappingOWLClasses += childClass
+      disjointClassesNotPartOfGeneralizationSets -= childClass
       incompleteOverlappingClassesAsIRIs += childClass.getIRI
       createOWLSubClassAxiom(childClass, owlClass, errorMessages)
     }
-    incompleteOverlappingClasses += (owlClass.getIRI -> incompleteOverlappingClassesAsIRIs)
-
 
 
   private def createDefinitionAnnotation(owlNamedObject: OWLNamedObject,
                                          definition: String,
                                          errorMessages: mutable.Seq[String]): Unit =
-    logger.debug(s"createDefinitionAnnotation: owlNamedObject=$owlNamedObject, definition=$definition, " +
+    logger.trace(s"createDefinitionAnnotation: owlNamedObject=$owlNamedObject, definition=$definition, " +
       s"errorMessages=$errorMessages ${Code.source}")
     if definition.nonEmpty then
       val owlClassDefinitionAnnotationAxiom = dataFactory.getOWLAnnotationAssertionAxiom(owlNamedObject.getIRI,
@@ -138,7 +167,7 @@ class UML2OWLWriter(ontologyIRI: String,
   private def createLabelAnnotation(owlNamedObject: OWLNamedObject,
                                     label: String,
                                     errorMessages: mutable.Seq[String]): OWLAnnotationAssertionAxiom =
-    logger.debug(s"createLabelAnnotation: owlNamedObject=$owlNamedObject, label=$label, " +
+    logger.trace(s"createLabelAnnotation: owlNamedObject=$owlNamedObject, label=$label, " +
       s"errorMessages=$errorMessages ${Code.source}")
     if label.nonEmpty then
       createOWLAnnotationAssertionAxiom(owlNamedObject, dataFactory.getRDFSLabel(), label, errorMessages)
@@ -146,10 +175,12 @@ class UML2OWLWriter(ontologyIRI: String,
       createOWLAnnotationAssertionAxiom(owlNamedObject, dataFactory.getRDFSLabel(), owlNamedObject.getIRI.getIRIString, errorMessages)
 
   private def createOWLAnnotationAssertionAxiom(owlNamedObject: OWLNamedObject,
-                                                owlAnnotationProperty: OWLAnnotationProperty, literal: String,
+                                                owlAnnotationProperty: OWLAnnotationProperty,
+                                                literal: String,
                                                 errorMessages: mutable.Seq[String]): OWLAnnotationAssertionAxiom =
-    logger.debug(s"createOWLAnnotationAssertionAxiom: owlAnnotationProperty=$owlAnnotationProperty, literal=$literal, " +
-      s"errorMessages=$errorMessages ${Code.source}")
+    logger.trace(s"createOWLAnnotationAssertionAxiom: owlNamedObject=$owlNamedObject, " +
+      s"owlAnnotationProperty=$owlAnnotationProperty, literal=$literal, errorMessages=$errorMessages ${Code.source}")
+
     if literal.isBlank then
       throw new IllegalArgumentException("Literal cannot be blank")
     val owlAnnotationAssertionAxiom = dataFactory.getOWLAnnotationAssertionAxiom(owlNamedObject.getIRI,
@@ -159,27 +190,31 @@ class UML2OWLWriter(ontologyIRI: String,
     owlAnnotationAssertionAxiom
 
 
-  private def createOWLClass(child: UMLClassIdentity, errorMessages: mutable.Seq[String]): OWLClass =
-    val owlClass = dataFactory.getOWLClass(child.getIRI)
+  private def createOWLClass(umlClass: UMLClassIdentity, errorMessages: mutable.Seq[String]): OWLClass =
+    val owlClass = dataFactory.getOWLClass(umlClass.getIRI)
     if manager.addAxiom(ontology, dataFactory.getOWLDeclarationAxiom(owlClass)) != SUCCESSFULLY then
       errorMessages :+ s"Could not declare class=${owlClass.getIRI}"
     owlClass
 
   private def createOWLDisjointClassesAxiom(disjointOWLClasses: mutable.Set[OWLClass],
-                                            errorMessages: mutable.Seq[String]): OWLDisjointClassesAxiom =
-    val disjointClassesAxiom = dataFactory.getOWLDisjointClassesAxiom(disjointOWLClasses.asJava)
-    if manager.addAxiom(ontology, disjointClassesAxiom) != SUCCESSFULLY then
-      errorMessages :+ s"Could not add disjointClasses axiom for ${disjointOWLClasses.map(_.getIRI).mkString(", ")}"
-    disjointClassesAxiom
+                                            errorMessages: mutable.Seq[String]): Unit =
+    if disjointOWLClasses.size < 2 then
+      logger.warn(s"createOWLDisjointClassesAxiom: disjointOWLClasses.size=${disjointOWLClasses.size} < 2")
+    else
+      val disjointClassesAxiom = dataFactory.getOWLDisjointClassesAxiom(disjointOWLClasses.asJava)
+      if manager.addAxiom(ontology, disjointClassesAxiom) != SUCCESSFULLY then
+        errorMessages :+ s"Could not add disjointClasses axiom for ${disjointOWLClasses.map(_.getIRI).mkString(", ")}"
 
   private def createOWLEquivalentToUnionAxiom(owlClass: OWLClass, completeOverlappingOWLClasses: mutable.Set[OWLClass],
-                                          errorMessages: mutable.Seq[String]): OWLEquivalentClassesAxiom =
-    val equivalentToUnionAxiom = dataFactory.getOWLEquivalentClassesAxiom(owlClass,
-      dataFactory.getOWLObjectUnionOf(completeOverlappingOWLClasses.asJava))
-    if manager.addAxiom(ontology, equivalentToUnionAxiom) != SUCCESSFULLY then
-      errorMessages :+ s"Could not add overlappingUnion axiom for ${owlClass.getIRI}" +
-        s" equivalent to union of ${completeOverlappingOWLClasses.map(_.getIRI).mkString(", ")}"
-    equivalentToUnionAxiom
+                                          errorMessages: mutable.Seq[String]): Unit =
+    if completeOverlappingOWLClasses.size < 2 then
+      logger.warn(s"createOWLEquivalentToUnionAxiom: completeOverlappingOWLClasses.size=${completeOverlappingOWLClasses.size} < 2")
+    else
+      val equivalentToUnionAxiom = dataFactory.getOWLEquivalentClassesAxiom(owlClass,
+        dataFactory.getOWLObjectUnionOf(completeOverlappingOWLClasses.asJava))
+      if manager.addAxiom(ontology, equivalentToUnionAxiom) != SUCCESSFULLY then
+        errorMessages :+ s"Could not add overlappingUnion axiom for ${owlClass.getIRI}" +
+          s" equivalent to union of ${completeOverlappingOWLClasses.map(_.getIRI).mkString(", ")}"
 
   private def createOWLDisjointUnionAxiom(owlClass: OWLClass, completeDisjointOWLClasses: mutable.Set[OWLClass],
                                        errorMessages: mutable.Seq[String]): OWLDisjointUnionAxiom =
@@ -202,6 +237,7 @@ class UML2OWLWriter(ontologyIRI: String,
     var errorMessages: mutable.Seq[String] = new ArrayBuffer[String]()
     classes.foreach(umlClass =>
         val owlClass = createAndAnnotateOWLClass(umlClass, errorMessages))
+    createOWLDisjointClassesAxiom(disjointClassesNotPartOfGeneralizationSets, errorMessages)
     logger.info("processUMLClasses: Done")
     errorMessages
   end processUMLClasses
@@ -219,10 +255,5 @@ class UML2OWLWriter(ontologyIRI: String,
         logger.info("generateOWL: Done")
         Left(e.getMessage)
   end generateOWL
-
-
-
-
-
-
+  
 end UML2OWLWriter

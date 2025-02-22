@@ -18,7 +18,8 @@
 <!--    <logger name="extractParents" level="trace" />-->
 <!--    <logger name="extractAttributes" level="trace" />-->
 <!--    <logger name="### evaluateFunction ###" level="trace" />-->
-<!--    <logger name="executeXPathQuery" level="trace" />-->
+<!--    <logger name="XMIReader" level="trace" />-->
+    <logger name="UML2OWLWriter" level="trace" />
     <logger name="cacheUMLClassIdentity-classIdentity" level="trace" />
 
     <!-- org.uml2semantics.model.UMLClassDiagram.scala -->
