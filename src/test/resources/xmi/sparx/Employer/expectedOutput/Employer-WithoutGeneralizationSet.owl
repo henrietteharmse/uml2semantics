@@ -28,6 +28,7 @@
     <owl:Class rdf:about="https://uml2semantics.com/ontology/Employee">
         <rdfs:subClassOf rdf:resource="https://uml2semantics.com/ontology/Person"/>
         <owl:disjointWith rdf:resource="https://uml2semantics.com/ontology/Employer"/>
+        <rdfs:comment>An employee is someone who does work for an employer for which they get compensated.</rdfs:comment>
         <rdfs:label>Employee</rdfs:label>
     </owl:Class>
     
@@ -38,6 +39,7 @@
 
     <owl:Class rdf:about="https://uml2semantics.com/ontology/Employer">
         <rdfs:subClassOf rdf:resource="https://uml2semantics.com/ontology/Person"/>
+        <rdfs:comment>An employer is someone that employs 1 or more persons.</rdfs:comment>
         <rdfs:label>Employer</rdfs:label>
     </owl:Class>
     
@@ -48,6 +50,7 @@
 
     <owl:Class rdf:about="https://uml2semantics.com/ontology/Person">
         <owl:disjointWith rdf:resource="https://uml2semantics.com/ontology/Renumeration"/>
+        <rdfs:comment>A person is a human being.</rdfs:comment>
         <rdfs:label>Person</rdfs:label>
     </owl:Class>
     

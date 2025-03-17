@@ -1,16 +1,13 @@
 package org.uml2semantics.model
 
-import org.uml2semantics.model.UMLClassIdentity.ClassIdentityBuilder
-import org.uml2semantics.model.UMLGeneralizationSet.GeneralizationSetBuilder
 import org.uml2semantics.model.cache.{ClassBuilderCache, ClassIdentityBuilderCache}
 
-import scala.collection.immutable.HashSet
 import scala.collection.mutable
 
 sealed trait UMLClassIdentifier extends UMLNamedElement
 
 case class UMLClassName(name: String) extends UMLClassIdentifier:
-  override def isEmpty: Boolean = name.isEmpty || name.isBlank
+  override def isEmpty: Boolean = name.isEmpty
   override def nonEmpty: Boolean = name.nonEmpty
   override def getName: String = name
 
@@ -106,7 +103,7 @@ object UMLClassIdentity:
       classIdentityToReturn
 
 
-case class UMLClassDefinition(definitionOption: Option[String] = None)
+case class UMLClassDefinition(definition: String)
 
 
 enum CoveringConstraint:
@@ -171,7 +168,7 @@ object UMLGeneralizationSet:
 case class UMLClassChildren(setOfGeneralizationSets: Set[UMLGeneralizationSet])
 
 case class UMLClass(classIdentity: UMLClassIdentity,
-                    classDefinition: UMLClassDefinition = UMLClassDefinition(),
+                    classDefinitionOption: Option[UMLClassDefinition] = None,
                     children: UMLClassChildren = UMLClassChildren(Set())) extends UMLIdentity:
   def getIRI: String = classIdentity.getIRI
   def getLabel: String = classIdentity.getLabel
@@ -208,8 +205,8 @@ object UMLClass:
       this
 
     def withNameAndCurie(name: String, curie: String): ClassBuilder =
-      if name.isEmpty && curie.isEmpty then
-        throw new IllegalArgumentException("Name and curie must not be empty.")
+      if name.isEmpty || curie.isEmpty then
+        throw new IllegalArgumentException("Name or curie must not be empty.")
       this.classIdentityBuilder = classIdentityBuilder.withNameAndCurie(name, curie)
       this
 
@@ -243,7 +240,7 @@ object UMLClass:
     def build: UMLClass =
       val umlClass = UMLClass(
         classIdentityBuilder.build,
-        UMLClassDefinition(definition),
+        definition.map(UMLClassDefinition.apply(_)),
         UMLClassChildren(children.map(_.build).toSet)
       )
       ClassBuilderCache.cacheUMLClass(umlClass, this)

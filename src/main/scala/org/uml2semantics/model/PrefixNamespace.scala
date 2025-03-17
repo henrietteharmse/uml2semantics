@@ -7,6 +7,9 @@ import org.uml2semantics.model.PrefixNamespace.prefixMap
 import scala.collection.mutable.Map
 import scala.collection.{immutable, mutable}
 
+private val FRAGMENT_SEPARATOR: Char = '#'
+private val PATH_SEPARATOR: Char = '/'
+
 
 case class PrefixName(name: String):
   def nonEmpty: Boolean = name.nonEmpty

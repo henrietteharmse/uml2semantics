@@ -27,6 +27,13 @@ the following xpath should be used: //packagedElement[@type='uml:Class']/@name
 # Get generalizations
 1. //packagedElement[@xmi:type='uml:Class' and @name='Employee']/generalization/@general
 2. //packagedElement[@xmi:id='EAID_C64147AF_31BF_484d_A408_A97C799E44C7']/@name
+## ---> Get generalizationSets
+//packagedElement[@xmi:type='uml:GeneralizationSet']/@isCovering
+//packagedElement[@xmi:type='uml:GeneralizationSet']/@isDisjoint
+//packagedElement[@xmi:type='uml:GeneralizationSet']/generalization/@xmi:idref
+//packagedElement/generalization[@xmi:type='uml:Generalization' and @xmi:id='EAID_C8B3AEC7_2739_412a_80F0_1995B9A86671']/@general
+//packagedElement[@xmi:type='uml:Class' and @xmi:id='EAID_C64147AF_31BF_484d_A408_A97C799E44C7']/@name
 
+//packagedElement/generalization[@xmi:type='uml:Generalization' and @xmi:id='EAID_C8B3AEC7_2739_412a_80F0_1995B9A86671']/..
 					  
 

@@ -71,8 +71,8 @@ class UML2OWLWriter(ontologyIRI: String,
           createIncompleteOverlappingChildren(owlClass, generalizationSet, errorMessages)
     }
 
-    umlClass.classDefinition.definitionOption.foreach(definition =>
-      createDefinitionAnnotation(owlClass, definition, errorMessages))
+    umlClass.classDefinitionOption.foreach(classDefinition =>
+      createDefinitionAnnotation(owlClass, classDefinition.definition, errorMessages))
     createLabelAnnotation(owlClass, umlClass.classIdentity.getLabel, errorMessages)
     logger.trace(s"createAndAnnotateOWLClass: Done. allIncompleteOverlappingOWLClasses=$allIncompleteOverlappingOWLClasses, " +
       s"disjointClassesNotPartOfGeneralizationSets=$disjointClassesNotPartOfGeneralizationSets ${Code.source}")
