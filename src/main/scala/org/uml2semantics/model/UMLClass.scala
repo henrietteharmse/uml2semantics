@@ -40,6 +40,12 @@ case class UMLClassIdentity(nameOption: Option[UMLClassName] = None,
       case (_, Some(name)) => name.getName
       case (Some(curie), _) => curie.getName
       case _ => throw new IllegalArgumentException("Name and curie must not be empty.")
+      
+  def getClassIdentifier:  UMLClassIdentifier =
+    (nameOption, curieOption) match
+      case (_, Some(curie)) => curie
+      case (Some(name), _) => name
+      case _ => throw new IllegalArgumentException("Name and curie must not be empty.") 
 
 object UMLClassIdentity:
 
@@ -49,10 +55,10 @@ object UMLClassIdentity:
       case (_, Some(name)) => UMLClassIdentity(Some(name), None, prefixNamespace)
       case _ => throw new IllegalArgumentException("Name and curie must not be empty.")
 
-  def apply(identifier: UMLClassIdentifier, prefixNamespace: PrefixNamespace): UMLClassIdentity =
-    identifier match
-      case name: UMLClassName => UMLClassIdentity(Some(name), None, prefixNamespace)
-      case curie: UMLClassCurie => UMLClassIdentity(None, Some(curie), prefixNamespace)
+//  def apply(identifier: UMLClassIdentifier, prefixNamespace: PrefixNamespace): UMLClassIdentity =
+//    identifier match
+//      case name: UMLClassName => UMLClassIdentity(Some(name), None, prefixNamespace)
+//      case curie: UMLClassCurie => UMLClassIdentity(None, Some(curie), prefixNamespace)
 
 
   def builder(prefixNamespace: PrefixNamespace): ClassIdentityBuilder =
@@ -74,8 +80,8 @@ object UMLClassIdentity:
       this.name = UMLClassName(name)
       this.curie = UMLClassCurie(curie)
       this
-
-
+    
+ 
     def withNameOrCurie(nameOrCurie: String): ClassIdentityBuilder =
       if nameOrCurie.contains(':') then
         this.curie = UMLClassCurie(nameOrCurie)
@@ -83,24 +89,23 @@ object UMLClassIdentity:
         this.name = UMLClassName(nameOrCurie)
       this
 
+    
     def build: UMLClassIdentity =
       if name.isEmpty && curie.isEmpty then
         throw new IllegalArgumentException("Name and curie must not be empty.")
 
-      val classIdentity = UMLClassIdentity(name, curie, prefixNamespace)
-      val classIdentityByNameOption = name.flatMap(ClassIdentityBuilderCache.getUMLClassIdentity)
-      val classIdentityByCurieOption = curie.flatMap(ClassIdentityBuilderCache.getUMLClassIdentity)
+      // Assume this class identity is the one to use if it has both a name and a curie.
+      val thisClassIdentity = UMLClassIdentity(name, curie, prefixNamespace)
+      if thisClassIdentity.nameOption.nonEmpty && thisClassIdentity.curieOption.nonEmpty then
+        ClassIdentityBuilderCache.cacheUMLClassIdentity(thisClassIdentity, this)
+        return thisClassIdentity
 
-      val classIdentityToReturn = (classIdentity.nameOption, classIdentity.curieOption) match
-        case (Some(_), Some(_)) => classIdentity
-        case (None, Some(_)) if classIdentityByNameOption.isDefined =>
-          UMLClassIdentity(classIdentityByNameOption.get.nameOption, curie, prefixNamespace)
-        case (Some(_), None) if classIdentityByCurieOption.isDefined =>
-          UMLClassIdentity(name, classIdentityByCurieOption.get.curieOption, prefixNamespace)
-        case _ => classIdentity
-
-      ClassIdentityBuilderCache.cacheUMLClassIdentity(classIdentityToReturn, this)
-      classIdentityToReturn
+      // Retrieve the class identity from the cache and use it, if it exists.
+      val cachedClassIdentityBuilderOption = ClassIdentityBuilderCache.getClassIdentityBuilder(thisClassIdentity)
+      if cachedClassIdentityBuilderOption.nonEmpty then
+        cachedClassIdentityBuilderOption.get.build
+      else
+        thisClassIdentity
 
 
 case class UMLClassDefinition(definition: String)
@@ -145,7 +150,8 @@ object UMLGeneralizationSet:
       children.map(child =>
         var childIdentity = ClassIdentityBuilderCache.getUMLClassIdentity(child).getOrElse(
           UMLClassIdentity.builder(prefixNamespace).withNameOrCurie(child).build)
-        var childBuilder = ClassIdentityBuilderCache.getClassIdentityBuilder(childIdentity)
+        var childBuilderOption = ClassIdentityBuilderCache.getClassIdentityBuilder(childIdentity)
+        val childBuilder = childBuilderOption.getOrElse(UMLClassIdentity.builder(prefixNamespace).withNameOrCurie(child))
         this.children += childBuilder.withNameOrCurie(child).build)
       this
 
@@ -184,10 +190,10 @@ object UMLClass:
    *
    * @Todo: Handle the case where a single class can belong to multiple generalization sets, if we find this is indeed a
    *
-   * @param prefixNamespaceOption
+   * @param prefixNamespace
    */
-  class ClassBuilder(prefixNamespaceOption: PrefixNamespace):
-    private var classIdentityBuilder = UMLClassIdentity.builder(prefixNamespaceOption)
+  class ClassBuilder(prefixNamespace: PrefixNamespace):
+    private var classIdentityBuilder = UMLClassIdentity.builder(prefixNamespace)
     private var definition: Option[String] = None
     private var children: scala.collection.mutable.Set[UMLGeneralizationSet.GeneralizationSetBuilder] =
       scala.collection.mutable.HashSet()
@@ -215,13 +221,13 @@ object UMLClass:
       this
 
     def withChildren(parent: String, children: Set[String]): ClassBuilder =
-      this.children += UMLGeneralizationSet.builder(prefixNamespaceOption)
+      this.children += UMLGeneralizationSet.builder(prefixNamespace)
         .withParentAndChildren(parent, children)
       this
 
     def withParentAndChildren(parent: String, children: Set[String],
                               covering: CoveringConstraint, disjoint: DisjointConstraint): ClassBuilder =
-      this.children += UMLGeneralizationSet.builder(prefixNamespaceOption)
+      this.children += UMLGeneralizationSet.builder(prefixNamespace)
         .withParentAndChildren(parent, children)
         .withCoveringConstraint(covering)
         .withDisjointConstraint(disjoint)

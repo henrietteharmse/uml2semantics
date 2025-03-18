@@ -1,7 +1,7 @@
 package org.uml2semantics.model.cache
 
 import org.uml2semantics.model.UMLClassIdentity.ClassIdentityBuilder
-import org.uml2semantics.model.{PrefixNamespace, UMLClass, UMLClassCurie, UMLClassIdentity, UMLClassName}
+import org.uml2semantics.model.{PrefixNamespace, UMLClass, UMLClassCurie, UMLClassIdentifier, UMLClassIdentity, UMLClassName}
 
 import scala.collection.mutable
 
@@ -11,17 +11,17 @@ object ClassIdentityBuilderCache:
   private val classIdentityByClassName = mutable.Map[UMLClassName, UMLClassIdentity]()
   private val classIdentityByClassCurie = mutable.Map[UMLClassCurie, UMLClassIdentity]()
 
-  def cacheUMLClassIdentity(className: UMLClassName, builder: ClassIdentityBuilder): Unit =
-    if !classIdentityByClassName.contains(className) then
-      val classIdentity = UMLClassIdentity(nameOption = Some(className), ontologyPrefix = builder.prefixNamespace)
-      classIdentityByClassName += (className -> classIdentity)
-      buildersByClassName += (className -> builder)
-
-  def cacheUMLClassIdentity(classCurie: UMLClassCurie, builder: ClassIdentityBuilder): Unit =
-    if !classIdentityByClassCurie.contains(classCurie) then
-      val classIdentity = UMLClassIdentity(curieOption = Some(classCurie), ontologyPrefix = builder.prefixNamespace)
-      classIdentityByClassCurie += (classCurie -> classIdentity)
-      buildersByClassCurie += (classCurie -> builder)
+//  def cacheUMLClassIdentity(className: UMLClassName, builder: ClassIdentityBuilder): Unit =
+//    if !classIdentityByClassName.contains(className) then
+//      val classIdentity = UMLClassIdentity(nameOption = Some(className), ontologyPrefix = builder.prefixNamespace)
+//      classIdentityByClassName += (className -> classIdentity)
+//      buildersByClassName += (className -> builder)
+//
+//  def cacheUMLClassIdentity(classCurie: UMLClassCurie, builder: ClassIdentityBuilder): Unit =
+//    if !classIdentityByClassCurie.contains(classCurie) then
+//      val classIdentity = UMLClassIdentity(curieOption = Some(classCurie), ontologyPrefix = builder.prefixNamespace)
+//      classIdentityByClassCurie += (classCurie -> classIdentity)
+//      buildersByClassCurie += (classCurie -> builder)
 
   def cacheUMLClassIdentity(classIdentity: UMLClassIdentity, builder: ClassIdentityBuilder): UMLClassIdentity =
     classIdentity.nameOption.foreach(name =>
@@ -42,20 +42,17 @@ object ClassIdentityBuilderCache:
       case (_, Some(className)) => classIdentityByClassName.get(className)
       case _ => throw new IllegalArgumentException("Name and curie must not be empty.")
 
-  def getUMLClassIdentity(identifier: UMLClassCurie | UMLClassName): Option[UMLClassIdentity] =
+  def getUMLClassIdentity(identifier: UMLClassIdentifier): Option[UMLClassIdentity] =
     identifier match
       case name: UMLClassName => classIdentityByClassName.get(name)
       case curie: UMLClassCurie => classIdentityByClassCurie.get(curie)
-
-  def getClassIdentityBuilder(classIdentity: UMLClassIdentity): ClassIdentityBuilder =
+  
+  def getClassIdentityBuilder(classIdentity: UMLClassIdentity): Option[ClassIdentityBuilder] =
     (classIdentity.curieOption, classIdentity.nameOption) match
       case (Some(curie), Some(name)) => buildersByClassCurie.get(curie)
-        .getOrElse(buildersByClassName.get(name)
-          .getOrElse(UMLClassIdentity.builder(classIdentity.ontologyPrefix)))
-      case (Some(curie), None) => buildersByClassCurie.get(curie).getOrElse(
-        UMLClassIdentity.builder(classIdentity.ontologyPrefix))
-      case (None, Some(name)) => buildersByClassName.get(name).getOrElse(
-        UMLClassIdentity.builder(classIdentity.ontologyPrefix))
+        .orElse(buildersByClassName.get(name))
+      case (Some(curie), None) => buildersByClassCurie.get(curie)
+      case (None, Some(name)) => buildersByClassName.get(name)
       case (None, None) => throw new IllegalArgumentException("ClassIdentity must have a name or curie")
 
 object ClassBuilderCache:
