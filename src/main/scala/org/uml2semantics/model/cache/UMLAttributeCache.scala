@@ -1,6 +1,6 @@
 package org.uml2semantics.model.cache
 
-import org.uml2semantics.model.{UMLAttributeCurie, UMLAttributeIdentifier, UMLAttributeIdentity, UMLAttributeName, UMLClassCurie, UMLClassIdentifier, UMLClassIdentity, UMLClassName}
+import org.uml2semantics.model.{UMLAttribute, UMLAttributeCurie, UMLAttributeIdentifier, UMLAttributeIdentity, UMLAttributeName, UMLClassCurie, UMLClassIdentifier, UMLClassIdentity, UMLClassName}
 import org.uml2semantics.model.UMLAttributeIdentity.AttributeIdentityBuilder
 import org.uml2semantics.model.cache.ClassIdentityBuilderCache
 
@@ -75,9 +75,9 @@ object AttributeIdentityBuilderCache:
         classIdentity.nameOption.flatMap(attributeIdentityByClassNameAttributeCurie.get(_).flatMap(_.get(curie)))
           .orElse(classIdentity.curieOption.flatMap(attributeIdentityByClassCurieAttributeCurie.get(_).flatMap(_.get(curie))))
 
-  def getUMLAttributeIdentityBuilder(classIdentity: UMLClassIdentity, attributeIdentity: UMLAttributeIdentity): 
+  def getUMLAttributeIdentityBuilder(classIdentity: UMLClassIdentity, attributeIdentity: UMLAttributeIdentity):
     Option[AttributeIdentityBuilder] =
-    
+
     (attributeIdentity.curieOption, attributeIdentity.nameOption) match
       case (Some(curie), Some(name)) =>
         buildersByClassCurieAttributeCurie.get(classIdentity.curieOption.get)
@@ -93,19 +93,20 @@ object AttributeIdentityBuilderCache:
       case (None, None) => throw new IllegalArgumentException("AttributeIdentity must have a name or curie")
 
 
+object AttributeBuilderCache:
+  private val buildersByAttributeIdentity = mutable.Map[UMLAttributeIdentity, UMLAttribute.AttributeBuilder]()
+  private val attributesByAttributeIdentity = mutable.Map[UMLAttributeIdentity, UMLAttribute]()
 
+  def cacheUMLAttribute(umlAttribute: UMLAttribute, builder: UMLAttribute.AttributeBuilder): Unit =
+    buildersByAttributeIdentity += (umlAttribute.attributeIdentity -> builder)
+    attributesByAttributeIdentity += (umlAttribute.attributeIdentity -> umlAttribute)
 
+  def getUMLAttribute(attributeIdentity: UMLAttributeIdentity): Option[UMLAttribute] =
+    attributesByAttributeIdentity.get(attributeIdentity)
 
+  def getUMLAttributeBuilder(attributeIdentity: UMLAttributeIdentity): Option[UMLAttribute.AttributeBuilder] =
+    buildersByAttributeIdentity.get(attributeIdentity)
 
-  
-    
-    
-
-
-
-
-
-
-
-
-
+  def getUMLAttributeBuilder(classIdentifier: String, attributeIdentifier: String): Option[UMLAttribute.AttributeBuilder] =
+    AttributeIdentityBuilderCache.getUMLAttributeIdentity(classIdentifier, attributeIdentifier)
+      .flatMap(getUMLAttributeBuilder)

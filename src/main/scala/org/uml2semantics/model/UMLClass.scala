@@ -65,37 +65,39 @@ object UMLClassIdentity:
     ClassIdentityBuilder(prefixNamespace)
 
   class ClassIdentityBuilder(var prefixNamespace: PrefixNamespace):
-    protected var name: Option[UMLClassName] = None
-    protected var curie: Option[UMLClassCurie] = None
+    protected var name: Option[String] = None
+    protected var curie: Option[String] = None
 
     def withName(name: String): ClassIdentityBuilder =
-      this.name = UMLClassName(name)
+      this.name = Some(name)
       this
 
     def withCurie(curieAsString: String): ClassIdentityBuilder =
-      this.curie = UMLClassCurie(curieAsString)
+      this.curie = Some(curieAsString)
       this
 
     def withNameAndCurie(name: String, curie: String): ClassIdentityBuilder =
-      this.name = UMLClassName(name)
-      this.curie = UMLClassCurie(curie)
-      this
-    
- 
-    def withNameOrCurie(nameOrCurie: String): ClassIdentityBuilder =
-      if nameOrCurie.contains(':') then
-        this.curie = UMLClassCurie(nameOrCurie)
-      else
-        this.name = UMLClassName(nameOrCurie)
+      this.name = Some(name)
+      this.curie = Some(curie)
       this
 
-    
+
+    def withNameOrCurie(nameOrCurie: String): ClassIdentityBuilder =
+      if nameOrCurie.contains(':') then
+        this.curie = Some(nameOrCurie)
+      else
+        this.name = Some(nameOrCurie)
+      this
+
+
     def build: UMLClassIdentity =
       if name.isEmpty && curie.isEmpty then
         throw new IllegalArgumentException("Name and curie must not be empty.")
+      val classNameOption = name.flatMap(UMLClassName(_))
+      val classCurieOption = curie.flatMap(UMLClassCurie(_))
 
       // Assume this class identity is the one to use if it has both a name and a curie.
-      val thisClassIdentity = UMLClassIdentity(name, curie, prefixNamespace)
+      val thisClassIdentity = UMLClassIdentity(classNameOption, classCurieOption, prefixNamespace)
       if thisClassIdentity.nameOption.nonEmpty && thisClassIdentity.curieOption.nonEmpty then
         ClassIdentityBuilderCache.cacheUMLClassIdentity(thisClassIdentity, this)
         return thisClassIdentity
@@ -108,7 +110,7 @@ object UMLClassIdentity:
         thisClassIdentity
 
 
-case class UMLClassDefinition(definition: String)
+case class UMLClassDefinition(definition: String = "")
 
 
 enum CoveringConstraint:
