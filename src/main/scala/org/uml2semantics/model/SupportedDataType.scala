@@ -66,5 +66,5 @@ object SupportedDataType:
 
   def getIRI(dataType: SupportedDataType): String =
     logger.debug(s"dataType=$dataType ${Code.source}")
-    dataType._curie.toIRI
+    dataType._curie.getIRI
 

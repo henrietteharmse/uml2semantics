@@ -90,7 +90,7 @@ case class PrefixReference(reference: String)
 
 private val SEPARATOR: String = ":"
 
-case class Curie(curie: String):
+case class Curie(curie: String) extends LabeledIRI:
   private val logger = Logger[this.type]
   require(Curie.isCurieBasedOnConfiguredPrefix(curie), s"Curie=$curie is not using a known prefix.")
   private val args: Array[String] = curie.split(SEPARATOR)
@@ -100,12 +100,15 @@ case class Curie(curie: String):
   logger.debug(s"prefixReference=$prefixReference ${Code.source}")
 
 
-  def toIRI: String =
+  def getIRI: String =
     require(PrefixNamespace.getPrefixNamespace(prefixName).nonEmpty, s"Prefix name = '$prefixName' is undefined. Please define it.")
     PrefixNamespace.getPrefixNamespace(prefixName).get.prefixIRI.iri + prefixReference.reference
-
+    
+  def getLabel: String = curie
+  
   def nonEmpty: Boolean = prefixName.nonEmpty && curie.nonEmpty
   def isEmpty: Boolean = prefixName.isEmpty && curie.isEmpty
+  
 object Curie:
   private val logger = Logger[this.type]
 
@@ -142,3 +145,4 @@ object Curie:
     else
       false
 
+  

@@ -47,7 +47,7 @@
 
 
     <!-- org.uml2semantics.model.owl.UmlToOWLWriter.scala -->
-    <logger name="org.uml2semantics.owl.UML2OWLWriter" level="error" />
+    <logger name="org.uml2semantics.writer.UML2OWLWriter" level="error" />
 
 <!--    <logger name="org.uml2semantics.model." level="debug" />-->
 

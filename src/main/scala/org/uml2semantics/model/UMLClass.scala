@@ -26,11 +26,11 @@ object UMLClassCurie:
 
 case class UMLClassIdentity(nameOption: Option[UMLClassName] = None,
                             curieOption: Option[UMLClassCurie] = None,
-                            ontologyPrefix: PrefixNamespace) extends UMLIdentity:
+                            ontologyPrefix: PrefixNamespace) extends LabeledIRI:
 
   def getIRI: String =
     (curieOption, nameOption) match
-      case (Some(curie), _) => curie.curie.toIRI
+      case (Some(curie), _) => curie.curie.getIRI
       case (_, Some(name)) =>   val iri = ontologyPrefix.prefixIRI.iri
         iri + (if iri.matches(".*[/#]$") then name.getName else "/" + name.getName)
       case _ => throw new IllegalArgumentException("Name and curie must not be empty.")
@@ -180,7 +180,7 @@ case class UMLClassChildren(setOfGeneralizationSets: Set[UMLGeneralizationSet])
 
 case class UMLClass(classIdentity: UMLClassIdentity,
                     classDefinitionOption: Option[UMLClassDefinition] = None,
-                    children: UMLClassChildren = UMLClassChildren(Set())) extends UMLIdentity:
+                    children: UMLClassChildren = UMLClassChildren(Set())) extends LabeledIRI:
   def getIRI: String = classIdentity.getIRI
   def getLabel: String = classIdentity.getLabel
 

@@ -4,6 +4,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 scalacOptions ++= Seq(// use ++= to add to existing options
     "-explaintypes",
+  "-explain",
   "-deprecation"
 )
 lazy val root = (project in file("."))

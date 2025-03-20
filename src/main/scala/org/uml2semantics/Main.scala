@@ -7,7 +7,7 @@ import org.uml2semantics.inline.Code
 import org.uml2semantics.model.PrefixNamespace
 import org.uml2semantics.reader.{TSVReader, XMIReader}
 //import org.uml2semantics.reader.{TSVReader, XMIReader}
-import org.uml2semantics.owl.UML2OWLWriter
+import org.uml2semantics.writer.UML2OWLWriter
 import scopt.OParser
 
 // The cache import here is used for debugging purposes only
@@ -113,7 +113,10 @@ val argParser =
       val k = 0
 
       if input.owlOntologyFile.isDefined then
-        val owlWriter = new UML2OWLWriter(input.ontologyIRI, input.owlOntologyFile.get, ClassBuilderCache.getClasses)
+        val owlWriter = new UML2OWLWriter(input.ontologyIRI, 
+          input.owlOntologyFile.get, 
+          ClassBuilderCache.getClasses,
+          AttributeBuilderCache.getAttributes)
         owlWriter.generateOWL
 //      owlWriter.generateOWL match
 //        case Left(exceptionMsg) => println(s"An exception occurred:$exceptionMsg")

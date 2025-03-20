@@ -131,3 +131,5 @@ object AttributeBuilderCache:
   def getUMLAttributeBuilder(classIdentifier: String, attributeIdentifier: String): Option[UMLAttribute.AttributeBuilder] =
     AttributeIdentityBuilderCache.getUMLAttributeIdentity(classIdentifier, attributeIdentifier)
       .flatMap(getUMLAttributeBuilder)
+    
+  def getAttributes: Set[UMLAttribute] = attributesByAttributeIdentity.values.toSet

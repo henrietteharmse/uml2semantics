@@ -1,16 +1,16 @@
 package org.uml2semantics.model
 
-import org.uml2semantics.model.cache.{AttributeBuilderCache, AttributeIdentityBuilderCache, ClassBuilderCache}
 import com.typesafe.scalalogging.Logger
 import org.uml2semantics.inline.Code
 import org.uml2semantics.model.UMLCardinality.>=
+import org.uml2semantics.model.cache.{AttributeBuilderCache, AttributeIdentityBuilderCache, ClassBuilderCache}
 
 sealed trait UMLAttributeIdentifier(classIdentifier: UMLClassIdentifier) extends UMLNamedElement
 
 case class UMLAttributeName(classIdentifier: UMLClassIdentifier, name: String) extends UMLAttributeIdentifier(classIdentifier):
   def isEmpty: Boolean = name.isEmpty
   def nonEmpty: Boolean = name.nonEmpty
-  def getName: String = classIdentifier.getName + FRAGMENT_SEPARATOR + name
+  def getName: String = name
 
 object UMLAttributeName:
   def apply(classIdentifier: UMLClassIdentifier, name: String): Option[UMLAttributeName] =
@@ -31,10 +31,10 @@ object UMLAttributeCurie:
 
 case class UMLAttributeIdentity(classIdentity: UMLClassIdentity,
                                 nameOption: Option[UMLAttributeName] = None,
-                                curieOption: Option[UMLAttributeCurie] = None) extends UMLIdentity:
+                                curieOption: Option[UMLAttributeCurie] = None) extends LabeledIRI:
   def getIRI: String =
     (curieOption, nameOption) match
-      case (Some(curie), _) => curie.curie.toIRI
+      case (Some(curie), _) => curie.curie.getIRI
       case (_, Some(name)) => val iri = classIdentity.ontologyPrefix.prefixIRI.iri
         iri + (if iri.matches(".*#$") then name.getName
           else if iri.matches(".*/$") then classIdentity.getLabel + FRAGMENT_SEPARATOR + name.getName
@@ -214,12 +214,12 @@ object UMLAttributeType:
       case umlClass: UMLClass => UMLClassType(umlClass)
       case curie: Curie => CurieBasedUMLClassAttributeType(curie)
 
-case class UMLAttributeDefinition(definition: String = "")
+case class UMLAttributeDefinition(definition: String)
 
 case class UMLAttribute(attributeIdentity: UMLAttributeIdentity,
                         typeOfAttribute: Option[UMLAttributeType] = None,
                         multiplicity: UMLMultiplicity = UMLMultiplicity(),
-                        definition: UMLAttributeDefinition = UMLAttributeDefinition()) extends UMLIdentity:
+                        definition: Option[UMLAttributeDefinition] = None) extends LabeledIRI:
 
   def getIRI: String = attributeIdentity.getIRI
 
@@ -281,6 +281,6 @@ object UMLAttribute:
         attributeIdentityBuilder.build,
         typeOfAttribute,
         multiplicity,
-        UMLAttributeDefinition(definition.getOrElse("")))
+        definition.map(UMLAttributeDefinition.apply(_)))
       AttributeBuilderCache.cacheUMLAttribute(umlAttribute, this)
       umlAttribute
