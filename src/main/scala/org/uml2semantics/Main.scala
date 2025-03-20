@@ -12,6 +12,7 @@ import scopt.OParser
 
 // The cache import here is used for debugging purposes only
 import org.uml2semantics.model.cache.{ClassIdentityBuilderCache, ClassBuilderCache}
+import org.uml2semantics.model.cache.{AttributeIdentityBuilderCache, AttributeBuilderCache}
 
 import java.io.File
 

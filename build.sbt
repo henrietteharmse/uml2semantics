@@ -1,8 +1,10 @@
 ThisBuild / version := "v0.0.2"
 ThisBuild / scalaVersion := "3.6.3"
+Global / onChangedBuildSource := ReloadOnSourceChanges
 
 scalacOptions ++= Seq(// use ++= to add to existing options
-    "-explaintypes"
+    "-explaintypes",
+  "-deprecation"
 )
 lazy val root = (project in file("."))
   .settings(

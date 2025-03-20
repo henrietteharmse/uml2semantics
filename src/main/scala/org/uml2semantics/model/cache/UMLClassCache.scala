@@ -54,6 +54,14 @@ object ClassIdentityBuilderCache:
       case (Some(curie), None) => buildersByClassCurie.get(curie)
       case (None, Some(name)) => buildersByClassName.get(name)
       case (None, None) => throw new IllegalArgumentException("ClassIdentity must have a name or curie")
+      
+  def getClassIdentity(classIdentity: UMLClassIdentity):  Option[UMLClassIdentity] =
+    (classIdentity.curieOption, classIdentity.nameOption) match
+      case (Some(curie), Some(name)) => classIdentityByClassCurie.get(curie)
+        .orElse(classIdentityByClassName.get(name))
+      case (Some(curie), None) => classIdentityByClassCurie.get(curie)
+      case (None, Some(name)) => classIdentityByClassName.get(name)
+      case (None, None) => throw new IllegalArgumentException("ClassIdentity must have a name or curie") 
 
 object ClassBuilderCache:
   private val buildersByClassIdentity = mutable.Map[UMLClassIdentity, UMLClass.ClassBuilder]()
@@ -62,10 +70,13 @@ object ClassBuilderCache:
   def cacheUMLClass(umlClass: UMLClass, builder: UMLClass.ClassBuilder): Unit =
     buildersByClassIdentity += (umlClass.classIdentity -> builder)
     classesByClassIdentity += (umlClass.classIdentity -> umlClass)
-
-
+  
   def getUMLClass(classIdentity: UMLClassIdentity): Option[UMLClass] =
     classesByClassIdentity.get(classIdentity)
+    
+  def getUMLClass(name: String): Option[UMLClass] =
+    ClassIdentityBuilderCache.getUMLClassIdentity(name)
+      .flatMap(getUMLClass)
 
   def getUMLClassBuilder(classIdentity: UMLClassIdentity): Option[UMLClass.ClassBuilder] =
     buildersByClassIdentity.get(classIdentity)

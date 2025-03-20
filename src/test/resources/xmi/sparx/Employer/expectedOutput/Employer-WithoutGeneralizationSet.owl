@@ -45,12 +45,25 @@
     
 
 
+    <!-- https://uml2semantics.com/ontology/PaymentSchedule -->
+
+
+    <owl:Class rdf:about="https://uml2semantics.com/ontology/PaymentSchedule">
+        <rdfs:label>PaymentSchedule</rdfs:label>
+    </owl:Class>
+    
+
+
     <!-- https://uml2semantics.com/ontology/Person -->
 
 
     <owl:Class rdf:about="https://uml2semantics.com/ontology/Person">
-        <owl:disjointWith rdf:resource="https://uml2semantics.com/ontology/Renumeration"/>
-        <rdfs:comment>A person is a human being.</rdfs:comment>
+        <rdfs:comment>A person is a &lt;b&gt;human being&lt;/b&gt;.
+
+Human beings are also referred to as homo sapiens or modern humans.
+
+
+</rdfs:comment>
         <rdfs:label>Person</rdfs:label>
     </owl:Class>
     
@@ -62,6 +75,26 @@
     <owl:Class rdf:about="https://uml2semantics.com/ontology/Renumeration">
         <rdfs:label>Renumeration</rdfs:label>
     </owl:Class>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // General axioms
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    <rdf:Description>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="https://uml2semantics.com/ontology/PaymentSchedule"/>
+            <rdf:Description rdf:about="https://uml2semantics.com/ontology/Person"/>
+            <rdf:Description rdf:about="https://uml2semantics.com/ontology/Renumeration"/>
+        </owl:members>
+    </rdf:Description>
 </rdf:RDF>
 
 

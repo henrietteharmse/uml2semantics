@@ -76,6 +76,11 @@ object UMLClassIdentity:
       this.curie = Some(curieAsString)
       this
 
+    def withClassIdentity(classIdentity: UMLClassIdentity): ClassIdentityBuilder=
+      this.name = classIdentity.nameOption.map(_.getName)
+      this.curie = classIdentity.curieOption.flatMap(curie => Option(curie.curie).map(_.curie))
+      this
+
     def withNameAndCurie(name: String, curie: String): ClassIdentityBuilder =
       this.name = Some(name)
       this.curie = Some(curie)
@@ -102,13 +107,11 @@ object UMLClassIdentity:
         ClassIdentityBuilderCache.cacheUMLClassIdentity(thisClassIdentity, this)
         return thisClassIdentity
 
-      // Retrieve the class identity from the cache and use it, if it exists.
-      val cachedClassIdentityBuilderOption = ClassIdentityBuilderCache.getClassIdentityBuilder(thisClassIdentity)
-      if cachedClassIdentityBuilderOption.nonEmpty then
-        cachedClassIdentityBuilderOption.get.build
-      else
-        thisClassIdentity
-
+      // Retrieve the class identity from the cache and return it, if it exists because it might have both name and curie.
+      // If it does not exist, cache this class identity even if it has only a name or a curie instead of both.
+      ClassIdentityBuilderCache.getClassIdentity(thisClassIdentity).getOrElse {
+        ClassIdentityBuilderCache.cacheUMLClassIdentity(thisClassIdentity, this)
+      }
 
 case class UMLClassDefinition(definition: String = "")
 

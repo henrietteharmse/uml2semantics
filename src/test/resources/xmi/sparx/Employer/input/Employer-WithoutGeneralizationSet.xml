@@ -50,11 +50,11 @@
 			<packagedElement xmi:type="uml:Class" xmi:id="EAID_C64147AF_31BF_484d_A408_A97C799E44C7" name="Person" visibility="public">
 				<ownedAttribute xmi:type="uml:Property" xmi:id="EAID_154CDC3D_010A_4ccc_BFA4_C194C0C3F812" name="name" visibility="private" isStatic="false" isReadOnly="false" isDerived="false" isOrdered="false" isUnique="true" isDerivedUnion="false">
 					<lowerValue xmi:type="uml:LiteralInteger" xmi:id="EAID_LI000007_010A_4ccc_BFA4_C194C0C3F812" value="1"/>
-					<upperValue xmi:type="uml:LiteralInteger" xmi:id="EAID_LI000008_010A_4ccc_BFA4_C194C0C3F812" value="1"/>
+					<upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="EAID_LI000008_010A_4ccc_BFA4_C194C0C3F812" value="-1"/>
 					<type xmi:idref="EAJava_xsd_string"/>
 				</ownedAttribute>
 				<ownedAttribute xmi:type="uml:Property" xmi:id="EAID_F745E3DD_1656_4174_9760_FAA3EBE4207E" name="surname" visibility="private" isStatic="false" isReadOnly="false" isDerived="false" isOrdered="false" isUnique="true" isDerivedUnion="false">
-					<lowerValue xmi:type="uml:LiteralInteger" xmi:id="EAID_LI000009_1656_4174_9760_FAA3EBE4207E" value="1"/>
+					<lowerValue xmi:type="uml:LiteralInteger" xmi:id="EAID_LI000009_1656_4174_9760_FAA3EBE4207E" value="0"/>
 					<upperValue xmi:type="uml:LiteralInteger" xmi:id="EAID_LI000010_1656_4174_9760_FAA3EBE4207E" value="1"/>
 					<type xmi:idref="EAJava_xsd_string"/>
 				</ownedAttribute>
@@ -162,8 +162,8 @@
 			</element>
 			<element xmi:idref="EAID_C64147AF_31BF_484d_A408_A97C799E44C7" xmi:type="uml:Class" name="Person" scope="public">
 				<model package="EAPK_B9F1721C_D9F8_4d15_9DF5_86D534E9291B" tpos="0" ea_localid="5" ea_eleType="element"/>
-				<properties documentation="A person is a human being." isSpecification="false" sType="Class" nType="0" scope="public" isRoot="false" isLeaf="false" isAbstract="false" isActive="false"/>
-				<project author="henri" version="1.0" phase="1.0" created="2023-07-24 19:41:42" modified="2024-11-08 15:35:30" complexity="1" status="Proposed"/>
+				<properties documentation="A person is a &lt;b&gt;human being&lt;/b&gt;.&#xA;&#xA;Human beings are also referred to as homo sapiens or modern humans.&#xA;&#xA;&#xA;" isSpecification="false" sType="Class" nType="0" scope="public" isRoot="false" isLeaf="false" isAbstract="false" isActive="false"/>
+				<project author="henri" version="1.0" phase="1.0" created="2023-07-24 19:41:42" modified="2025-03-17 10:28:00" complexity="1" status="Proposed"/>
 				<code product_name="Java" gentype="Java"/>
 				<style appearance="BackColor=-1;BorderColor=-1;BorderWidth=-1;FontColor=-1;VSwimLanes=1;HSwimLanes=1;BorderStyle=0;"/>
 				<tags/>
@@ -172,13 +172,13 @@
 				<attributes>
 					<attribute xmi:idref="EAID_154CDC3D_010A_4ccc_BFA4_C194C0C3F812" name="name" scope="Private">
 						<initial/>
-						<documentation value="The given name of the person."/>
+						<documentation value="The given name of the person. A person can have more than 1 name."/>
 						<model ea_localid="1" ea_guid="{154CDC3D-010A-4ccc-BFA4-C194C0C3F812}"/>
 						<properties type="xsd:string" collection="false" static="0" duplicates="0" changeability="changeable"/>
 						<coords ordered="0"/>
 						<containment containment="Not Specified" position="0"/>
 						<stereotype/>
-						<bounds lower="1" upper="1"/>
+						<bounds lower="1" upper="*"/>
 						<options/>
 						<style/>
 						<styleex value="volatile=0;union=0;"/>
@@ -193,7 +193,7 @@
 						<coords ordered="0"/>
 						<containment containment="Not Specified" position="1"/>
 						<stereotype/>
-						<bounds lower="1" upper="1"/>
+						<bounds lower="0" upper="1"/>
 						<options/>
 						<style/>
 						<styleex value="volatile=0;union=0;"/>

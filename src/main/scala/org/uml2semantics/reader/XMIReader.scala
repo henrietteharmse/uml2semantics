@@ -37,29 +37,25 @@ object XMIReader extends UMLClassDiagramReader :
         .withNameOrCurie(classIdentifier)
       if definition.nonEmpty then
         classBuilder = classBuilder.withDefinition(definition)
-      classBuilder.build
+      val umlClass = classBuilder.build
+      parseClassAttributes(xPath, xmiDocument, classNode, umlClass.classIdentity)
+
 
     populateParentsWithTheirChildren(parentToGeneralizationSetMap, ontologyPrefix)
-    val k = 1
 
 
 
   private def parseClassDefinition(xPath: XPath, xmiDocument: Document,
                                    classNode: Node, classIdentifier: String): String =
     val classId = classNode.getAttributes.getNamedItem("xmi:id").getNodeValue
-    val classPropertyNodes = doXPathQueryGetAsSeqOfNodes(xPath, xmiDocument,
-      s"//element[@idref='$classId' and @type='uml:Class' and @name='$classIdentifier']/properties")
-    val definition = StringBuilder()
-    classPropertyNodes.foreach { propertiesNode =>
-      val definitionNode = propertiesNode.getAttributes.getNamedItem("documentation")
-      if definitionNode != null then
-        definition.append(definitionNode.getNodeValue)
-    }
-    definition.toString()
+    doXPathQueryGetAsString(xPath, xmiDocument,
+      s"//element[@idref='$classId' and @type='uml:Class' and @name='$classIdentifier']/properties/@documentation")
+
 
 
   private def parseClassParents(xPath: XPath, document: Document, childNode: Node,
-                                parentToGeneralizationSetMap: mutable.Map[String, XMIGeneralizationSet]): immutable.Seq[XMIGeneralizationSet] =
+                                parentToGeneralizationSetMap: mutable.Map[String, XMIGeneralizationSet]):
+                                immutable.Seq[XMIGeneralizationSet] =
 
     val generalizationNodes = doXPathQueryGetAsSeqOfNodes(xPath, childNode, "generalization")
     val childName = childNode.getAttributes.getNamedItem("name").getNodeValue
@@ -67,8 +63,10 @@ object XMIReader extends UMLClassDiagramReader :
     try {
       generalizationNodes.map { generalizationNode =>
         val parentId = generalizationNode.getAttributes.getNamedItem("general").getNodeValue
-        val parentName = doXPathQueryGetAsString(xPath, document, s"//packagedElement[@id='$parentId' and @type='uml:Class']/@name")
-        val memberNodes = doXPathQueryGetAsSeqOfNodes(xPath, document, s"//packagedElement/generalization[@idref='${generalizationNode.getAttributes.getNamedItem("xmi:id").getNodeValue}']")
+        val parentName = doXPathQueryGetAsString(xPath, document,
+          s"//packagedElement[@id='$parentId' and @type='uml:Class']/@name")
+        val memberNodes = doXPathQueryGetAsSeqOfNodes(xPath, document,
+          s"//packagedElement/generalization[@idref='${generalizationNode.getAttributes.getNamedItem("xmi:id").getNodeValue}']")
         val existingGeneralizationSet = parentToGeneralizationSetMap.get(parentName)
 
         val generalizationSet = if memberNodes.nonEmpty then
@@ -108,11 +106,37 @@ object XMIReader extends UMLClassDiagramReader :
       classesToRebuild += classBuilder
     }
 
-    classesToRebuild.foreach(classBuilder =>
-      val umlClass = classBuilder.build
-      ClassBuilderCache.cacheUMLClass(umlClass, classBuilder)
-    )
+    classesToRebuild.foreach(classBuilder => classBuilder.build)
 
+  private def parseClassAttributes(xPath: XPath, xmiDocument: Document, classNode: Node,
+                                   umlClassIdentity: UMLClassIdentity): Unit =
+
+    val classId = classNode.getAttributes.getNamedItem("xmi:id").getNodeValue
+    val classAttributeNodes = doXPathQueryGetAsSeqOfNodes(xPath, xmiDocument,
+      s"//element[@idref='$classId' and @type='uml:Class']//attribute")
+    val attributes = classAttributeNodes.map { attributeNode =>
+      val attributeName = attributeNode.getAttributes.getNamedItem("name").getNodeValue
+      val attributeId = attributeNode.getAttributes.getNamedItem("xmi:idref").getNodeValue
+      val attributeDefinition = doXPathQueryGetAsString(xPath, xmiDocument,
+        s"//attribute[@idref='$attributeId']/documentation/@value")
+      val attributeType = doXPathQueryGetAsString(xPath, xmiDocument,
+        s"//attribute[@idref='$attributeId']/properties/@type")
+      val attributeBounds = AttributeBounds(
+        doXPathQueryGetAsString(xPath, xmiDocument, s"//attribute[@idref='$attributeId']/bounds/@lower"),
+        doXPathQueryGetAsString(xPath, xmiDocument, s"//attribute[@idref='$attributeId']/bounds/@upper")
+      )
+      XMIAttribute(attributeName, attributeType, attributeBounds, attributeDefinition)
+    }
+
+    attributes.foreach { xmiAttribute =>
+      val attributeBuilder = UMLAttribute.builder(umlClassIdentity.ontologyPrefix)
+        .withClassIdentity(umlClassIdentity)
+        .withNameOrCurie(xmiAttribute.name)
+        .withType(xmiAttribute.typeOfAttribute)
+        .withMultiplicity(xmiAttribute.bounds.lowerBound, xmiAttribute.bounds.upperBound)
+        .withDefinition(xmiAttribute.definition)
+        .build
+    }
 
   private def doXPathQueryGetAsSeqOfNodes(xPath: XPath, node: Node, query: String): immutable.Seq[Node] =
     try {
@@ -126,7 +150,6 @@ object XMIReader extends UMLClassDiagramReader :
         logger.error(s"Error while executing XPath query $query on node $node: ${e.getMessage}", e)
         Seq.empty
     }
-
 
   private def doXPathQueryGetAsString(xPath: XPath, node: Node, query: String): String =
     xPath
@@ -146,7 +169,7 @@ object XMIReader extends UMLClassDiagramReader :
                                      complete: Boolean=false, disjoint: Boolean=true):
     def isComplete: Boolean = complete
     def isDisjoint: Boolean = disjoint
-    def getParent: String = parent
+    private def getParent: String = parent
     def getChildren: immutable.Set[String] = children.toSet
 
     def merge(other: XMIGeneralizationSet): XMIGeneralizationSet =
@@ -156,3 +179,6 @@ object XMIReader extends UMLClassDiagramReader :
         XMIGeneralizationSet(this.parent, children ++ other.getChildren, this.isComplete, this.isDisjoint)
       else
         throw new IllegalArgumentException("Generalization sets must have the same complete and disjoint attributes.")
+
+  private case class AttributeBounds(lowerBound: String, upperBound: String)
+  private case class XMIAttribute(name: String, typeOfAttribute: String, bounds: AttributeBounds, definition:String)

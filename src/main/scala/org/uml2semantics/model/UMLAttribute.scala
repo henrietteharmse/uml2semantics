@@ -1,6 +1,6 @@
 package org.uml2semantics.model
 
-import org.uml2semantics.model.cache.{AttributeBuilderCache, AttributeIdentityBuilderCache}
+import org.uml2semantics.model.cache.{AttributeBuilderCache, AttributeIdentityBuilderCache, ClassBuilderCache}
 import com.typesafe.scalalogging.Logger
 import org.uml2semantics.inline.Code
 import org.uml2semantics.model.UMLCardinality.>=
@@ -38,7 +38,7 @@ case class UMLAttributeIdentity(classIdentity: UMLClassIdentity,
       case (_, Some(name)) => val iri = classIdentity.ontologyPrefix.prefixIRI.iri
         iri + (if iri.matches(".*#$") then name.getName
           else if iri.matches(".*/$") then classIdentity.getLabel + FRAGMENT_SEPARATOR + name.getName
-          else  PATH_SEPARATOR + classIdentity.getLabel + FRAGMENT_SEPARATOR + name.getName)
+          else  s"$PATH_SEPARATOR" + classIdentity.getLabel + FRAGMENT_SEPARATOR + name.getName)
       case _ => throw new IllegalArgumentException("Name and curie must not be empty.")
 
   def getLabel: String =
@@ -75,6 +75,10 @@ object UMLAttributeIdentity:
       this.classIdentityBuilder = classIdentityBuilder.withCurie(curie)
       this
 
+    def withClassIdentity(classIdentity: UMLClassIdentity): AttributeIdentityBuilder =
+      this.classIdentityBuilder = classIdentityBuilder.withClassIdentity(classIdentity)
+      this
+
     def withName(name: String): AttributeIdentityBuilder =
       this.nameOption = Some(name)
       this
@@ -105,17 +109,15 @@ object UMLAttributeIdentity:
         classIdentity.getClassIdentifier, _))
       val attributeCurieOption: Option[UMLAttributeCurie] = curieOption.flatMap(UMLAttributeCurie(
         classIdentity.getClassIdentifier, _))
-      val attributeIdentity: UMLAttributeIdentity = UMLAttributeIdentity(classIdentity, attributeNameOption, attributeCurieOption)
+      val thisAttributeIdentity: UMLAttributeIdentity = UMLAttributeIdentity(classIdentity, attributeNameOption, attributeCurieOption)
       if attributeNameOption.isDefined && attributeCurieOption.isDefined then
-        AttributeIdentityBuilderCache.cacheUMLAttributeIdentity(attributeIdentity,  this)
-        return attributeIdentity
+        AttributeIdentityBuilderCache.cacheUMLAttributeIdentity(thisAttributeIdentity,  this)
+        return thisAttributeIdentity
 
-      val attributeIdentityBuilderOption =
-        AttributeIdentityBuilderCache.getUMLAttributeIdentityBuilder(classIdentity, attributeIdentity)
-      if attributeIdentityBuilderOption.isDefined then
-        attributeIdentityBuilderOption.get.build
-      else
-        attributeIdentity
+      AttributeIdentityBuilderCache.getUMLAttributeIdentity(thisAttributeIdentity).getOrElse {
+        AttributeIdentityBuilderCache.cacheUMLAttributeIdentity(thisAttributeIdentity,  this)
+      }
+
 
 opaque type UMLInfinite <: Char = '*'
 
@@ -190,15 +192,32 @@ object UMLMultiplicity:
          but "min=$min" and "max=$max" found.""")
     new UMLMultiplicity(min, max)
 
-sealed trait UMLClassAttributeType
-case class UMLXMLDataType(attributeType: SupportedDataType) extends UMLClassAttributeType
-case class UMLClassIdentityType(attributeType: UMLClassIdentity) extends UMLClassAttributeType
-case class CurieBasedUMLClassAttributeType(attributeType: Curie) extends UMLClassAttributeType
+sealed trait UMLAttributeType
+case class UMLXMLDataType(attributeType: SupportedDataType) extends UMLAttributeType
+case class UMLClassType(attributeType: UMLClass) extends UMLAttributeType
+case class CurieBasedUMLClassAttributeType(attributeType: Curie) extends UMLAttributeType
+
+object UMLAttributeType:
+  private val logger = Logger[this.type]
+
+  def apply(attributeTypeName: String, ontologyPrefix: PrefixNamespace): UMLAttributeType =
+    logger.debug(s"s=$attributeTypeName ${Code.source}")
+    val curieOption = Curie.fromString(attributeTypeName)
+    val attributeType = curieOption.flatMap(curie => SupportedDataType(curie))
+      .orElse(ClassBuilderCache.getUMLClass(attributeTypeName))
+      .orElse(curieOption.flatMap(_ => curieOption))
+      .orElse(Some(UMLClass.builder(ontologyPrefix).withNameOrCurie(attributeTypeName).build))
+      .get
+
+    attributeType match
+      case dataType: SupportedDataType => UMLXMLDataType(dataType)
+      case umlClass: UMLClass => UMLClassType(umlClass)
+      case curie: Curie => CurieBasedUMLClassAttributeType(curie)
 
 case class UMLAttributeDefinition(definition: String = "")
 
 case class UMLAttribute(attributeIdentity: UMLAttributeIdentity,
-                        typeOfAttribute: Option[UMLClassAttributeType] = None,
+                        typeOfAttribute: Option[UMLAttributeType] = None,
                         multiplicity: UMLMultiplicity = UMLMultiplicity(),
                         definition: UMLAttributeDefinition = UMLAttributeDefinition()) extends UMLIdentity:
 
@@ -207,11 +226,11 @@ case class UMLAttribute(attributeIdentity: UMLAttributeIdentity,
   def getLabel: String = attributeIdentity.getLabel
 
 object UMLAttribute:
-//  def builder (prefixNamespace: PrefixNamespace): AttributeBuilder = new AttributeBuilder(prefixNamespace)
+  def builder (prefixNamespace: PrefixNamespace): AttributeBuilder = new AttributeBuilder(prefixNamespace)
 
   class AttributeBuilder(prefixNamespace: PrefixNamespace):
     private var attributeIdentityBuilder = UMLAttributeIdentity.AttributeIdentityBuilder(prefixNamespace)
-    private var typeOfAttribute: Option[UMLClassAttributeType] = None
+    private var typeOfAttribute: Option[UMLAttributeType] = None
     private var multiplicity: UMLMultiplicity = UMLMultiplicity()
     private var definition: Option[String] = None
 
@@ -223,6 +242,10 @@ object UMLAttribute:
       this.attributeIdentityBuilder = attributeIdentityBuilder.withCurie(curie)
       this
 
+    def withClassIdentity(classIdentity: UMLClassIdentity): AttributeBuilder =
+      this.attributeIdentityBuilder = attributeIdentityBuilder.withClassIdentity(classIdentity)
+      this
+
     def withName(name: String): AttributeBuilder =
       this.attributeIdentityBuilder = attributeIdentityBuilder.withName(name)
       this
@@ -231,22 +254,32 @@ object UMLAttribute:
       this.attributeIdentityBuilder = attributeIdentityBuilder.withCurie(curieAsString)
       this
 
-    def withTypeOfAttribute(attributeType: UMLClassAttributeType): AttributeBuilder =
+    def withNameOrCurie(nameOrCurie: String): AttributeBuilder =
+      this.attributeIdentityBuilder = attributeIdentityBuilder.withNameOrCurie(nameOrCurie)
+      this
+
+    def withType(attributeType: UMLAttributeType): AttributeBuilder =
       this.typeOfAttribute = Some(attributeType)
       this
 
-    def withMultiplicity(min: UMLCardinality, max: UMLCardinality): AttributeBuilder =
-      this.multiplicity = UMLMultiplicity(min, max)
+    def withType(attributeType: String): AttributeBuilder =
+      this.typeOfAttribute = Some(UMLAttributeType(attributeType, prefixNamespace))
+      this
+
+    def withMultiplicity(min: String, max: String): AttributeBuilder =
+      val minCardinality = UMLCardinality(min)
+      val maxCardinality = UMLCardinality(max)
+      this.multiplicity = UMLMultiplicity(minCardinality, maxCardinality)
       this
 
     def withDefinition(definition: String): AttributeBuilder =
       this.definition = Some(definition)
       this
-      
+
     def build: UMLAttribute =
       val umlAttribute = UMLAttribute(
-        attributeIdentityBuilder.build, 
-        typeOfAttribute, 
+        attributeIdentityBuilder.build,
+        typeOfAttribute,
         multiplicity,
         UMLAttributeDefinition(definition.getOrElse("")))
       AttributeBuilderCache.cacheUMLAttribute(umlAttribute, this)

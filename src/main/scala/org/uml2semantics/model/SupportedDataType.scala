@@ -47,10 +47,18 @@ enum SupportedDataType(curie: Curie):
 object SupportedDataType:
   private val logger = Logger[this.type]
 
-  def unapply(s: String): Option[SupportedDataType] =
+  def apply(s: String): Option[SupportedDataType] =
     logger.debug(s"s=$s ${Code.source}")
     try
       val dataType: SupportedDataType = SupportedDataType.valueOf(s)
+      Some(dataType)
+    catch
+      case _ => None
+  
+  def apply(curie: Curie): Option[SupportedDataType] =
+    logger.debug(s"curie=$curie ${Code.source}")
+    try
+      val dataType: SupportedDataType = SupportedDataType.valueOf(curie.curie)
       Some(dataType)
     catch
       case _ => None

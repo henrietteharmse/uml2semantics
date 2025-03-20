@@ -64,6 +64,27 @@ object AttributeIdentityBuilderCache:
         case _ => throw new IllegalArgumentException("Name and curie must not be empty.")
     }
 
+  def getUMLAttributeIdentity(attributeIdentity: UMLAttributeIdentity): Option[UMLAttributeIdentity] =
+    attributeIdentity.classIdentity.nameOption.flatMap { className =>
+      attributeIdentity.nameOption.flatMap { attributeName =>
+        attributeIdentityByClassNameAttributeName.get(className).flatMap(_.get(attributeName))
+      }.orElse {
+        attributeIdentity.curieOption.flatMap { attributeCurie =>
+          attributeIdentityByClassNameAttributeCurie.get(className).flatMap(_.get(attributeCurie))
+        }
+      }
+    }.orElse {
+      attributeIdentity.classIdentity.curieOption.flatMap { classCurie =>
+        attributeIdentity.nameOption.flatMap { attributeName =>
+          attributeIdentityByClassCurieAttributeName.get(classCurie).flatMap(_.get(attributeName))
+        }.orElse {
+          attributeIdentity.curieOption.flatMap { attributeCurie =>
+            attributeIdentityByClassCurieAttributeCurie.get(classCurie).flatMap(_.get(attributeCurie))
+          }
+        }
+      }
+    }
+  
   def getUMLAttributeIdentity(classIdentity: UMLClassIdentity, attributeIdentifier: UMLAttributeIdentifier):
     Option[UMLAttributeIdentity] =
 
