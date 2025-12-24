@@ -216,8 +216,8 @@ object UMLClass:
       this
 
     def withNameAndCurie(name: String, curie: String): ClassBuilder =
-      if name.isEmpty || curie.isEmpty then
-        throw new IllegalArgumentException("Name or curie must not be empty.")
+      if name.isEmpty && curie.isEmpty then
+        throw new IllegalArgumentException("Name and curie of attributemust not be empty.")
       this.classIdentityBuilder = classIdentityBuilder.withNameAndCurie(name, curie)
       this
 

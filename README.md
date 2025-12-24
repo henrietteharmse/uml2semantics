@@ -97,6 +97,7 @@ java -jar uml2semantics.jar \
 ```
 
 ### Run uml2semantics using XMI file
+
 ```
 java -jar uml2semantics.jar \
 -m "./examples/xmi/sparx/Employer-WithGeneralization.xml" \

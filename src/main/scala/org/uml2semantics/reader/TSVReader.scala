@@ -27,6 +27,7 @@ object TSVReader extends UMLClassDiagramReader:
   override def parseUMLClassDiagram(input: InputParameters): Unit =
     val ontologyPrefix = PrefixNamespace(input.ontologyPrefix)
     parseClasses(input.classesTsv, ontologyPrefix)
+    parseClassAttributes(input.attributesTsv, ontologyPrefix)
     val k= 0
 
   private def parseClasses(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespace): Unit =
@@ -38,14 +39,21 @@ object TSVReader extends UMLClassDiagramReader:
     val parentToChildrenMap = mutable.Map[String, mutable.Set[String]]()
 
     reader.allWithHeaders().foreach(header => {
-      var classBuilder = UMLClass.builder(ontologyPrefix)
-      logger.trace(s"m = $header")
-      extractParents(parentToChildrenMap, Name, Curie, Parents, header)
+      try {
+        var classBuilder = UMLClass.builder(ontologyPrefix)
 
-      classBuilder
-        .withNameAndCurie(header(Name.toString), header(Curie.toString))
-        .withDefinition(header(Definition.toString))
-        .build
+        logger.trace(s"m = $header")
+
+        extractParents(parentToChildrenMap, Name, Curie, Parents, header)
+
+        classBuilder
+          .withNameAndCurie(header(Name.toString), header(Curie.toString))
+          .withDefinition(header(Definition.toString))
+          .build
+      } catch {
+        case t: Throwable =>
+          logger.error(s"Error processing Class header row: $header. Error: ${t.getMessage}", t)
+      }
     })
     populateParentsWithTheirChildren(parentToChildrenMap, ontologyPrefix)
 
@@ -81,12 +89,26 @@ object TSVReader extends UMLClassDiagramReader:
 
     val reader = CSVReader.open(maybeTsvFile.get)
     reader.allWithHeaders().foreach(header => {
-      var classBuilder = UMLClass.builder(ontologyPrefix)
-      logger.trace(s"m = $header")
-      classBuilder
-        .withNameAndCurie(header(Name.toString), header(Curie.toString))
-        .withDefinition(header(Definition.toString))
-        .build
+      try {
+      
+        var classIdentityBuilder = UMLClassIdentity.builder(ontologyPrefix)
+        var classIdentity = classIdentityBuilder
+          .withNameOrCurie(header(Class.toString))
+          .build
+
+        var attributeBuilder = UMLAttribute.builder(ontologyPrefix)
+        attributeBuilder
+          .withClassIdentity(classIdentity)
+          .withNameAndCurie(header(Name.toString), header(Curie.toString))
+          .withDefinition(header(Definition.toString))
+          .withType(header(ClassEnumOrPrimitiveType.toString))
+          .withMultiplicity(header(MinMultiplicity.toString), header(MaxMultiplicity.toString))
+          .build
+      } catch {
+        case t: Throwable =>
+          logger.error(s"Error processing Attribute header row: $header. Error: ${t.getMessage}", t)
+      }
+
     })
 
 

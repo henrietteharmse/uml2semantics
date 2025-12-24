@@ -254,6 +254,10 @@ object UMLAttribute:
       this.attributeIdentityBuilder = attributeIdentityBuilder.withCurie(curieAsString)
       this
 
+    def withNameAndCurie(name: String, curie: String): AttributeBuilder =
+      this.attributeIdentityBuilder = attributeIdentityBuilder.withNameAndCurie(name, curie)
+      this
+
     def withNameOrCurie(nameOrCurie: String): AttributeBuilder =
       this.attributeIdentityBuilder = attributeIdentityBuilder.withNameOrCurie(nameOrCurie)
       this
