@@ -80,12 +80,11 @@ types used in [Protege Desktop](https://protege.stanford.edu/) as data types are
 A Google spreadsheet for this UML class diagram can be found [here](https://docs.google.com/spreadsheets/d/1FXpbc52Ag24Htj3Qq36Z743QB5SzlShzjeg98uxd2Xo/edit?usp=sharing).
 Save the classes and attributes tabs as TSV files.
 
-### Run uml2semantics
+### Run uml2semantics using TSV files
 Assuming you have download uml2semantics to a`$uml2semantics` directory and saved the .tsv files to this directory as well,
 you can run it as follows:
 
 ```
-
 java -jar uml2semantics.jar \ 
 -c "$uml2semantics/Employer - Classes.tsv" \
 -a "$uml2semantics/Employer - Attributes.tsv" \
@@ -96,6 +95,21 @@ java -jar uml2semantics.jar \
 -i "http://uml2semantics.org/examples/employer/v.0.1" 
 
 ```
+
+### Run uml2semantics using XMI file
+```
+java -jar uml2semantics.jar \
+-m "./examples/xmi/sparx/Employer-WithGeneralization.xml" \
+-o "./uml2semantics/examples/xmi/sparx/employer.rdf" \
+-p "emp:http://uml2semantics.org/examples/employer#" \
+-i "http://uml2semantics.org/examples/employer/v.0.1" 
+
+```
+
+# Run uml2semantics using XMI and TSV files
+Using both TSV and XMI
+
+
 
 This will cause the ontology to be written out to `$uml2semantics/employer.owl`. An example of this file can be seen 
 [here](./examples/employer/employer.rdf)
