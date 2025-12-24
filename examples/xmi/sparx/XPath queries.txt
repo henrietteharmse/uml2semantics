@@ -12,13 +12,25 @@ the following xpath should be used: //packagedElement[@type='uml:Class']/@name
 #Get documentation for Person class
 //element[@xmi:type='uml:Class' and @name='Person']/properties/@documentation
 
+
+
+
+
+
 #Get all attributes for class with name 'Person'
 //element[@xmi:type='uml:Class' and @name='Person']//attribute/@name
+//attribute[@xmi:idref='EAID_154CDC3D_010A_4ccc_BFA4_C194C0C3F812']//documentation/@value
 
 #Get types for attribute 'name' of class 'Person'
 //element[@xmi:type='uml:Class' and @name='Person']//attribute[@name='dateOfBirth']/properties/@type
 # ---> incode
 //element[@type='uml:Class' and @name='Person']//attribute[@name='dateOfBirth']/properties/@type
+
+
+
+
+
+
 
 #Get associations for class 'Employer'
 #Not working yet

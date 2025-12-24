@@ -5,14 +5,14 @@ import org.uml2semantics.InputParameters
 import org.uml2semantics.Overrides.XMI
 import org.uml2semantics.inline.Code
 import org.uml2semantics.model.PrefixNamespace
-import org.uml2semantics.reader.{TSVReader, XMIReader}
-//import org.uml2semantics.reader.{TSVReader, XMIReader}
+import org.uml2semantics.model.cache.AttributeBuilderCache
+import org.uml2semantics.model.cache.AttributeIdentityBuilderCache
+import org.uml2semantics.model.cache.ClassBuilderCache
+import org.uml2semantics.model.cache.ClassIdentityBuilderCache
+import org.uml2semantics.reader.TSVReader
+import org.uml2semantics.reader.XMIReader
 import org.uml2semantics.writer.UML2OWLWriter
 import scopt.OParser
-
-// The cache import here is used for debugging purposes only
-import org.uml2semantics.model.cache.{ClassIdentityBuilderCache, ClassBuilderCache}
-import org.uml2semantics.model.cache.{AttributeIdentityBuilderCache, AttributeBuilderCache}
 
 import java.io.File
 

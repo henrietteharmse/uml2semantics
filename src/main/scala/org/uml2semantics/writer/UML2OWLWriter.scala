@@ -3,18 +3,17 @@ package org.uml2semantics.writer
 import com.typesafe.scalalogging.Logger
 import org.semanticweb.owlapi.apibinding.OWLManager
 import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat
-import org.semanticweb.owlapi.model.parameters.ChangeApplied
-import org.semanticweb.owlapi.model.parameters.ChangeApplied.{NO_OPERATION, SUCCESSFULLY}
 import org.semanticweb.owlapi.model.*
+import org.semanticweb.owlapi.model.parameters.ChangeApplied
+import org.semanticweb.owlapi.model.parameters.ChangeApplied.SUCCESSFULLY
 import org.semanticweb.owlapi.vocab.OWL2Datatype
-import org.uml2semantics.model.SupportedDataType.getIRI
-import org.uml2semantics.model.*
 import org.uml2semantics.inline.Code
+import org.uml2semantics.model.*
+import org.uml2semantics.model.SupportedDataType.getIRI
 
 import java.io.File
-import scala.collection.{immutable, mutable}
 import scala.collection.mutable.{ArrayBuffer, ListBuffer, Seq}
-import scala.util.Try
+import scala.collection.{immutable, mutable}
 import scala.jdk.CollectionConverters.*
 
 class UML2OWLWriter(ontologyIRI: String,

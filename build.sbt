@@ -17,7 +17,8 @@ lazy val root = (project in file("."))
         "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
         "ch.qos.logback" % "logback-classic" % "1.5.15",
         "com.lihaoyi" %% "sourcecode" % "0.4.2",
-        "org.apache.commons" % "commons-collections4" % "4.4"
+        "org.apache.commons" % "commons-collections4" % "4.4",
+        "org.apache.jena" % "apache-jena-libs" % "5.3.0" pomOnly()
 //        "org.scala-lang" %% "scala3-library" % "3.6.3"
     ),
     dependencyOverrides += "org.scala-lang" % "scala3-library" % scalaVersion.value,
