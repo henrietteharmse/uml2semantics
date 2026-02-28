@@ -26,8 +26,10 @@ object TSVReader extends UMLClassDiagramReader:
 
   override def parseUMLClassDiagram(input: InputParameters): Unit =
     val ontologyPrefix = PrefixNamespace(input.ontologyPrefix)
-    parseClasses(input.classesTsv, ontologyPrefix)
-    parseClassAttributes(input.attributesTsv, ontologyPrefix)
+    if (input.classesTsv.isDefined)
+      parseClasses(input.classesTsv, ontologyPrefix)
+    if (input.attributesTsv.isDefined)
+      parseClassAttributes(input.attributesTsv, ontologyPrefix)
     val k= 0
 
   private def parseClasses(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespace): Unit =

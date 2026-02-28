@@ -22,7 +22,7 @@ val argParser =
   OParser.sequence(
     programName("uml2semantics"),
     opt[Option[File]]('c', "classes")
-      .valueName("<csv-classes-file>")
+      .valueName("<tsv-classes-file>")
       .action((a, c) => c.copy(classesTsv = a))
       .validate(o =>
         if (o.exists(f => f.exists()) || o.isEmpty) success
@@ -30,7 +30,7 @@ val argParser =
       )
       .text("A TSV file containing UML class information"),
     opt[Option[File]]('a', "attributes")
-      .valueName("<csv-attributes-file>")
+      .valueName("<tsv-attributes-file>")
       .action((a, c) => c.copy(attributesTsv = a))
       .validate(o =>
         if (o.exists(f => f.exists()) || o.isEmpty) success
@@ -38,7 +38,7 @@ val argParser =
       )
       .text("A TSV file containing UML class attribute information"),
     opt[Option[File]]('e', "enumerations")
-      .valueName("<csv-enumerations-file>")
+      .valueName("<tsv-enumerations-file>")
       .action((a, c) => c.copy(enumerationsTsv = a))
       .validate(o =>
         if (o.exists(f => f.exists()) || o.isEmpty) success
@@ -46,7 +46,7 @@ val argParser =
       )
       .text("A TSV file containing UML enumerations"),
     opt[Option[File]]('n', "enumeration-values")
-      .valueName("<csv-enumeration-values-file>")
+      .valueName("<tsv-enumeration-values-file>")
       .action((a, c) => c.copy(enumerationValuesTsv = a))
       .validate(o =>
         if (o.exists(f => f.exists()) || o.isEmpty) success

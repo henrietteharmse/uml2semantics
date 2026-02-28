@@ -1,0 +1,120 @@
+<?xml  version='1.0' encoding='windows-1252' ?>
+<xmi:XMI xmlns:xmi="http://www.omg.org/spec/XMI/20110701" xmlns:uml="http://www.omg.org/spec/UML/20110701">
+	<xmi:Documentation exporter="Enterprise Architect" exporterVersion="6.5" exporterID="1605"/>
+	<uml:Model xmi:type="uml:Model" name="EA_Model">
+		<packagedElement xmi:type="uml:Package" xmi:id="EAPK_B9F1721C_D9F8_4d15_9DF5_86D534E9291B" name="Examples">
+			<packagedElement xmi:type="uml:Class" xmi:id="EAID_DFD18D8E_0C79_43c0_952F_8316E37E3CB3" name="Employee">
+				<generalization xmi:type="uml:Generalization" xmi:id="EAID_C8B3AEC7_2739_412a_80F0_1995B9A86671" general="EAID_C64147AF_31BF_484d_A408_A97C799E44C7"/>
+			</packagedElement>
+			<packagedElement xmi:type="uml:Association" xmi:id="EAID_5A094377_B1F4_43d1_AA46_36950D543DE2" name="renumeration">
+				<memberEnd xmi:idref="EAID_dst094377_B1F4_43d1_AA46_36950D543DE2"/>
+				<ownedEnd xmi:type="uml:Property" xmi:id="EAID_dst094377_B1F4_43d1_AA46_36950D543DE2" association="EAID_5A094377_B1F4_43d1_AA46_36950D543DE2">
+					<type xmi:idref="EAID_92C5E675_29D3_4b23_868C_FEBE9A585F76"/>
+					<lowerValue xmi:type="uml:LiteralInteger" xmi:id="EAID_LI000001__B1F4_43d1_AA46_36950D543DE2" value="1"/>
+					<upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="EAID_LI000002__B1F4_43d1_AA46_36950D543DE2" value="1"/>
+				</ownedEnd>
+				<memberEnd xmi:idref="EAID_src094377_B1F4_43d1_AA46_36950D543DE2"/>
+				<ownedEnd xmi:type="uml:Property" xmi:id="EAID_src094377_B1F4_43d1_AA46_36950D543DE2" association="EAID_5A094377_B1F4_43d1_AA46_36950D543DE2">
+					<type xmi:idref="EAID_DFD18D8E_0C79_43c0_952F_8316E37E3CB3"/>
+					<lowerValue xmi:type="uml:LiteralInteger" xmi:id="EAID_LI000017__B1F4_43d1_AA46_36950D543DE2" value="1"/>
+					<upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="EAID_LI000018__B1F4_43d1_AA46_36950D543DE2" value="1"/>
+				</ownedEnd>
+			</packagedElement>
+			<packagedElement xmi:type="uml:Association" xmi:id="EAID_637B25E7_8633_4b27_9EDB_08BD0BBA8903" name="employes">
+				<memberEnd xmi:idref="EAID_dst7B25E7_8633_4b27_9EDB_08BD0BBA8903"/>
+				<ownedEnd xmi:type="uml:Property" xmi:id="EAID_dst7B25E7_8633_4b27_9EDB_08BD0BBA8903" association="EAID_637B25E7_8633_4b27_9EDB_08BD0BBA8903">
+					<type xmi:idref="EAID_95F1AD87_96AB_4bf7_91A1_EC5721F8A65F"/>
+				</ownedEnd>
+				<memberEnd xmi:idref="EAID_src7B25E7_8633_4b27_9EDB_08BD0BBA8903"/>
+				<ownedEnd xmi:type="uml:Property" xmi:id="EAID_src7B25E7_8633_4b27_9EDB_08BD0BBA8903" association="EAID_637B25E7_8633_4b27_9EDB_08BD0BBA8903">
+					<type xmi:idref="EAID_DFD18D8E_0C79_43c0_952F_8316E37E3CB3"/>
+					<lowerValue xmi:type="uml:LiteralInteger" xmi:id="EAID_LI000005__8633_4b27_9EDB_08BD0BBA8903" value="1"/>
+					<upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="EAID_LI000006__8633_4b27_9EDB_08BD0BBA8903" value="*"/>
+				</ownedEnd>
+			</packagedElement>
+			<packagedElement xmi:type="uml:GeneralizationSet" xmi:id="EAID_F889EF3F_A6AC_4c33_A5FA_51F098359BE8" name="EmploymentSet" isCovering="true" isDisjoint="true">
+				<generalization xmi:idref="EAID_C8B3AEC7_2739_412a_80F0_1995B9A86671"/>
+				<generalization xmi:idref="EAID_27FC798D_B7CB_4a67_9A7D_B15C9DD5C036"/>
+			</packagedElement>
+			<packagedElement xmi:type="uml:Association" xmi:id="EAID_6CBA097C_1D6D_4064_9F60_EBAB863A3DCB" name="employedBy">
+				<memberEnd xmi:idref="EAID_dstBA097C_1D6D_4064_9F60_EBAB863A3DCB"/>
+				<memberEnd xmi:idref="EAID_srcBA097C_1D6D_4064_9F60_EBAB863A3DCB"/>
+				<ownedEnd xmi:type="uml:Property" xmi:id="EAID_srcBA097C_1D6D_4064_9F60_EBAB863A3DCB" association="EAID_6CBA097C_1D6D_4064_9F60_EBAB863A3DCB">
+					<type xmi:idref="EAID_95F1AD87_96AB_4bf7_91A1_EC5721F8A65F"/>
+					<lowerValue xmi:type="uml:LiteralInteger" xmi:id="EAID_LI000003__1D6D_4064_9F60_EBAB863A3DCB" value="1"/>
+					<upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="EAID_LI000004__1D6D_4064_9F60_EBAB863A3DCB" value="1"/>
+				</ownedEnd>
+				<ownedEnd xmi:type="uml:Property" xmi:id="EAID_dstBA097C_1D6D_4064_9F60_EBAB863A3DCB" association="EAID_6CBA097C_1D6D_4064_9F60_EBAB863A3DCB">
+					<type xmi:idref="EAID_DFD18D8E_0C79_43c0_952F_8316E37E3CB3"/>
+				</ownedEnd>
+			</packagedElement>
+			<packagedElement xmi:type="uml:Class" xmi:id="EAID_95F1AD87_96AB_4bf7_91A1_EC5721F8A65F" name="Employer">
+				<generalization xmi:type="uml:Generalization" xmi:id="EAID_27FC798D_B7CB_4a67_9A7D_B15C9DD5C036" general="EAID_C64147AF_31BF_484d_A408_A97C799E44C7"/>
+			</packagedElement>
+			<packagedElement xmi:type="uml:Class" xmi:id="EAID_C64147AF_31BF_484d_A408_A97C799E44C7" name="Person">
+				<ownedAttribute xmi:type="uml:Property" xmi:id="EAID_154CDC3D_010A_4ccc_BFA4_C194C0C3F812" name="name" visibility="private">
+					<type xmi:idref="EAJava_xsd_string"/>
+					<lowerValue xmi:type="uml:LiteralInteger" xmi:id="EAID_LI000007_010A_4ccc_BFA4_C194C0C3F812" value="1"/>
+					<upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="EAID_LI000008_010A_4ccc_BFA4_C194C0C3F812" value="1"/>
+				</ownedAttribute>
+				<ownedAttribute xmi:type="uml:Property" xmi:id="EAID_F745E3DD_1656_4174_9760_FAA3EBE4207E" name="surname" visibility="private">
+					<type xmi:idref="EAJava_xsd_string"/>
+					<lowerValue xmi:type="uml:LiteralInteger" xmi:id="EAID_LI000009_1656_4174_9760_FAA3EBE4207E" value="1"/>
+					<upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="EAID_LI000010_1656_4174_9760_FAA3EBE4207E" value="1"/>
+				</ownedAttribute>
+				<ownedAttribute xmi:type="uml:Property" xmi:id="EAID_7BF887BD_CB1E_471e_A5D9_B5552C0EE611" name="dateOfBirth" visibility="private">
+					<type xmi:idref="EAJava_xsd_dateTime"/>
+					<lowerValue xmi:type="uml:LiteralInteger" xmi:id="EAID_LI000011_CB1E_471e_A5D9_B5552C0EE611" value="1"/>
+					<upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="EAID_LI000012_CB1E_471e_A5D9_B5552C0EE611" value="1"/>
+				</ownedAttribute>
+			</packagedElement>
+			<packagedElement xmi:type="uml:Class" xmi:id="EAID_92C5E675_29D3_4b23_868C_FEBE9A585F76" name="Renumeration">
+				<ownedAttribute xmi:type="uml:Property" xmi:id="EAID_424021B4_BA2D_4f42_9A54_3EE7692054C3" name="rate">
+					<type xmi:idref="EAJava_xsd_decimal"/>
+					<lowerValue xmi:type="uml:LiteralInteger" xmi:id="EAID_LI000013_BA2D_4f42_9A54_3EE7692054C3" value="1"/>
+					<upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="EAID_LI000014_BA2D_4f42_9A54_3EE7692054C3" value="1"/>
+				</ownedAttribute>
+				<ownedAttribute xmi:type="uml:Property" xmi:id="EAID_BBBEA179_7250_4721_89AE_D412DB13E057" name="paymentSchedule">
+					<type xmi:idref="EAID_32C92229_E1C7_4bd0_BFAE_61079D66B4C1"/>
+					<lowerValue xmi:type="uml:LiteralInteger" xmi:id="EAID_LI000015_7250_4721_89AE_D412DB13E057" value="1"/>
+					<upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="EAID_LI000016_7250_4721_89AE_D412DB13E057" value="1"/>
+				</ownedAttribute>
+			</packagedElement>
+			<packagedElement xmi:type="uml:Association" xmi:id="EAID_9420498C_B9E7_4a7e_9B40_C8760DA89E4D">
+				<memberEnd xmi:idref="EAID_dst20498C_B9E7_4a7e_9B40_C8760DA89E4D"/>
+				<ownedEnd xmi:type="uml:Property" xmi:id="EAID_dst20498C_B9E7_4a7e_9B40_C8760DA89E4D" association="EAID_9420498C_B9E7_4a7e_9B40_C8760DA89E4D">
+					<type xmi:idref="EAID_32C92229_E1C7_4bd0_BFAE_61079D66B4C1"/>
+				</ownedEnd>
+				<memberEnd xmi:idref="EAID_src20498C_B9E7_4a7e_9B40_C8760DA89E4D"/>
+				<ownedEnd xmi:type="uml:Property" xmi:id="EAID_src20498C_B9E7_4a7e_9B40_C8760DA89E4D" association="EAID_9420498C_B9E7_4a7e_9B40_C8760DA89E4D">
+					<type xmi:idref="EAID_92C5E675_29D3_4b23_868C_FEBE9A585F76"/>
+				</ownedEnd>
+			</packagedElement>
+			<packagedElement xmi:type="uml:Enumeration" xmi:id="EAID_32C92229_E1C7_4bd0_BFAE_61079D66B4C1" name="PaymentSchedule">
+				<ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="EAID_719FD31B_D78F_4019_86D1_2927A2CC3404" name="Daily"/>
+				<ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="EAID_D187A23A_C902_4a0c_9FCA_021309C335FF" name="Weekly"/>
+				<ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="EAID_B9C55930_0494_4fbb_91C9_EB4758D7F8C4" name="Monthly"/>
+			</packagedElement>
+			<packagedElement xmi:type="uml:Enumeration" xmi:id="EAID_61ABEA6C_9800_41ff_AC4B_1557188E6C8B" name="Week">
+				<ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="EAID_9355603D_2714_4db4_B020_35348ECB2C8B" name="Saturday"/>
+				<ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="EAID_154701B3_6120_4ca6_A647_EC57D62A2207" name="Monday"/>
+				<ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="EAID_B6CFBDAE_7E75_455c_AE32_E4EEF0839774" name="Tuesday"/>
+				<ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="EAID_2F66B9BE_3BD3_4eba_8AFC_B33B7FE0F04C" name="Wednesday"/>
+				<ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="EAID_038F35D4_0EE7_411e_AD8B_DA037078A074" name="Thursday"/>
+				<ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="EAID_57215F80_E7C8_44d2_BC8A_79DDB0564B81" name="Friday"/>
+				<ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="EAID_13A9EF1D_CA39_4607_BD3B_1CA36B09AD0E" name="Sunday"/>
+			</packagedElement>
+			<packagedElement xmi:type="uml:Enumeration" xmi:id="EAID_E624D98A_6825_4ed9_96E3_101109DB3BDE" name="Weekday">
+				<ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="EAID_65F715EE_0A29_4171_93B6_BC39AB8D4FA0" name="Monday"/>
+				<ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="EAID_0D1B85B9_E87A_4610_9301_3FC085A7D039" name="Tuesday"/>
+				<ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="EAID_B7F1E8C4_BD49_4492_B3D5_C686E4A6AD1F" name="Wednesday"/>
+				<ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="EAID_007D30AE_8A25_43b1_BDFA_CB3A2BFAF5C3" name="Thursday"/>
+				<ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="EAID_BD6A7C41_D4A6_41c0_B32A_9CF75AEB41D8" name="Friday"/>
+			</packagedElement>
+			<packagedElement xmi:type="uml:Enumeration" xmi:id="EAID_F0D978AF_474E_4fe1_96BB_5AF3076B4FBD" name="Weekend">
+				<ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="EAID_E0E7B719_5766_4dad_9857_99B1414BABA6" name="Saturday"/>
+				<ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="EAID_119BC5EA_5324_4c5a_9D98_030EEAA51DEE" name="Sunday"/>
+			</packagedElement>
+		</packagedElement>
+	</uml:Model>
+</xmi:XMI>

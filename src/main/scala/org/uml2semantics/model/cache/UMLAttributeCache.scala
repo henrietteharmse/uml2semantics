@@ -1,6 +1,6 @@
 package org.uml2semantics.model.cache
 
-import org.uml2semantics.model.{UMLAttribute, UMLAttributeCurie, UMLAttributeIdentifier, UMLAttributeIdentity, UMLAttributeName, UMLClassCurie, UMLClassIdentifier, UMLClassIdentity, UMLClassName}
+import org.uml2semantics.model.{UMLAttribute, UMLAttributeCurie, UMLAttributeDefinition, UMLAttributeIdentifier, UMLAttributeIdentity, UMLAttributeName, UMLClassCurie, UMLClassIdentifier, UMLClassIdentity, UMLClassName, UMLMultiplicity}
 import org.uml2semantics.model.UMLAttributeIdentity.AttributeIdentityBuilder
 import org.uml2semantics.model.cache.ClassIdentityBuilderCache
 
@@ -119,8 +119,36 @@ object AttributeBuilderCache:
   private val attributesByAttributeIdentity = mutable.Map[UMLAttributeIdentity, UMLAttribute]()
 
   def cacheUMLAttribute(umlAttribute: UMLAttribute, builder: UMLAttribute.AttributeBuilder): Unit =
-    buildersByAttributeIdentity += (umlAttribute.attributeIdentity -> builder)
-    attributesByAttributeIdentity += (umlAttribute.attributeIdentity -> umlAttribute)
+    // When enriching with curie, remove any existing name-only version to avoid duplicates.
+    // The old entry may exist under two possible keys:
+    // 1. Original: name-only class identity + name-only attribute (before class was enriched)
+    // 2. Migrated: enriched class identity + name-only attribute (after updateClassIdentity ran)
+    var attributeToCache = umlAttribute
+    if umlAttribute.attributeIdentity.nameOption.isDefined && umlAttribute.attributeIdentity.curieOption.isDefined then
+      val classIdentity = umlAttribute.attributeIdentity.classIdentity
+      // Try finding with the original name-only class identity key
+      val nameOnlyClassIdentity = UMLClassIdentity(classIdentity.nameOption, None, classIdentity.ontologyPrefix)
+      val oldAttributeName = umlAttribute.attributeIdentity.nameOption.flatMap(an =>
+        UMLAttributeName(nameOnlyClassIdentity.getClassIdentifier, an.getName))
+      val nameOnlyIdentity = UMLAttributeIdentity(nameOnlyClassIdentity, oldAttributeName, None)
+      // Also try finding with the current (enriched) class identity but no attribute curie
+      val migratedIdentity = UMLAttributeIdentity(classIdentity, umlAttribute.attributeIdentity.nameOption, None)
+      // Find the old attribute under either key to merge its data
+      val oldAttribute = attributesByAttributeIdentity.get(nameOnlyIdentity)
+        .orElse(attributesByAttributeIdentity.get(migratedIdentity))
+      oldAttribute.foreach { old =>
+        val mergedType = umlAttribute.typeOfAttribute.orElse(old.typeOfAttribute)
+        val mergedMultiplicity = if umlAttribute.multiplicity != UMLMultiplicity() then umlAttribute.multiplicity
+          else old.multiplicity
+        val mergedDefinition = umlAttribute.definition match
+          case Some(UMLAttributeDefinition(d)) if d.nonEmpty => umlAttribute.definition
+          case _ => old.definition
+        attributeToCache = umlAttribute.copy(typeOfAttribute = mergedType, multiplicity = mergedMultiplicity, definition = mergedDefinition)
+      }
+      removeUMLAttribute(nameOnlyIdentity)
+      removeUMLAttribute(migratedIdentity)
+    buildersByAttributeIdentity += (attributeToCache.attributeIdentity -> builder)
+    attributesByAttributeIdentity += (attributeToCache.attributeIdentity -> attributeToCache)
 
   def getUMLAttribute(attributeIdentity: UMLAttributeIdentity): Option[UMLAttribute] =
     attributesByAttributeIdentity.get(attributeIdentity)
@@ -132,4 +160,29 @@ object AttributeBuilderCache:
     AttributeIdentityBuilderCache.getUMLAttributeIdentity(classIdentifier, attributeIdentifier)
       .flatMap(getUMLAttributeBuilder)
     
+  def removeUMLAttribute(attributeIdentity: UMLAttributeIdentity): Unit =
+    buildersByAttributeIdentity -= attributeIdentity
+    attributesByAttributeIdentity -= attributeIdentity
+
+  /**
+   * Updates all cached attributes whose class identity matches oldClassIdentity
+   * to use newClassIdentity instead. This is needed when a class is enriched with
+   * a curie (e.g., Person -> schema:Person) so that attributes not explicitly
+   * overridden (e.g., dateOfBirth) still reference the enriched class identity.
+   */
+  def updateClassIdentity(oldClassIdentity: UMLClassIdentity, newClassIdentity: UMLClassIdentity): Unit =
+    val entriesToUpdate = attributesByAttributeIdentity.toList.filter(_._1.classIdentity == oldClassIdentity)
+    entriesToUpdate.foreach { case (oldAttrIdentity, oldAttribute) =>
+      val newAttrName = oldAttrIdentity.nameOption.map(_.copy(classIdentifier = newClassIdentity.getClassIdentifier))
+      val newAttrCurie = oldAttrIdentity.curieOption.map(_.copy(classIdentifier = newClassIdentity.getClassIdentifier))
+      val newAttrIdentity = UMLAttributeIdentity(newClassIdentity, newAttrName, newAttrCurie)
+      val newAttribute = oldAttribute.copy(attributeIdentity = newAttrIdentity)
+
+      val builder = buildersByAttributeIdentity.get(oldAttrIdentity)
+      buildersByAttributeIdentity -= oldAttrIdentity
+      attributesByAttributeIdentity -= oldAttrIdentity
+      attributesByAttributeIdentity += (newAttrIdentity -> newAttribute)
+      builder.foreach(b => buildersByAttributeIdentity += (newAttrIdentity -> b))
+    }
+
   def getAttributes: Set[UMLAttribute] = attributesByAttributeIdentity.values.toSet

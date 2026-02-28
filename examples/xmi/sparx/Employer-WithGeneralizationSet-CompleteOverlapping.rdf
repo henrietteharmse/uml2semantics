@@ -22,28 +22,6 @@
     
 
 
-    <!-- http://uml2semantics.org/examples/employer#employedBy -->
-
-
-    <owl:ObjectProperty rdf:about="http://uml2semantics.org/examples/employer#employedBy">
-        <rdfs:domain rdf:resource="http://uml2semantics.org/examples/employer#Employee"/>
-        <rdfs:range rdf:resource="http://uml2semantics.org/examples/employer#Employer"/>
-        <rdfs:label>employedBy</rdfs:label>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://uml2semantics.org/examples/employer#employes -->
-
-
-    <owl:ObjectProperty rdf:about="http://uml2semantics.org/examples/employer#employes">
-        <rdfs:domain rdf:resource="http://uml2semantics.org/examples/employer#Employer"/>
-        <rdfs:range rdf:resource="http://uml2semantics.org/examples/employer#Employee"/>
-        <rdfs:label>employes</rdfs:label>
-    </owl:ObjectProperty>
-    
-
-
     <!-- http://uml2semantics.org/examples/employer#paymentSchedule -->
 
 
@@ -51,17 +29,6 @@
         <rdfs:domain rdf:resource="http://uml2semantics.org/examples/employer#Renumeration"/>
         <rdfs:range rdf:resource="http://uml2semantics.org/examples/employer#PaymentSchedule"/>
         <rdfs:label>paymentSchedule</rdfs:label>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://uml2semantics.org/examples/employer#renumeration -->
-
-
-    <owl:ObjectProperty rdf:about="http://uml2semantics.org/examples/employer#renumeration">
-        <rdfs:domain rdf:resource="http://uml2semantics.org/examples/employer#Employee"/>
-        <rdfs:range rdf:resource="http://uml2semantics.org/examples/employer#Renumeration"/>
-        <rdfs:label>renumeration</rdfs:label>
     </owl:ObjectProperty>
     
 
@@ -84,6 +51,7 @@
     <owl:DatatypeProperty rdf:about="http://uml2semantics.org/examples/employer#dateOfBirth">
         <rdfs:domain rdf:resource="http://uml2semantics.org/examples/employer#Person"/>
         <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>The date on which this person was born.</rdfs:comment>
         <rdfs:label>dateOfBirth</rdfs:label>
     </owl:DatatypeProperty>
     
@@ -95,6 +63,7 @@
     <owl:DatatypeProperty rdf:about="http://uml2semantics.org/examples/employer#name">
         <rdfs:domain rdf:resource="http://uml2semantics.org/examples/employer#Person"/>
         <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>The given name of the person.</rdfs:comment>
         <rdfs:label>name</rdfs:label>
     </owl:DatatypeProperty>
     
@@ -117,6 +86,7 @@
     <owl:DatatypeProperty rdf:about="http://uml2semantics.org/examples/employer#surname">
         <rdfs:domain rdf:resource="http://uml2semantics.org/examples/employer#Person"/>
         <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>The family name of the person.</rdfs:comment>
         <rdfs:label>surname</rdfs:label>
     </owl:DatatypeProperty>
     
@@ -138,18 +108,8 @@
 
 
     <owl:Class rdf:about="http://uml2semantics.org/examples/employer#Employee">
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="http://uml2semantics.org/examples/employer#employedBy"/>
-                <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:cardinality>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="http://uml2semantics.org/examples/employer#renumeration"/>
-                <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:cardinality>
-            </owl:Restriction>
-        </rdfs:subClassOf>
+        <rdfs:subClassOf rdf:resource="http://uml2semantics.org/examples/employer#Person"/>
+        <rdfs:comment>An employee is someone who does work for an employer for which they get compensated.</rdfs:comment>
         <rdfs:label>Employee</rdfs:label>
     </owl:Class>
     
@@ -159,12 +119,8 @@
 
 
     <owl:Class rdf:about="http://uml2semantics.org/examples/employer#Employer">
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="http://uml2semantics.org/examples/employer#employes"/>
-                <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:minCardinality>
-            </owl:Restriction>
-        </rdfs:subClassOf>
+        <rdfs:subClassOf rdf:resource="http://uml2semantics.org/examples/employer#Person"/>
+        <rdfs:comment>An employer is someone that employs 1 or more persons.</rdfs:comment>
         <rdfs:label>Employer</rdfs:label>
     </owl:Class>
     
@@ -183,6 +139,14 @@
 
 
     <owl:Class rdf:about="http://uml2semantics.org/examples/employer#Person">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://uml2semantics.org/examples/employer#Employee"/>
+                    <rdf:Description rdf:about="http://uml2semantics.org/examples/employer#Employer"/>
+                </owl:unionOf>
+            </owl:Class>
+        </owl:equivalentClass>
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="http://uml2semantics.org/examples/employer#dateOfBirth"/>
@@ -204,6 +168,7 @@
                 <owl:onDataRange rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
             </owl:Restriction>
         </rdfs:subClassOf>
+        <rdfs:comment>A person is a human being.</rdfs:comment>
         <rdfs:label>Person</rdfs:label>
     </owl:Class>
     
@@ -243,8 +208,6 @@
     <rdf:Description>
         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDisjointClasses"/>
         <owl:members rdf:parseType="Collection">
-            <rdf:Description rdf:about="http://uml2semantics.org/examples/employer#Employee"/>
-            <rdf:Description rdf:about="http://uml2semantics.org/examples/employer#Employer"/>
             <rdf:Description rdf:about="http://uml2semantics.org/examples/employer#PaymentSchedule"/>
             <rdf:Description rdf:about="http://uml2semantics.org/examples/employer#Person"/>
             <rdf:Description rdf:about="http://uml2semantics.org/examples/employer#Renumeration"/>

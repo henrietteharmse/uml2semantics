@@ -1,7 +1,7 @@
 package org.uml2semantics.model.cache
 
 import org.uml2semantics.model.UMLClassIdentity.ClassIdentityBuilder
-import org.uml2semantics.model.{PrefixNamespace, UMLClass, UMLClassCurie, UMLClassIdentifier, UMLClassIdentity, UMLClassName}
+import org.uml2semantics.model.{PrefixNamespace, UMLClass, UMLClassCurie, UMLClassDefinition, UMLClassIdentifier, UMLClassIdentity, UMLClassName}
 
 import scala.collection.mutable
 
@@ -68,8 +68,24 @@ object ClassBuilderCache:
   private val classesByClassIdentity = mutable.Map[UMLClassIdentity, UMLClass]()
 
   def cacheUMLClass(umlClass: UMLClass, builder: UMLClass.ClassBuilder): Unit =
-    buildersByClassIdentity += (umlClass.classIdentity -> builder)
-    classesByClassIdentity += (umlClass.classIdentity -> umlClass)
+    // When enriching with curie, remove any existing name-only version to avoid duplicates
+    var classToCache = umlClass
+    if umlClass.classIdentity.nameOption.nonEmpty && umlClass.classIdentity.curieOption.nonEmpty then
+      val nameOnlyIdentity = UMLClassIdentity(umlClass.classIdentity.nameOption, None, umlClass.classIdentity.ontologyPrefix)
+      // Merge data from the old class into the new one so we don't lose definition/children
+      classesByClassIdentity.get(nameOnlyIdentity).foreach { oldClass =>
+        val mergedDefinition = umlClass.classDefinitionOption match
+          case Some(UMLClassDefinition(d)) if d.nonEmpty => umlClass.classDefinitionOption
+          case _ => oldClass.classDefinitionOption
+        val mergedChildren = if umlClass.children.setOfGeneralizationSets.nonEmpty then umlClass.children
+          else oldClass.children
+        classToCache = umlClass.copy(classDefinitionOption = mergedDefinition, children = mergedChildren)
+      }
+      // Update attributes that still reference the old name-only class identity
+      AttributeBuilderCache.updateClassIdentity(nameOnlyIdentity, umlClass.classIdentity)
+      removeUMLClass(nameOnlyIdentity)
+    buildersByClassIdentity += (classToCache.classIdentity -> builder)
+    classesByClassIdentity += (classToCache.classIdentity -> classToCache)
   
   def getUMLClass(classIdentity: UMLClassIdentity): Option[UMLClass] =
     classesByClassIdentity.get(classIdentity)
@@ -85,5 +101,9 @@ object ClassBuilderCache:
     ClassIdentityBuilderCache.getUMLClassIdentity(name)
       .flatMap(getUMLClassBuilder)
     
+  def removeUMLClass(classIdentity: UMLClassIdentity): Unit =
+    buildersByClassIdentity -= classIdentity
+    classesByClassIdentity -= classIdentity
+
   def getClasses: Set[UMLClass] = classesByClassIdentity.values.toSet
 
