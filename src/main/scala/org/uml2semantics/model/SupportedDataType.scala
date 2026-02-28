@@ -2,6 +2,7 @@ package org.uml2semantics.model
 
 import com.typesafe.scalalogging.Logger
 import org.uml2semantics.inline.Code
+import org.uml2semantics.model.Curie
 
 
 enum SupportedDataType(curie: Curie):
@@ -10,6 +11,7 @@ enum SupportedDataType(curie: Curie):
   case `xsd:base64Binary` extends SupportedDataType(Curie("xsd:base64Binary"))
   case `xsd:boolean` extends SupportedDataType(Curie("xsd:boolean"))
   case `xsd:byte` extends SupportedDataType(Curie("xsd:byte"))
+  case `xsd:date` extends SupportedDataType(Curie("xsd:date"))
   case `xsd:dateTime` extends SupportedDataType(Curie("xsd:dateTime"))
   case `xsd:dateTimeStamp` extends SupportedDataType(Curie("xsd:dateTimeStamp"))
   case `xsd:decimal` extends SupportedDataType(Curie("xsd:decimal"))
@@ -45,10 +47,18 @@ enum SupportedDataType(curie: Curie):
 object SupportedDataType:
   private val logger = Logger[this.type]
 
-  def unapply(s: String): Option[SupportedDataType] =
+  def apply(s: String): Option[SupportedDataType] =
     logger.debug(s"s=$s ${Code.source}")
     try
       val dataType: SupportedDataType = SupportedDataType.valueOf(s)
+      Some(dataType)
+    catch
+      case _ => None
+  
+  def apply(curie: Curie): Option[SupportedDataType] =
+    logger.debug(s"curie=$curie ${Code.source}")
+    try
+      val dataType: SupportedDataType = SupportedDataType.valueOf(curie.curie)
       Some(dataType)
     catch
       case _ => None
@@ -56,5 +66,5 @@ object SupportedDataType:
 
   def getIRI(dataType: SupportedDataType): String =
     logger.debug(s"dataType=$dataType ${Code.source}")
-    dataType._curie.toIRI
+    dataType._curie.getIRI
 

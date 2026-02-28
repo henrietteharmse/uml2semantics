@@ -5,3 +5,9 @@
 target/
 project/target/
 project/project/
+.bloop/
+.metals/
+.vscode/
+project/.bloop
+project/metals.sbt
+catalog*.xml

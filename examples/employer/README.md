@@ -1,7 +1,7 @@
 # Instruction to generate the Employer ontology
 ```
 
-java -jar $uml2semantics/target/scala-3.2.2/uml2semantics.jar \ 
+java -jar uml2semantics.jar \ 
 -c "$uml2semantics/examples/employer/Employer - Classes.tsv" \
 -a "$uml2semantics/examples/employer/Employer - Attributes.tsv" \
 -e "$uml2semantics/examples/employer/Employer - Enumerations.tsv" \

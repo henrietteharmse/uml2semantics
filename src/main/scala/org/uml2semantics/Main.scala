@@ -2,24 +2,27 @@ package org.uml2semantics
 
 import com.typesafe.scalalogging.Logger
 import org.uml2semantics.InputParameters
+import org.uml2semantics.Overrides.XMI
 import org.uml2semantics.inline.Code
-import org.uml2semantics.model.{OntologyIRI, PrefixNamespace}
-import org.uml2semantics.reader.parseUMLClassDiagram
-import org.uml2semantics.owl.UML2OWLWriter
+import org.uml2semantics.model.PrefixNamespace
+import org.uml2semantics.model.cache.AttributeBuilderCache
+import org.uml2semantics.model.cache.AttributeIdentityBuilderCache
+import org.uml2semantics.model.cache.ClassBuilderCache
+import org.uml2semantics.model.cache.ClassIdentityBuilderCache
+import org.uml2semantics.reader.TSVReader
+import org.uml2semantics.reader.XMIReader
+import org.uml2semantics.writer.UML2OWLWriter
 import scopt.OParser
 
 import java.io.File
-
 
 val builder = OParser.builder[InputParameters]
 val argParser =
   import builder.*
   OParser.sequence(
     programName("uml2semantics"),
-    //    head("uml2owl","v0.0.1"),
     opt[Option[File]]('c', "classes")
-      .required()
-      .valueName("<csv-classes-file>")
+      .valueName("<tsv-classes-file>")
       .action((a, c) => c.copy(classesTsv = a))
       .validate(o =>
         if (o.exists(f => f.exists()) || o.isEmpty) success
@@ -27,7 +30,7 @@ val argParser =
       )
       .text("A TSV file containing UML class information"),
     opt[Option[File]]('a', "attributes")
-      .valueName("<csv-attributes-file>")
+      .valueName("<tsv-attributes-file>")
       .action((a, c) => c.copy(attributesTsv = a))
       .validate(o =>
         if (o.exists(f => f.exists()) || o.isEmpty) success
@@ -35,7 +38,7 @@ val argParser =
       )
       .text("A TSV file containing UML class attribute information"),
     opt[Option[File]]('e', "enumerations")
-      .valueName("<csv-enumerations-file>")
+      .valueName("<tsv-enumerations-file>")
       .action((a, c) => c.copy(enumerationsTsv = a))
       .validate(o =>
         if (o.exists(f => f.exists()) || o.isEmpty) success
@@ -43,7 +46,7 @@ val argParser =
       )
       .text("A TSV file containing UML enumerations"),
     opt[Option[File]]('n', "enumeration-values")
-      .valueName("<csv-enumeration-values-file>")
+      .valueName("<tsv-enumeration-values-file>")
       .action((a, c) => c.copy(enumerationValuesTsv = a))
       .validate(o =>
         if (o.exists(f => f.exists()) || o.isEmpty) success
@@ -61,6 +64,10 @@ val argParser =
       .valueName("<ontology-iri>")
       .action((a, c) => c.copy(ontologyIRI = a))
       .text("The IRI of the ontology, e.g.: https://example.com/ontology"),
+    opt[Option[File]]('m', "xmi file")
+      .valueName("<xmi-file>")
+      .action((a, c) => c.copy(xmiFile = a))
+      .text("A file adhering to the XMI specification."),
     opt[String]('p', "ontologyPrefix").required()
       .withFallback(() => "uml2ont:https://uml2semantics.com/ontology/")
       .valueName("<ontology-prefix>")
@@ -70,25 +77,68 @@ val argParser =
       .withFallback(() => PrefixNamespace.predefinedPrefixNamespacesAsStrings())
       .valueName("<prefixname:prefix>,<prefixname:prefix>...")
       .action((a, c) => c.copy(prefixes = a))
-      .text("A list of all the prefixes used in the UML class representation separated by commas.")
+      .text("A list of all the prefixes used in the UML class representation separated by commas."),
+    opt[String]("overrides")
+      .valueName("<XMI> | <TSV>")
+      .action((a, c) => c.copy(overrides = a))
+      .text("Indicates whether the XMI file should be used to override the TSV file or vice versa. " +
+        "Use <XMI> to indicate that the XMI file should be used to override the TSV file " +
+        "and <TSV> to indicate that the TSV file should be used to override the XMI file. " +
+        "If not specified, the TSV file will be used to override the XMI file." +
+        "This configuration only applies when both an XMI file and a TSV file are provided.")
   )
 
 
 @main def uml2owl(arguments: String*): Unit =
   val logger = Logger[this.type]
-  logger.info("Start")
-  logger.debug(s"arguments = $arguments ${Code.source}")
   OParser.parse(argParser, arguments, InputParameters()) match
     case Some(input) =>
+      logger.debug(s"Some input=$input at ${Code.source}")
+
       PrefixNamespace.cachePrefixes(input.prefixes)
       PrefixNamespace.cachePrefix(input.ontologyPrefix)
-      val umlClassDiagram = parseUMLClassDiagram(input)
-      val owlWriter = new UML2OWLWriter(umlClassDiagram)
-      owlWriter.generateOWL match
-        case Left(exceptionMsg) => println(s"An exception occurred:$exceptionMsg")
-        case Right(warnings) =>
-          if warnings.nonEmpty then
-            logger.warn("During processing of the UMLClassdiagram the following potential problem were found ${Code.sourceDetail}:")
-            warnings.foreach(w => println(s"$w"))
+
+      // Determine if TSV input is provided (classes or attributes)
+      val hasTsvInput = input.classesTsv.isDefined || input.attributesTsv.isDefined
+      val hasXmiInput = input.xmiFile.isDefined
+
+      // Determine override behavior
+      val overrideType = Overrides(input.overrides)
+
+      // Process inputs based on what's provided
+      (hasTsvInput, hasXmiInput) match
+        case (true, false) =>
+          // Only TSV input provided
+          logger.info("Processing TSV input files")
+          TSVReader.parseUMLClassDiagram(input)
+        
+        case (false, true) =>
+          // Only XMI input provided
+          logger.info("Processing XMI input file")
+          XMIReader.parseUMLClassDiagram(input)
+        
+        case (true, true) =>
+          // Both TSV and XMI provided - apply override logic
+          overrideType match
+            case Overrides.XMI =>
+              // XMI overrides TSV: process TSV first, then XMI
+              logger.info("Processing TSV input files first, then XMI will override")
+              TSVReader.parseUMLClassDiagram(input)
+              XMIReader.parseUMLClassDiagram(input)
+            case Overrides.TSV =>
+              // TSV overrides XMI: process XMI first, then TSV
+              logger.info("Processing XMI input file first, then TSV will override")
+              XMIReader.parseUMLClassDiagram(input)
+              TSVReader.parseUMLClassDiagram(input)
+        
+        case (false, false) =>
+          logger.error("No input files specified. Please provide either TSV files (-c, -a) or an XMI file (-m)")
+
+      if input.owlOntologyFile.isDefined then
+        val owlWriter = new UML2OWLWriter(input.ontologyIRI, 
+          input.owlOntologyFile.get, 
+          ClassBuilderCache.getClasses,
+          AttributeBuilderCache.getAttributes)
+        owlWriter.generateOWL
     case _ => logger.error("Unexpected case ${Code.sourceDetail}")
   logger.info("Done")

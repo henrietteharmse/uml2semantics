@@ -1,0 +1,51 @@
+Test queries using: http://xpather.com/
+
+#Get all classes
+//packagedElement[@xmi:type='uml:Class']/@name
+#Get all classes - to get extensions such as documentation
+//xmi:Extension/elements/element[@xmi:type='uml:Class']/@name
+#### NOTE!!!
+For some reason the xPath queries in Scala/Java should remove "xmi:" from queries. That means to get all classes,
+the following xpath should be used: //packagedElement[@type='uml:Class']/@name
+
+
+#Get documentation for Person class
+//element[@xmi:type='uml:Class' and @name='Person']/properties/@documentation
+
+
+
+
+
+
+#Get all attributes for class with name 'Person'
+//element[@xmi:type='uml:Class' and @name='Person']//attribute/@name
+//attribute[@xmi:idref='EAID_154CDC3D_010A_4ccc_BFA4_C194C0C3F812']//documentation/@value
+
+#Get types for attribute 'name' of class 'Person'
+//element[@xmi:type='uml:Class' and @name='Person']//attribute[@name='dateOfBirth']/properties/@type
+# ---> incode
+//element[@type='uml:Class' and @name='Person']//attribute[@name='dateOfBirth']/properties/@type
+
+
+
+
+
+
+
+#Get associations for class 'Employer'
+#Not working yet
+1. //packagedElement[@xmi:type='uml:Class'][@name='Employer']/
+
+# Get generalizations
+1. //packagedElement[@xmi:type='uml:Class' and @name='Employee']/generalization/@general
+2. //packagedElement[@xmi:id='EAID_C64147AF_31BF_484d_A408_A97C799E44C7']/@name
+## ---> Get generalizationSets
+//packagedElement[@xmi:type='uml:GeneralizationSet']/@isCovering
+//packagedElement[@xmi:type='uml:GeneralizationSet']/@isDisjoint
+//packagedElement[@xmi:type='uml:GeneralizationSet']/generalization/@xmi:idref
+//packagedElement/generalization[@xmi:type='uml:Generalization' and @xmi:id='EAID_C8B3AEC7_2739_412a_80F0_1995B9A86671']/@general
+//packagedElement[@xmi:type='uml:Class' and @xmi:id='EAID_C64147AF_31BF_484d_A408_A97C799E44C7']/@name
+
+//packagedElement/generalization[@xmi:type='uml:Generalization' and @xmi:id='EAID_C8B3AEC7_2739_412a_80F0_1995B9A86671']/..
+					  
+

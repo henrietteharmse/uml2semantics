@@ -2,7 +2,7 @@
 
 ```
 
-java -jar $uml2semantics/target/scala-3.2.2/uml2semantics.jar \ 
+java -jar uml2semantics.jar \ 
 -c "$uml2semantics/examples/dcat2/DCATv2 - Classes.tsv" \
 -a "$uml2semantics/examples/dcat2/DCATv2 - Attributes.tsv" \
 -o "$uml2semantics/examples/dcat2/dcat-v2.rdf" \

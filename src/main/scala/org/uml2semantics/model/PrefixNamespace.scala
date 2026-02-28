@@ -2,19 +2,27 @@ package org.uml2semantics.model
 
 import com.typesafe.scalalogging.Logger
 import org.uml2semantics.inline.Code
-import org.uml2semantics.model.PrefixNamespace.{logger, prefixMap}
+import org.uml2semantics.model.PrefixNamespace.prefixMap
 
-import scala.annotation.targetName
-import scala.collection.{immutable, mutable}
 import scala.collection.mutable.Map
+import scala.collection.{immutable, mutable}
+
+private val FRAGMENT_SEPARATOR: Char = '#'
+private val PATH_SEPARATOR: Char = '/'
 
 
-case class PrefixName(name: String)
+case class PrefixName(name: String):
+  def nonEmpty: Boolean = name.nonEmpty
+  def isEmpty: Boolean = name.isEmpty
 
-case class PrefixIRI(iri: String)
+case class PrefixIRI(iri: String):
+  def nonEmpty: Boolean = iri.nonEmpty
+  def isEmpty: Boolean = iri.isEmpty
 
 case class PrefixNamespace(prefixName: PrefixName, prefixIRI: PrefixIRI):
   private def toSimpleString: String = prefixName.name + ":" + prefixIRI.iri
+  def nonEmpty: Boolean = prefixName.nonEmpty && prefixIRI.iri.nonEmpty
+  def isEmpty: Boolean = prefixName.isEmpty && prefixIRI.isEmpty
 
 object PrefixNamespace:
   private val logger = Logger[this.type]
@@ -82,9 +90,9 @@ case class PrefixReference(reference: String)
 
 private val SEPARATOR: String = ":"
 
-case class Curie(curie: String):
+case class Curie(curie: String) extends LabeledIRI:
   private val logger = Logger[this.type]
-  require(Curie.isCurieBasedOnConfiguredPrefix(curie), s"Curie=$curie is not using a known prefix. To specify prefix, use -x option.")
+  require(Curie.isCurieBasedOnConfiguredPrefix(curie), s"Curie=$curie is not using a known prefix.")
   private val args: Array[String] = curie.split(SEPARATOR)
   val prefixName: PrefixName = PrefixName(args(0))
   logger.debug(s"prefixName=$prefixName ${Code.source}")
@@ -92,10 +100,15 @@ case class Curie(curie: String):
   logger.debug(s"prefixReference=$prefixReference ${Code.source}")
 
 
-  def toIRI: String =
+  def getIRI: String =
     require(PrefixNamespace.getPrefixNamespace(prefixName).nonEmpty, s"Prefix name = '$prefixName' is undefined. Please define it.")
     PrefixNamespace.getPrefixNamespace(prefixName).get.prefixIRI.iri + prefixReference.reference
-
+    
+  def getLabel: String = curie
+  
+  def nonEmpty: Boolean = prefixName.nonEmpty && curie.nonEmpty
+  def isEmpty: Boolean = prefixName.isEmpty && curie.isEmpty
+  
 object Curie:
   private val logger = Logger[this.type]
 
@@ -108,12 +121,17 @@ object Curie:
   def apply(prefixName: PrefixName, prefixReference: PrefixReference): Curie =
     logger.debug(s"prefixName=$prefixName, prefixReference=$prefixReference ${Code.source}")
     new Curie(prefixName.name + SEPARATOR + prefixReference.reference)
-
-  def unapply(s: String): Option[Curie] =
+      
+  def fromString(s: String): Option[Curie] =
     logger.debug(s"s=$s ${Code.source}")
-    if isCurieBasedOnConfiguredPrefix(s) then
-      Some(Curie(s))
-    else None
+    if s.contains(SEPARATOR) && isCurieBasedOnConfiguredPrefix(s) then
+      Some(new Curie(s))
+    else
+      None
+
+  def unapply(curie: Curie): Option[(PrefixName, PrefixReference)] =
+    logger.debug(s"curie=$curie ${Code.source}")
+    Some((curie.prefixName, curie.prefixReference))
 
   def isCurieBasedOnConfiguredPrefix(s: String): Boolean =
     logger.debug(s"s=$s ${Code.source}")
@@ -127,3 +145,4 @@ object Curie:
     else
       false
 
+  

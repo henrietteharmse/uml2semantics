@@ -1,4 +1,4 @@
-Curie	Name	Definition	ParentNames
+Curie	Name	Definition	Parents
 	Person		
 	Employee		Person
 	Employer		Person
