@@ -92,7 +92,7 @@ java -jar uml2semantics.jar \
 ```
 
 ### Run uml2semantics using XMI file
-Consider this example ![UML class diagram](./examples/xmi/sparx/Employer-WithGeneralizationSet-IncompleteOverlapping.png).
+Consider this example ![UML class diagram](./examples/xmi/sparx/Employer-WithGeneralizationSet-CompleteOverlapping.png).
 Note: Currently enumerations are not read from XMI as yet.
 
 Assuming your in the `$uml2semantics` directory where you have cloned uml2semantics and downloaded the uml2semantics.jar,
