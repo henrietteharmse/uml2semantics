@@ -127,8 +127,8 @@ java -jar uml2semantics.jar \
 
 The resulting ontology is written to `./uml2semantics/examples/xmi/sparx/Employer-WithGeneralizationSet-CompleteOverlapping-TSVOverride.rdf`.
 Due to the use of the override, instead of having `http://uml2semantics.org/examples/employer#Person` as the IRI of the 
-Person class, it is now `http://schema.org/Person`. We can do something similar for the name attribute of Person where 
-we may want to rather make use Schema.org's givenName. This is of use where existing UML class diagrams need to be integrated with 
+Person class, it is now `http://schema.org/Person`. We can do something similar for the name attribute of Person, where 
+we may want to rather make use of1 Schema.org's givenName. This is of use where existing UML class diagrams need to be integrated with 
 linked data. Such overrides are not limited to curies only. It can be anything that can be specified via TSV and could 
 include additional classes and attributes.
 
