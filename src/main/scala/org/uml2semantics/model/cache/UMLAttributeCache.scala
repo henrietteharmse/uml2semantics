@@ -17,6 +17,16 @@ object AttributeIdentityBuilderCache:
   private val attributeIdentityByClassCurieAttributeCurie = mutable.Map[UMLClassCurie, mutable.Map[UMLAttributeCurie, UMLAttributeIdentity]]()
 
 
+  def clear(): Unit =
+    buildersByClassNameAttributeName.clear()
+    buildersByClassNameAttributeCurie.clear()
+    buildersByClassCurieAttributeName.clear()
+    buildersByClassCurieAttributeCurie.clear()
+    attributeIdentityByClassNameAttributeName.clear()
+    attributeIdentityByClassNameAttributeCurie.clear()
+    attributeIdentityByClassCurieAttributeName.clear()
+    attributeIdentityByClassCurieAttributeCurie.clear()
+
   def cacheUMLAttributeIdentity(attributeIdentity: UMLAttributeIdentity, builder: AttributeIdentityBuilder): UMLAttributeIdentity =
     def updateCache[K, V](map: mutable.Map[K, mutable.Map[V, UMLAttributeIdentity]],
                           key: K, subKey: V, value: UMLAttributeIdentity): Unit =
@@ -117,6 +127,10 @@ object AttributeIdentityBuilderCache:
 object AttributeBuilderCache:
   private val buildersByAttributeIdentity = mutable.Map[UMLAttributeIdentity, UMLAttribute.AttributeBuilder]()
   private val attributesByAttributeIdentity = mutable.Map[UMLAttributeIdentity, UMLAttribute]()
+
+  def clear(): Unit =
+    buildersByAttributeIdentity.clear()
+    attributesByAttributeIdentity.clear()
 
   def cacheUMLAttribute(umlAttribute: UMLAttribute, builder: UMLAttribute.AttributeBuilder): Unit =
     // When enriching with curie, remove any existing name-only version to avoid duplicates.

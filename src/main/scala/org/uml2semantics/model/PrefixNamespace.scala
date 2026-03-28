@@ -48,6 +48,9 @@ object PrefixNamespace:
     }
   )
 
+  def clear(): Unit =
+    prefixMap.clear()
+
   def apply(prefixName: PrefixName, prefixIRI: PrefixIRI): PrefixNamespace =
     logger.debug(s"prefixName=$prefixName, prefixIRI=$prefixIRI, ${Code.source}")
     val prefixNamespace: PrefixNamespace = new PrefixNamespace(prefixName, prefixIRI)

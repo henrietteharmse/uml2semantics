@@ -1,0 +1,177 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://uml2semantics.org/examples/employer/v.0.2#"
+     xml:base="http://uml2semantics.org/examples/employer/v.0.2"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    <owl:Ontology rdf:about="http://uml2semantics.org/examples/employer/v.0.2"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    
+
+
+    <!-- http://uml2semantics.org/examples/employer#employedBy -->
+
+
+    <owl:ObjectProperty rdf:about="http://uml2semantics.org/examples/employer#employedBy">
+        <rdfs:domain rdf:resource="http://uml2semantics.org/examples/employer#Employee"/>
+        <rdfs:range rdf:resource="http://uml2semantics.org/examples/employer#Employer"/>
+        <rdfs:comment>An employee works for 1 employer.</rdfs:comment>
+        <rdfs:label>employedBy</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://uml2semantics.org/examples/employer#employs -->
+
+
+    <owl:ObjectProperty rdf:about="http://uml2semantics.org/examples/employer#employs">
+        <rdfs:domain rdf:resource="http://uml2semantics.org/examples/employer#Employer"/>
+        <rdfs:range rdf:resource="http://uml2semantics.org/examples/employer#Employee"/>
+        <rdfs:comment>An employer employs 1 or more employees.</rdfs:comment>
+        <rdfs:label>employs</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    
+
+
+    <!-- http://uml2semantics.org/examples/employer#dateOfBirth -->
+
+
+    <owl:DatatypeProperty rdf:about="http://uml2semantics.org/examples/employer#dateOfBirth">
+        <rdfs:domain rdf:resource="http://uml2semantics.org/examples/employer#Person"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:comment>The date the person was born on.</rdfs:comment>
+        <rdfs:label>dateOfBirth</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://uml2semantics.org/examples/employer#name -->
+
+
+    <owl:DatatypeProperty rdf:about="http://uml2semantics.org/examples/employer#name">
+        <rdfs:domain rdf:resource="http://uml2semantics.org/examples/employer#Person"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>The name of a person.</rdfs:comment>
+        <rdfs:label>name</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://uml2semantics.org/examples/employer#surname -->
+
+
+    <owl:DatatypeProperty rdf:about="http://uml2semantics.org/examples/employer#surname">
+        <rdfs:domain rdf:resource="http://uml2semantics.org/examples/employer#Person"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>The surname of a person.</rdfs:comment>
+        <rdfs:label>surname</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    
+
+
+    <!-- http://uml2semantics.org/examples/employer#Employee -->
+
+
+    <owl:Class rdf:about="http://uml2semantics.org/examples/employer#Employee">
+        <rdfs:subClassOf rdf:resource="http://uml2semantics.org/examples/employer#Person"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://uml2semantics.org/examples/employer#employedBy"/>
+                <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:cardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment>A person that does work for an employer.</rdfs:comment>
+        <rdfs:label>Employee</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://uml2semantics.org/examples/employer#Employer -->
+
+
+    <owl:Class rdf:about="http://uml2semantics.org/examples/employer#Employer">
+        <rdfs:subClassOf rdf:resource="http://uml2semantics.org/examples/employer#Person"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://uml2semantics.org/examples/employer#employs"/>
+                <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment>A person that employs people.</rdfs:comment>
+        <rdfs:label>Employer</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://uml2semantics.org/examples/employer#Person -->
+
+
+    <owl:Class rdf:about="http://uml2semantics.org/examples/employer#Person">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://uml2semantics.org/examples/employer#dateOfBirth"/>
+                <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://uml2semantics.org/examples/employer#name"/>
+                <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://uml2semantics.org/examples/employer#surname"/>
+                <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment>A human being.</rdfs:comment>
+        <rdfs:label>Person</rdfs:label>
+    </owl:Class>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 5.5.1.2024-09-07T21:41:32Z) https://github.com/owlcs/owlapi/ -->
+
+

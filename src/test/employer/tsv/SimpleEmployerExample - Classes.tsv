@@ -1,0 +1,4 @@
+Curie	Name	Definition	Parents
+	Person	A human being.
+	Employer	A person that employs people.	Person
+	Employee	A person that does work for an employer.	Person

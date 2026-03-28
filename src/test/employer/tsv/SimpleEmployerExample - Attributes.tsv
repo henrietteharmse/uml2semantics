@@ -1,0 +1,6 @@
+Class	Curie	Name	ClassEnumOrPrimitiveType	MinMultiplicity	MaxMultiplicity	Definition
+Person		name	xsd:string	1	1	The name of a person.
+Person		surname	xsd:string	1	1	The surname of a person.
+Person		dateOfBirth	xsd:dateTime	1	1	The date the person was born on.
+Employer		employs	Employee	1	*	An employer employs 1 or more employees.
+Employee		employedBy	Employer	1	1	An employee works for 1 employer.

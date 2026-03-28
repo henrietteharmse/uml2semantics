@@ -23,6 +23,12 @@ object ClassIdentityBuilderCache:
 //      classIdentityByClassCurie += (classCurie -> classIdentity)
 //      buildersByClassCurie += (classCurie -> builder)
 
+  def clear(): Unit =
+    buildersByClassName.clear()
+    buildersByClassCurie.clear()
+    classIdentityByClassName.clear()
+    classIdentityByClassCurie.clear()
+
   def cacheUMLClassIdentity(classIdentity: UMLClassIdentity, builder: ClassIdentityBuilder): UMLClassIdentity =
     classIdentity.nameOption.foreach(name =>
       classIdentityByClassName += (name -> classIdentity)
@@ -66,6 +72,10 @@ object ClassIdentityBuilderCache:
 object ClassBuilderCache:
   private val buildersByClassIdentity = mutable.Map[UMLClassIdentity, UMLClass.ClassBuilder]()
   private val classesByClassIdentity = mutable.Map[UMLClassIdentity, UMLClass]()
+
+  def clear(): Unit =
+    buildersByClassIdentity.clear()
+    classesByClassIdentity.clear()
 
   def cacheUMLClass(umlClass: UMLClass, builder: UMLClass.ClassBuilder): Unit =
     // When enriching with curie, remove any existing name-only version to avoid duplicates
