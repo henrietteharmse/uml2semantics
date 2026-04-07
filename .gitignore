@@ -11,4 +11,4 @@ project/project/
 project/.bloop
 project/metals.sbt
 catalog*.xml
-src/test/employer/generated/
+/test-output/

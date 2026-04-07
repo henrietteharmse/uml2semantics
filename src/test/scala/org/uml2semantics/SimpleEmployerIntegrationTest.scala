@@ -17,15 +17,15 @@ class SimpleEmployerIntegrationTest extends FunSuite:
     PrefixNamespace.clear()
 
   test("TSV-to-OWL pipeline produces semantically equivalent ontology for SimpleEmployerExample") {
-    val outputDir = new File("src/test/employer/generated/tsv")
+    val outputDir = new File("test-output/simple-employer")
     outputDir.mkdirs()
 
     val outputFile = new File(outputDir, "SimpleEmployerExample.rdf")
-    val expectedFile = new File("src/test/employer/expected/SimpleEmployerExample.rdf")
+    val expectedFile = new File("src/test/resources/scenarios/simple-employer/expected/SimpleEmployerExample.rdf")
 
     uml2owl(
-      "-c", "src/test/employer/tsv/SimpleEmployerExample - Classes.tsv",
-      "-a", "src/test/employer/tsv/SimpleEmployerExample - Attributes.tsv",
+      "-c", "src/test/resources/scenarios/simple-employer/input/tsv/Classes.tsv",
+      "-a", "src/test/resources/scenarios/simple-employer/input/tsv/Attributes.tsv",
       "-p", "emp:http://uml2semantics.org/examples/employer#",
       "-i", "http://uml2semantics.org/examples/employer/v.0.2",
       "-o", outputFile.getPath
