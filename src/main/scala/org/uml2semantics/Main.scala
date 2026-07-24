@@ -135,10 +135,13 @@ val argParser =
           logger.error("No input files specified. Please provide either TSV files (-c, -a) or an XMI file (-m)")
 
       if input.owlOntologyFile.isDefined then
-        val owlWriter = new UML2OWLWriter(input.ontologyIRI, 
-          input.owlOntologyFile.get, 
+        val owlWriter = new UML2OWLWriter(input.ontologyIRI,
+          input.owlOntologyFile.get,
           ClassBuilderCache.getClasses,
           AttributeBuilderCache.getAttributes)
-        owlWriter.generateOWL
+        owlWriter.generateOWL match
+          case Right(errorMessages) => errorMessages.foreach(errorMessage => logger.error(errorMessage))
+          case Left(errorMessage) =>
+            logger.error(s"Could not save the ontology to ${input.owlOntologyFile.get}: $errorMessage")
     case _ => logger.error("Unexpected case ${Code.sourceDetail}")
   logger.info("Done")
