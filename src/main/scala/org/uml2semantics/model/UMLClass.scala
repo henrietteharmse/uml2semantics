@@ -130,7 +130,7 @@ enum DisjointConstraint:
  */
 case class UMLGeneralizationSet(generalizationSet: Set[UMLClassIdentity],
                                 coveringConstraint: CoveringConstraint = CoveringConstraint.Incomplete,
-                                disjointConstraint: DisjointConstraint = DisjointConstraint.Disjoint)
+                                disjointConstraint: DisjointConstraint = DisjointConstraint.Overlapping)
 
 object UMLGeneralizationSet:
   def builder(prefixNamespace: PrefixNamespace): GeneralizationSetBuilder =

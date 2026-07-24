@@ -166,7 +166,7 @@ object XMIReader extends UMLClassDiagramReader :
       .toSeq
 
   private class XMIGeneralizationSet(parent: String, children: mutable.Set[String],
-                                     complete: Boolean=false, disjoint: Boolean=true):
+                                     complete: Boolean=false, disjoint: Boolean=false):
     def isComplete: Boolean = complete
     def isDisjoint: Boolean = disjoint
     private def getParent: String = parent

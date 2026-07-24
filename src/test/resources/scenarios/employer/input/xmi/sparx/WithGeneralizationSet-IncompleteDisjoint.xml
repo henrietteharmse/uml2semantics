@@ -32,6 +32,10 @@
 					<upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="EAID_LI000006__8633_4b27_9EDB_08BD0BBA8903" value="*"/>
 				</ownedEnd>
 			</packagedElement>
+			<packagedElement xmi:type="uml:GeneralizationSet" xmi:id="EAID_F889EF3F_A6AC_4c33_A5FA_51F098359BE8" name="EmploymentSet" isDisjoint="true">
+				<generalization xmi:idref="EAID_C8B3AEC7_2739_412a_80F0_1995B9A86671"/>
+				<generalization xmi:idref="EAID_27FC798D_B7CB_4a67_9A7D_B15C9DD5C036"/>
+			</packagedElement>
 			<packagedElement xmi:type="uml:Association" xmi:id="EAID_6CBA097C_1D6D_4064_9F60_EBAB863A3DCB" name="employedBy">
 				<memberEnd xmi:idref="EAID_dstBA097C_1D6D_4064_9F60_EBAB863A3DCB"/>
 				<memberEnd xmi:idref="EAID_srcBA097C_1D6D_4064_9F60_EBAB863A3DCB"/>
