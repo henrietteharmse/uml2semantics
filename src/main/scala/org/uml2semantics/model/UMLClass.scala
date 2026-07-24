@@ -202,6 +202,7 @@ object UMLClass:
     private var definition: Option[String] = None
     private var children: scala.collection.mutable.Set[UMLGeneralizationSet.GeneralizationSetBuilder] =
       scala.collection.mutable.HashSet()
+    private var lastAddedGeneralizationSet: Option[UMLGeneralizationSet.GeneralizationSetBuilder] = None
 
     def withName(name: String): ClassBuilder =
       this.classIdentityBuilder = classIdentityBuilder.withName(name)
@@ -226,25 +227,29 @@ object UMLClass:
       this
 
     def withChildren(parent: String, children: Set[String]): ClassBuilder =
-      this.children += UMLGeneralizationSet.builder(prefixNamespace)
+      val generalizationSetBuilder = UMLGeneralizationSet.builder(prefixNamespace)
         .withParentAndChildren(parent, children)
+      this.children += generalizationSetBuilder
+      this.lastAddedGeneralizationSet = Some(generalizationSetBuilder)
       this
 
     def withParentAndChildren(parent: String, children: Set[String],
                               covering: CoveringConstraint, disjoint: DisjointConstraint): ClassBuilder =
-      this.children += UMLGeneralizationSet.builder(prefixNamespace)
+      val generalizationSetBuilder = UMLGeneralizationSet.builder(prefixNamespace)
         .withParentAndChildren(parent, children)
         .withCoveringConstraint(covering)
         .withDisjointConstraint(disjoint)
+      this.children += generalizationSetBuilder
+      this.lastAddedGeneralizationSet = Some(generalizationSetBuilder)
       this
 
     def withCompleteDisjoint(complete: Boolean, disjoint: Boolean): ClassBuilder =
       val covering = if complete then CoveringConstraint.Complete else CoveringConstraint.Incomplete
       val disjointConstraint = if disjoint then DisjointConstraint.Disjoint else DisjointConstraint.Overlapping
-      if children.isEmpty then
-        throw new IllegalArgumentException("Children must not be empty. The assumption is that the children for this class" +
-          "has already been populated.")
-      children.head.withCoveringConstraint(covering)
+      lastAddedGeneralizationSet.getOrElse(
+          throw new IllegalArgumentException("Children must not be empty. The assumption is that the children for this class" +
+            "has already been populated."))
+        .withCoveringConstraint(covering)
         .withDisjointConstraint(disjointConstraint)
       this
     
