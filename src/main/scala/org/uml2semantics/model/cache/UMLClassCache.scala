@@ -80,22 +80,27 @@ object ClassBuilderCache:
     classesByClassIdentity.clear()
 
   def cacheUMLClass(umlClass: UMLClass, builder: UMLClass.ClassBuilder): Unit =
-    // When enriching with curie, remove any existing name-only version to avoid duplicates
+    // When enriching a partial (name-only or curie-only) entry with the full identity,
+    // remove the partial versions to avoid duplicates
     var classToCache = umlClass
     if umlClass.classIdentity.nameOption.nonEmpty && umlClass.classIdentity.curieOption.nonEmpty then
-      val nameOnlyIdentity = UMLClassIdentity(umlClass.classIdentity.nameOption, None, umlClass.classIdentity.ontologyPrefix)
-      // Merge data from the old class into the new one so we don't lose definition/children
-      classesByClassIdentity.get(nameOnlyIdentity).foreach { oldClass =>
-        val mergedDefinition = umlClass.classDefinitionOption match
-          case Some(UMLClassDefinition(d)) if d.nonEmpty => umlClass.classDefinitionOption
-          case _ => oldClass.classDefinitionOption
-        val mergedChildren = if umlClass.children.setOfGeneralizationSets.nonEmpty then umlClass.children
-          else oldClass.children
-        classToCache = umlClass.copy(classDefinitionOption = mergedDefinition, children = mergedChildren)
+      val partialIdentities = Seq(
+        UMLClassIdentity(umlClass.classIdentity.nameOption, None, umlClass.classIdentity.ontologyPrefix),
+        UMLClassIdentity(None, umlClass.classIdentity.curieOption, umlClass.classIdentity.ontologyPrefix))
+      partialIdentities.foreach { partialIdentity =>
+        // Merge data from the old class into the new one so we don't lose definition/children
+        classesByClassIdentity.get(partialIdentity).foreach { oldClass =>
+          val mergedDefinition = classToCache.classDefinitionOption match
+            case Some(UMLClassDefinition(d)) if d.nonEmpty => classToCache.classDefinitionOption
+            case _ => oldClass.classDefinitionOption
+          val mergedChildren = if classToCache.children.setOfGeneralizationSets.nonEmpty then classToCache.children
+            else oldClass.children
+          classToCache = classToCache.copy(classDefinitionOption = mergedDefinition, children = mergedChildren)
+        }
+        // Update attributes that still reference the old partial class identity
+        AttributeBuilderCache.updateClassIdentity(partialIdentity, umlClass.classIdentity)
+        removeUMLClass(partialIdentity)
       }
-      // Update attributes that still reference the old name-only class identity
-      AttributeBuilderCache.updateClassIdentity(nameOnlyIdentity, umlClass.classIdentity)
-      removeUMLClass(nameOnlyIdentity)
     buildersByClassIdentity += (classToCache.classIdentity -> builder)
     classesByClassIdentity += (classToCache.classIdentity -> classToCache)
   
