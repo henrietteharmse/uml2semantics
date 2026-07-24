@@ -96,7 +96,7 @@ private val SEPARATOR: String = ":"
 case class Curie(curie: String) extends LabeledIRI:
   private val logger = Logger[this.type]
   require(Curie.isCurieBasedOnConfiguredPrefix(curie), s"Curie=$curie is not using a known prefix.")
-  private val args: Array[String] = curie.split(SEPARATOR)
+  private val args: Array[String] = curie.split(SEPARATOR, 2)
   val prefixName: PrefixName = PrefixName(args(0))
   logger.debug(s"prefixName=$prefixName ${Code.source}")
   val prefixReference: PrefixReference = PrefixReference(args(1))
@@ -139,7 +139,7 @@ object Curie:
   def isCurieBasedOnConfiguredPrefix(s: String): Boolean =
     logger.debug(s"s=$s ${Code.source}")
     if s.contains(SEPARATOR) then
-      val stringArray: Array[String] = s.split(SEPARATOR)
+      val stringArray: Array[String] = s.split(SEPARATOR, 2)
       val possiblePrefixName: String = stringArray(0)
       val optionPrefixNamespace: Option[PrefixNamespace] = PrefixNamespace.getPrefixNamespace(PrefixName(possiblePrefixName))
       optionPrefixNamespace match

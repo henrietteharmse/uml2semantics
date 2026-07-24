@@ -53,7 +53,9 @@ object UMLClassIdentity:
     (UMLClassCurie(identifier), UMLClassName(identifier)) match
       case (Some(curie), _) => UMLClassIdentity(None, Some(curie), prefixNamespace)
       case (_, Some(name)) => UMLClassIdentity(Some(name), None, prefixNamespace)
-      case _ => throw new IllegalArgumentException("Name and curie must not be empty.")
+      case _ => throw new IllegalArgumentException(
+        s"Could not interpret '$identifier' as a class name or curie. If it is intended to be a curie, its prefix " +
+          s"must be configured via the -p or -x command line options.")
 
 //  def apply(identifier: UMLClassIdentifier, prefixNamespace: PrefixNamespace): UMLClassIdentity =
 //    identifier match
@@ -100,6 +102,10 @@ object UMLClassIdentity:
         throw new IllegalArgumentException("Name and curie must not be empty.")
       val classNameOption = name.flatMap(UMLClassName(_))
       val classCurieOption = curie.flatMap(UMLClassCurie(_))
+      if classNameOption.isEmpty && classCurieOption.isEmpty then
+        throw new IllegalArgumentException(
+          s"Could not interpret '${curie.orElse(name).get}' as a class name or curie. If it is intended to be a " +
+            s"curie, its prefix must be configured via the -p or -x command line options.")
 
       // Assume this class identity is the one to use if it has both a name and a curie.
       val thisClassIdentity = UMLClassIdentity(classNameOption, classCurieOption, prefixNamespace)

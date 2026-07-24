@@ -53,7 +53,9 @@ object UMLAttributeIdentity:
       UMLAttributeName(classIdentity.getClassIdentifier, attributeIdentifier)) match
       case (Some(curie), _) => UMLAttributeIdentity(classIdentity, None, Some(curie))
       case (_, Some(name)) => UMLAttributeIdentity(classIdentity, Some(name), None)
-      case _ => throw new IllegalArgumentException("Name and curie must not be empty.")
+      case _ => throw new IllegalArgumentException(
+        s"Could not interpret '$attributeIdentifier' as an attribute name or curie. If it is intended to be a " +
+          s"curie, its prefix must be configured via the -p or -x command line options.")
       
 //  def apply(classIdentifier: UMLClassIdentifier, attributeIdentifier: UMLAttributeIdentifier):  UMLAttributeIdentity =
 //    val classIdentity = UMLClassIdentity(classIdentifier)
@@ -109,6 +111,10 @@ object UMLAttributeIdentity:
         classIdentity.getClassIdentifier, _))
       val attributeCurieOption: Option[UMLAttributeCurie] = curieOption.flatMap(UMLAttributeCurie(
         classIdentity.getClassIdentifier, _))
+      if attributeNameOption.isEmpty && attributeCurieOption.isEmpty then
+        throw new IllegalArgumentException(
+          s"Could not interpret '${curieOption.orElse(nameOption).get}' as an attribute name or curie. If it is " +
+            s"intended to be a curie, its prefix must be configured via the -p or -x command line options.")
       val thisAttributeIdentity: UMLAttributeIdentity = UMLAttributeIdentity(classIdentity, attributeNameOption, attributeCurieOption)
       if attributeNameOption.isDefined && attributeCurieOption.isDefined then
         AttributeIdentityBuilderCache.cacheUMLAttributeIdentity(thisAttributeIdentity,  this)
