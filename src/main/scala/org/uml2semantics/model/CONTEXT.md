@@ -1,5 +1,31 @@
 # Context: model
 
-The UML domain model and builder caches: `UMLClass`, `UMLAttribute`, generalization sets (covering and disjointness constraints), `LabeledIRI`, `PrefixNamespace`, `SupportedDataType`.
+The internal vocabulary for describing a UML class diagram, independent of input format (TSV/XMI) and output format (OWL/SHACL). Everything here lives in `org.uml2semantics.model` and its `cache` subpackage. Readers construct these objects through builders; writers consume them.
 
 ## Glossary
+
+- **Class identity** (`UMLClassIdentity`) — how a class is known: an optional *name*, an optional *curie*, plus the *ontology prefix* used to mint an IRI when only a name is present. At least one of name or curie must be present; having both is the fully *enriched* form.
+- **Name** (`UMLClassName`, `UMLAttributeName`) — a plain UML identifier. Must not contain a colon and must not be blank. A name mints its IRI under the ontology prefix.
+- **Curie** (`Curie`) — a compact URI of the form `prefixName:reference` (W3C CURIE spec). Only valid when its prefix name is a configured *prefix namespace*. A curie resolves to an IRI by prefix expansion, bypassing ontology-prefix minting — this is how classes and attributes are mapped onto external vocabularies (e.g. `schema:Person`).
+- **Name-or-curie rule** — an identifier string containing `:` is interpreted as a curie; otherwise as a name (`withNameOrCurie`). This is why names may not contain colons.
+- **Enrichment** — a later input source supplying the missing half of an identity (e.g. class `Person` later gains curie `schema:Person`). The caches merge the old entry into the enriched one field-by-field: non-empty older values (definition, children, attribute type, multiplicity) are kept when the newer build leaves them empty, and attributes still pointing at the old class identity are migrated (`AttributeBuilderCache.updateClassIdentity`). Enrichment is the mechanism behind the `--overrides` precedence between TSV and XMI.
+- **Ontology prefix** — the `PrefixNamespace` of the ontology being generated (CLI flag `-p`). Used to mint IRIs for name-only identities.
+- **Prefix namespace** (`PrefixNamespace`) — a prefix name bound to a prefix IRI, registered in a global prefix map. `xsd`, `rdf`, `rdfs`, `owl` are predefined; others come from CLI flags `-p` and `-x`.
+- **IRI minting** — for a class name: `<ontology-prefix-iri>/Name` (no extra `/` if the prefix IRI already ends in `/` or `#`). For an attribute name: `<ontology-prefix-iri>/ClassLabel#attributeName` — the class label as path segment, `#` as fragment separator. Curies expand directly and take precedence.
+- **Labeled IRI** (`LabeledIRI`) — anything carrying both an IRI and a human-readable label. The label prefers the name over the curie.
+- **Attribute identity** (`UMLAttributeIdentity`) — an attribute's name/curie scoped by the identity of its owning class. Attributes are always class-scoped; there is no global attribute namespace.
+- **Attribute type** (`UMLAttributeType`) — one of: a *supported data type* (`UMLXMLDataType`), a class in the diagram (`UMLClassType`), or a curie denoting an external class (`CurieBasedUMLClassAttributeType`). A type string resolves in this order: supported-datatype curie → already-cached class → curie → a new placeholder class built on the fly.
+- **Supported data type** (`SupportedDataType`) — the closed enum of XSD/RDF/RDFS datatypes admissible as attribute types, keyed by their curie literal (e.g. `xsd:string`, `rdf:langString`).
+- **Cardinality** (`UMLCardinality`) — a non-negative integer or the unbounded marker `*` (`UMLInfinite`). An unparsable cardinality string defaults to 1.
+- **Multiplicity** (`UMLMultiplicity`) — a min and max cardinality pair, default `[1,1]`. Invariant: max ≥ min, where `*` is greater than any integer.
+- **Generalization set** (`UMLGeneralizationSet`) — the set of child classes sharing one parent, qualified by a *covering constraint* and a *disjoint constraint*.
+- **Covering constraint** — `Complete` (the children exhaust the parent) or `Incomplete`.
+- **Disjoint constraint** — `Disjoint` (children are pairwise disjoint) or `Overlapping`.
+- **Builder-and-cache pattern** — model objects are constructed through builders, and every `build` writes both the object and its builder into a global mutable cache (`ClassBuilderCache`, `ClassIdentityBuilderCache`, `AttributeBuilderCache`, `AttributeIdentityBuilderCache`). A later source can fetch the builder, extend it, and rebuild — this is what makes enrichment work. The caches, not reader return values, are the hand-off point to the writer.
+
+## Invariants and assumptions
+
+- A class belongs to at most one generalization set — a simplifying assumption; UML allows several (`@Todo` in `ClassBuilder`).
+- Generalization set names are not yet supported.
+- Every identity must have a name or a curie; builders throw `IllegalArgumentException` otherwise.
+- The default covering/disjoint constraints are {incomplete, overlapping} everywhere (`UMLGeneralizationSet`, `GeneralizationSetBuilder`, and the XMI reader's internal representation), matching the UML spec defaults of `isCovering = false` and `isDisjoint = false`.
