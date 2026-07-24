@@ -64,7 +64,7 @@ val argParser =
       .valueName("<ontology-iri>")
       .action((a, c) => c.copy(ontologyIRI = a))
       .text("The IRI of the ontology, e.g.: https://example.com/ontology"),
-    opt[Option[File]]('m', "xmi file")
+    opt[Option[File]]('m', "xmi")
       .valueName("<xmi-file>")
       .action((a, c) => c.copy(xmiFile = a))
       .text("A file adhering to the XMI specification."),
