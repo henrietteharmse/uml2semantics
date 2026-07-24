@@ -65,7 +65,7 @@ object TSVReader extends UMLClassDiagramReader:
                              Parents: ClassesHeader.Parents.type, header: Map[String, String]): Unit =
     val parentSet = {
       val maybeParent = header.get(Parents.toString)
-      logger.trace(s"maybeParent.get=${maybeParent.get}")
+      logger.trace(s"maybeParent=$maybeParent")
       maybeParent.getOrElse("")
     }.split('|')
       .map(_.trim)
