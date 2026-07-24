@@ -80,6 +80,10 @@ val argParser =
       .text("A list of all the prefixes used in the UML class representation separated by commas."),
     opt[String]("overrides")
       .valueName("<XMI> | <TSV>")
+      .validate(o =>
+        if (Set("XMI", "TSV").contains(o.toUpperCase)) success
+        else failure(s"Invalid value '$o' for --overrides. Valid values are XMI and TSV.")
+      )
       .action((a, c) => c.copy(overrides = a))
       .text("Indicates whether the XMI file should be used to override the TSV file or vice versa. " +
         "Use <XMI> to indicate that the XMI file should be used to override the TSV file " +

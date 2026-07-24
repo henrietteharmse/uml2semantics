@@ -29,5 +29,7 @@ object Overrides:
     logger.debug(s"precedence=$precedence, ${Code.source}")
     precedence.toUpperCase match
       case "XMI" => XMI
-      case _ => TSV
+      case "TSV" => TSV
+      case _ => throw new IllegalArgumentException(
+        s"Invalid value '$precedence' for --overrides. Valid values are XMI and TSV.")
 
