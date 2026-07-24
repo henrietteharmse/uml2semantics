@@ -38,7 +38,6 @@ enum SupportedDataType(curie: Curie):
   case `xsd:unsignedLong` extends SupportedDataType(Curie("xsd:unsignedLong"))
   case `xsd:unsignedShort` extends SupportedDataType(Curie("xsd:unsignedShort"))
   case `rdfs:Literal` extends SupportedDataType(Curie("rdfs:Literal"))
-  case `rdfs:DataType` extends SupportedDataType(Curie("rdfs:DataType"))
   case `rdf:langString` extends SupportedDataType(Curie("rdf:langString"))
   case `rdf:HTML` extends SupportedDataType(Curie("rdf:HTML"))
   case `rdf:XMLLiteral` extends SupportedDataType(Curie("rdf:XMLLiteral"))

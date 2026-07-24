@@ -6,7 +6,6 @@ import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat
 import org.semanticweb.owlapi.model.*
 import org.semanticweb.owlapi.model.parameters.ChangeApplied
 import org.semanticweb.owlapi.model.parameters.ChangeApplied.UNSUCCESSFULLY
-import org.semanticweb.owlapi.vocab.OWL2Datatype
 import org.uml2semantics.inline.Code
 import org.uml2semantics.model.*
 import org.uml2semantics.model.SupportedDataType.getIRI
@@ -108,7 +107,7 @@ class UML2OWLWriter(ontologyIRI: String,
     val owlDataPropertyDomainAxiom = dataFactory.getOWLDataPropertyDomainAxiom(owlDataProperty, domain)
     if manager.addAxiom(ontology, owlDataPropertyDomainAxiom) == UNSUCCESSFULLY then
       errorMessages += s"Could not create domain axiom for $owlDataProperty with domain=$domain"
-    val dataType: OWL2Datatype = OWL2Datatype.getDatatype(IRI.create(getIRI(attributeType)))
+    val dataType: OWLDatatype = dataFactory.getOWLDatatype(IRI.create(getIRI(attributeType)))
     val owlDataPropertyRangeAxiom = dataFactory.getOWLDataPropertyRangeAxiom(owlDataProperty, dataType)
     if manager.addAxiom(ontology, owlDataPropertyRangeAxiom) == UNSUCCESSFULLY then
       errorMessages += s"Could not create range axiom for $owlDataProperty with range=$dataType"
@@ -190,7 +189,7 @@ class UML2OWLWriter(ontologyIRI: String,
 
   private def createDataExistentialRestrictions(umlAttribute: UMLAttribute, domain: OWLClass,
                                                 owlDataProperty: OWLDataProperty,
-                                                dataType: OWL2Datatype,
+                                                dataType: OWLDatatype,
                                                 errorMessages: mutable.Buffer[String]): mutable.Buffer[String] =
 
     umlAttribute.multiplicity match
