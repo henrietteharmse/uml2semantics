@@ -87,12 +87,10 @@ class UML2OWLWriter(ontologyIRI: String,
       attributeType match
         case UMLXMLDataType(attributeType) =>
           createDataProperty(umlAttribute, owlClass, attributeType, errorMessages)
-        case CurieBasedUMLClassAttributeType(attributeType: UMLAttributeType) =>
+        case CurieBasedUMLClassAttributeType(attributeType) =>
           createObjectProperty(umlAttribute, owlClass, attributeType, errorMessages)
         case UMLClassType(attributeType) =>
           createObjectProperty(umlAttribute, owlClass, attributeType, errorMessages)
-        case _ =>
-          throw new IllegalArgumentException(s"Unsupported attribute type found for ${umlAttribute.attributeIdentity.getLabel}")
     }.getOrElse {
       createObjectProperty(umlAttribute, owlClass, errorMessages)
     }
