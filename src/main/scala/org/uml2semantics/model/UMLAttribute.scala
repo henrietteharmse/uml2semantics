@@ -162,7 +162,7 @@ object UMLCardinality:
   def >=(c1: UMLCardinality, c2: UMLCardinality): Boolean =
     logger.debug(s"c1=$c1, c2=$c2 ${Code.source}")
     (c1, c2) match
-      case (UMLInfiniteCardinality(_), UMLInfiniteCardinality(_)) => false
+      case (UMLInfiniteCardinality(_), UMLInfiniteCardinality(_)) => true
       case (UMLInfiniteCardinality(_), UMLNonNegativeCardinality(_)) => true
       case (UMLNonNegativeCardinality(_), UMLInfiniteCardinality(_)) => false
       case (UMLNonNegativeCardinality(t1), UMLNonNegativeCardinality(t2)) => t1 >= t2
