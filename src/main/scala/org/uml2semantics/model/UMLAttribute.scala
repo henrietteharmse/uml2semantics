@@ -20,7 +20,7 @@ object UMLAttributeName:
 case class UMLAttributeCurie(classIdentifier: UMLClassIdentifier, curie: Curie) extends UMLAttributeIdentifier(classIdentifier):
   def isEmpty: Boolean = curie.isEmpty
   def nonEmpty: Boolean = curie.nonEmpty
-  def getName: String = classIdentifier.getName + FRAGMENT_SEPARATOR + curie
+  def getName: String = curie.curie
 
 object UMLAttributeCurie:
   def apply(classIdentifier: UMLClassIdentifier, curie: String): Option[UMLAttributeCurie] =
