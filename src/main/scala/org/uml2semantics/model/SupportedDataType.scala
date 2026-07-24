@@ -52,15 +52,15 @@ object SupportedDataType:
       val dataType: SupportedDataType = SupportedDataType.valueOf(s)
       Some(dataType)
     catch
-      case _ => None
-  
+      case _: IllegalArgumentException => None
+
   def apply(curie: Curie): Option[SupportedDataType] =
     logger.debug(s"curie=$curie ${Code.source}")
     try
       val dataType: SupportedDataType = SupportedDataType.valueOf(curie.curie)
       Some(dataType)
     catch
-      case _ => None
+      case _: IllegalArgumentException => None
 
 
   def getIRI(dataType: SupportedDataType): String =
