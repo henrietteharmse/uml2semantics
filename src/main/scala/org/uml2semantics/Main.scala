@@ -102,6 +102,9 @@ val argParser =
       PrefixNamespace.cachePrefixes(input.prefixes)
       PrefixNamespace.cachePrefix(input.ontologyPrefix)
 
+      if input.enumerationsTsv.isDefined || input.enumerationValuesTsv.isDefined then
+        logger.warn("Enumeration TSV files (-e, -n) are not supported yet and will be ignored.")
+
       // Determine if TSV input is provided (classes or attributes)
       val hasTsvInput = input.classesTsv.isDefined || input.attributesTsv.isDefined
       val hasXmiInput = input.xmiFile.isDefined
