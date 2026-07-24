@@ -22,6 +22,12 @@ object XMIReader extends UMLClassDiagramReader :
   override def parseUMLClassDiagram(input: InputParameters): Unit =
     logger.debug(s"start xmi parsing ${Code.source}")
     val ontologyPrefix: PrefixNamespace = PrefixNamespace(input.ontologyPrefix)
+    // The DocumentBuilderFactory is deliberately left namespace-UNaware. Every XPath query in this
+    // reader addresses namespaced attributes by their unprefixed local-ish form (@type, @id, @idref
+    // instead of xmi:type, xmi:id, xmi:idref), which only matches because the parser treats "xmi:type"
+    // as a plain attribute name and XPath's @type falls back accordingly. Enabling
+    // setNamespaceAware(true) would silently break every query in this file unless they are all
+    // rewritten with a NamespaceContext.
     val xmiDocument: Document = DocumentBuilderFactory.newInstance.newDocumentBuilder.parse(input.xmiFile.get)
     parseClasses(ontologyPrefix, XPathFactory.newInstance.newXPath, xmiDocument)
 
