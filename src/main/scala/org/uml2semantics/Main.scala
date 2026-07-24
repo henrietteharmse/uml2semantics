@@ -143,5 +143,5 @@ val argParser =
           case Right(errorMessages) => errorMessages.foreach(errorMessage => logger.error(errorMessage))
           case Left(errorMessage) =>
             logger.error(s"Could not save the ontology to ${input.owlOntologyFile.get}: $errorMessage")
-    case _ => logger.error("Unexpected case ${Code.sourceDetail}")
+    case _ => logger.error(s"Could not parse the provided arguments. ${Code.sourceDetail}")
   logger.info("Done")
