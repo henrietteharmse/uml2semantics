@@ -241,11 +241,11 @@ object UMLAttribute:
     private var definition: Option[String] = None
 
     def withClassName(name: String): AttributeBuilder =
-      this.attributeIdentityBuilder = attributeIdentityBuilder.withName(name)
+      this.attributeIdentityBuilder = attributeIdentityBuilder.withClassName(name)
       this
 
     def withClassCurie(curie: String): AttributeBuilder =
-      this.attributeIdentityBuilder = attributeIdentityBuilder.withCurie(curie)
+      this.attributeIdentityBuilder = attributeIdentityBuilder.withClassCurie(curie)
       this
 
     def withClassIdentity(classIdentity: UMLClassIdentity): AttributeBuilder =
