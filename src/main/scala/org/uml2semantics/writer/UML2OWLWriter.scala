@@ -18,7 +18,8 @@ import scala.jdk.CollectionConverters.*
 class UML2OWLWriter(ontologyIRI: String,
                     owlOntologyFile: File,
                     classes: Set[UMLClass],
-                    attributes: Set[UMLAttribute]):
+                    attributes: Set[UMLAttribute],
+                    globalDisjointness: Boolean = true):
 
   private val logger = Logger("UML2OWLWriter")
   private val manager = OWLManager.createOWLOntologyManager
@@ -383,7 +384,8 @@ class UML2OWLWriter(ontologyIRI: String,
     val errorMessages: mutable.Buffer[String] = new ArrayBuffer[String]()
     classes.foreach(umlClass =>
         val owlClass = createAndAnnotateOWLClass(umlClass, errorMessages))
-    createOWLDisjointClassesAxiom(disjointClassesNotPartOfGeneralizationSets, errorMessages)
+    if globalDisjointness then
+      createOWLDisjointClassesAxiom(disjointClassesNotPartOfGeneralizationSets, errorMessages)
     logger.info("processUMLClasses: Done")
     errorMessages
   end processUMLClasses

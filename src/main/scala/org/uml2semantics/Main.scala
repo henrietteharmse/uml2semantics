@@ -78,6 +78,11 @@ val argParser =
       .valueName("<prefixname:prefix>,<prefixname:prefix>...")
       .action((a, c) => c.copy(prefixes = a))
       .text("A list of all the prefixes used in the UML class representation separated by commas."),
+    opt[Unit]("no-global-disjointness")
+      .action((_, c) => c.copy(globalDisjointness = false))
+      .text("Disables the default behavior of making all classes that are not part of a generalization set " +
+        "mutually disjoint. Use this when a class has more than one parent, which global disjointness " +
+        "would render unsatisfiable."),
     opt[String]("overrides")
       .valueName("<XMI> | <TSV>")
       .validate(o =>
@@ -145,7 +150,8 @@ val argParser =
         val owlWriter = new UML2OWLWriter(input.ontologyIRI,
           input.owlOntologyFile.get,
           ClassBuilderCache.getClasses,
-          AttributeBuilderCache.getAttributes)
+          AttributeBuilderCache.getAttributes,
+          input.globalDisjointness)
         owlWriter.generateOWL match
           case Right(errorMessages) => errorMessages.foreach(errorMessage => logger.error(errorMessage))
           case Left(errorMessage) =>
