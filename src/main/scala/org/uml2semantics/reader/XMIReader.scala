@@ -14,6 +14,7 @@ import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.xpath.*
 import scala.collection.{immutable, mutable}
 import scala.jdk.CollectionConverters.*
+import scala.util.control.NonFatal
 
 object XMIReader extends UMLClassDiagramReader :
   val logger = Logger("XMIReader")
@@ -114,28 +115,38 @@ object XMIReader extends UMLClassDiagramReader :
     val classId = classNode.getAttributes.getNamedItem("xmi:id").getNodeValue
     val classAttributeNodes = doXPathQueryGetAsSeqOfNodes(xPath, xmiDocument,
       s"//element[@idref='$classId' and @type='uml:Class']//attribute")
-    val attributes = classAttributeNodes.map { attributeNode =>
-      val attributeName = attributeNode.getAttributes.getNamedItem("name").getNodeValue
-      val attributeId = attributeNode.getAttributes.getNamedItem("xmi:idref").getNodeValue
-      val attributeDefinition = doXPathQueryGetAsString(xPath, xmiDocument,
-        s"//attribute[@idref='$attributeId']/documentation/@value")
-      val attributeType = doXPathQueryGetAsString(xPath, xmiDocument,
-        s"//attribute[@idref='$attributeId']/properties/@type")
-      val attributeBounds = AttributeBounds(
-        doXPathQueryGetAsString(xPath, xmiDocument, s"//attribute[@idref='$attributeId']/bounds/@lower"),
-        doXPathQueryGetAsString(xPath, xmiDocument, s"//attribute[@idref='$attributeId']/bounds/@upper")
-      )
-      XMIAttribute(attributeName, attributeType, attributeBounds, attributeDefinition)
+    val attributes = classAttributeNodes.flatMap { attributeNode =>
+      try
+        val attributeName = attributeNode.getAttributes.getNamedItem("name").getNodeValue
+        val attributeId = attributeNode.getAttributes.getNamedItem("xmi:idref").getNodeValue
+        val attributeDefinition = doXPathQueryGetAsString(xPath, xmiDocument,
+          s"//attribute[@idref='$attributeId']/documentation/@value")
+        val attributeType = doXPathQueryGetAsString(xPath, xmiDocument,
+          s"//attribute[@idref='$attributeId']/properties/@type")
+        val attributeBounds = AttributeBounds(
+          doXPathQueryGetAsString(xPath, xmiDocument, s"//attribute[@idref='$attributeId']/bounds/@lower"),
+          doXPathQueryGetAsString(xPath, xmiDocument, s"//attribute[@idref='$attributeId']/bounds/@upper")
+        )
+        Some(XMIAttribute(attributeName, attributeType, attributeBounds, attributeDefinition))
+      catch
+        case NonFatal(t) =>
+          logger.error(s"Error while extracting an attribute of class ${umlClassIdentity.getLabel}: ${t.getMessage}", t)
+          None
     }
 
     attributes.foreach { xmiAttribute =>
-      val attributeBuilder = UMLAttribute.builder(umlClassIdentity.ontologyPrefix)
-        .withClassIdentity(umlClassIdentity)
-        .withNameOrCurie(xmiAttribute.name)
-        .withType(xmiAttribute.typeOfAttribute)
-        .withMultiplicity(xmiAttribute.bounds.lowerBound, xmiAttribute.bounds.upperBound)
-        .withDefinition(xmiAttribute.definition)
-        .build
+      try
+        UMLAttribute.builder(umlClassIdentity.ontologyPrefix)
+          .withClassIdentity(umlClassIdentity)
+          .withNameOrCurie(xmiAttribute.name)
+          .withType(xmiAttribute.typeOfAttribute)
+          .withMultiplicity(xmiAttribute.bounds.lowerBound, xmiAttribute.bounds.upperBound)
+          .withDefinition(xmiAttribute.definition)
+          .build
+      catch
+        case NonFatal(t) =>
+          logger.error(s"Error while processing attribute ${xmiAttribute.name} of class " +
+            s"${umlClassIdentity.getLabel}: ${t.getMessage}", t)
     }
 
   private def doXPathQueryGetAsSeqOfNodes(xPath: XPath, node: Node, query: String): immutable.Seq[Node] =

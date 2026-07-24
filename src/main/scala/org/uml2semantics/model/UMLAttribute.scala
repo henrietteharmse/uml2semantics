@@ -163,7 +163,10 @@ object UMLCardinality:
     s match
       case UMLNonNegativeInteger(i) => UMLNonNegativeCardinality(i)
       case UMLInfinite() => UMLInfiniteCardinality(UMLInfinite())
-      case _ => UMLNonNegativeCardinality(UMLNonNegativeInteger(1))
+      // An unspecified cardinality defaults to 1, in line with the UML specification.
+      case _ if s.isBlank => UMLNonNegativeCardinality(UMLNonNegativeInteger(1))
+      case _ => throw new IllegalArgumentException(
+        s"Invalid cardinality '$s'. Expected a non-negative integer or '*'.")
 
   def >=(c1: UMLCardinality, c2: UMLCardinality): Boolean =
     logger.debug(s"c1=$c1, c2=$c2 ${Code.source}")
