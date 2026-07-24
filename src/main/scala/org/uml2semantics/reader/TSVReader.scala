@@ -30,7 +30,6 @@ object TSVReader extends UMLClassDiagramReader:
       parseClasses(input.classesTsv, ontologyPrefix)
     if (input.attributesTsv.isDefined)
       parseClassAttributes(input.attributesTsv, ontologyPrefix)
-    val k= 0
 
   private def parseClasses(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespace): Unit =
     import ClassesHeader.*
@@ -38,9 +37,10 @@ object TSVReader extends UMLClassDiagramReader:
     implicit object TsvFormat extends TSVFormat {}
 
     val reader = CSVReader.open(maybeTsvFile.get)
+    val rows = try reader.allWithHeaders() finally reader.close()
     val parentToChildrenMap = mutable.Map[String, mutable.Set[String]]()
 
-    reader.allWithHeaders().foreach(header => {
+    rows.foreach(header => {
       try {
         var classBuilder = UMLClass.builder(ontologyPrefix)
 
@@ -90,7 +90,8 @@ object TSVReader extends UMLClassDiagramReader:
     implicit object TsvFormat extends TSVFormat {}
 
     val reader = CSVReader.open(maybeTsvFile.get)
-    reader.allWithHeaders().foreach(header => {
+    val rows = try reader.allWithHeaders() finally reader.close()
+    rows.foreach(header => {
       try {
       
         var classIdentityBuilder = UMLClassIdentity.builder(ontologyPrefix)
