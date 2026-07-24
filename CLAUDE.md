@@ -9,11 +9,12 @@ uml2semantics converts UML class diagrams into OWL 2 ontologies. It accepts inpu
 ## Build & Run Commands
 
 - **Compile**: `sbt clean compile`
+- **Test**: `sbt test` (munit; integration test compares generated ontologies semantically against expected outputs in `src/test/resources/scenarios/`)
 - **Build assembly JAR**: `sbt assembly` (outputs `target/scala-3.6.3/uml2semantics.jar`)
 - **Run**: `java -jar target/scala-3.6.3/uml2semantics.jar [options]`
 - **Manual test**: `./runTest.sh` (runs a sample XMI-to-OWL conversion)
 
-There is no automated test suite (no ScalaTest/specs2). Testing is done manually via `runTest.sh` and comparing output OWL files against expected outputs in `src/test/resources/`.
+Additional scenarios can also be tested manually via `runTest.sh` by comparing output OWL files against expected outputs in `src/test/resources/`.
 
 ## Tech Stack
 
@@ -66,6 +67,7 @@ Readers populate global mutable caches rather than returning data:
 | `-p` | Ontology prefix as `name:iri` |
 | `-x` | Additional prefixes (comma-separated CURIEs) |
 | `--overrides` | `XMI` or `TSV` — which source overrides when both provided |
+| `--no-global-disjointness` | Disables pairwise disjointness of classes outside generalization sets |
 
 ## Agent skills
 

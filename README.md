@@ -32,6 +32,7 @@ Java 11+
 | `-p` | `--ontologyPrefix` | **Yes** | Prefix for the ontology (e.g., `ex:https://example.com/ontology/`) |
 | `-x` | `--prefixes` | No | Comma-separated list of additional prefixes (`name:uri,...`) |
 |  | `--overrides` | No | When both XMI and TSV are provided: `TSV` (default) or `XMI`. Indicates which source takes precedence. |
+|  | `--no-global-disjointness` | No | Disables making all classes that are not part of a generalization set mutually disjoint. Needed when a class has more than one parent. |
 
 At minimum, you must provide either TSV files (`-c`, `-a`, `-e`, `-n`) or an XMI file (`-m`) as input, along with the three required options (`-o`, `-i`, `-p`).
 
