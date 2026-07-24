@@ -36,7 +36,7 @@ case class UMLAttributeIdentity(classIdentity: UMLClassIdentity,
     (curieOption, nameOption) match
       case (Some(curie), _) => curie.curie.getIRI
       case (_, Some(name)) => val iri = classIdentity.ontologyPrefix.prefixIRI.iri
-        iri + (if iri.matches(".*#$") then name.getName
+        iri + (if iri.matches(".*#$") then classIdentity.getLabel + PATH_SEPARATOR + name.getName
           else if iri.matches(".*/$") then classIdentity.getLabel + FRAGMENT_SEPARATOR + name.getName
           else  s"$PATH_SEPARATOR" + classIdentity.getLabel + FRAGMENT_SEPARATOR + name.getName)
       case _ => throw new IllegalArgumentException("Name and curie must not be empty.")
