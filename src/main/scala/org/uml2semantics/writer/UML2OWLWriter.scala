@@ -356,6 +356,57 @@ class UML2OWLWriter(ontologyIRI: String,
       errorMessages += s"Could not declare class=${owlClass.getIRI}"
     owlClass
 
+  /**
+   * Drops from the global disjointness axiom any class that shares a subclass with another member of
+   * that axiom. Two classes declared disjoint cannot have a common subclass — the subclass would be
+   * unsatisfiable — and excluding a generalization set's children only covers the direct parent-child
+   * pair, where the shared subclass is the child itself. Two ancestors of the same class are the case
+   * left over, and they are what this removes.
+   *
+   * Eligibility is read from a snapshot taken before anything is removed, so the result does not
+   * depend on the order classes happen to be visited in. All of a class's eligible ancestors are
+   * dropped rather than the one that would suffice, because which one to keep would be arbitrary.
+   * Single inheritance is untouched however deep it runs: a chain leaves only its root eligible, and
+   * one class cannot contradict itself.
+   */
+  private def relaxGlobalDisjointnessForSharedSubclasses(): Unit =
+    val parentIRIsByChildIRI = mutable.Map[String, mutable.Set[String]]()
+    val labelsByIRI = mutable.Map[String, String]()
+    classes.foreach { umlClass =>
+      val parentIRI = umlClass.classIdentity.getIRI
+      labelsByIRI += (parentIRI -> umlClass.classIdentity.getLabel)
+      umlClass.children.setOfGeneralizationSets.foreach(_.generalizationSet.foreach { child =>
+        parentIRIsByChildIRI.getOrElseUpdate(child.getIRI, mutable.Set[String]()) += parentIRI
+      })
+    }
+
+    def ancestorsOf(classIRI: String): Set[String] =
+      val ancestors = mutable.Set[String]()
+      val pending = mutable.Stack[String]()
+      pending.pushAll(parentIRIsByChildIRI.getOrElse(classIRI, mutable.Set[String]()))
+      while pending.nonEmpty do
+        val ancestor = pending.pop()
+        // A generalization cycle would otherwise loop forever; `add` reports whether this is new.
+        if ancestor != classIRI && ancestors.add(ancestor) then
+          pending.pushAll(parentIRIsByChildIRI.getOrElse(ancestor, mutable.Set[String]()))
+      ancestors.toSet
+
+    val eligibleIRIs = disjointClassesNotPartOfGeneralizationSets.map(_.getIRI.toString).toSet
+    parentIRIsByChildIRI.keys.toSeq.sorted.foreach { childIRI =>
+      val contradictoryAncestorIRIs = ancestorsOf(childIRI).intersect(eligibleIRIs)
+      if contradictoryAncestorIRIs.size > 1 then
+        contradictoryAncestorIRIs.foreach(ancestorIRI =>
+          disjointClassesNotPartOfGeneralizationSets -= dataFactory.getOWLClass(ancestorIRI))
+        val childLabel = labelsByIRI.getOrElse(childIRI, childIRI)
+        val ancestorLabels = contradictoryAncestorIRIs.toSeq
+          .map(ancestorIRI => labelsByIRI.getOrElse(ancestorIRI, ancestorIRI)).sorted
+        diagnostics.warn(DiagnosticCode.GlobalDisjointnessRelaxed,
+          s"$childLabel inherits from ${ancestorLabels.mkString(" and ")}, which the default disjointness " +
+            s"assumption would have declared mutually disjoint, making $childLabel unsatisfiable. They were " +
+            s"left out of the global disjointness axiom. Use --no-global-disjointness to switch the " +
+            s"assumption off entirely.")
+    }
+
   private def createOWLDisjointClassesAxiom(disjointOWLClasses: mutable.Set[OWLClass],
                                             errorMessages: mutable.Buffer[String]): Unit =
     if disjointOWLClasses.size < 2 then
@@ -399,6 +450,7 @@ class UML2OWLWriter(ontologyIRI: String,
     classes.foreach(umlClass =>
         val owlClass = createAndAnnotateOWLClass(umlClass, errorMessages))
     if globalDisjointness then
+      relaxGlobalDisjointnessForSharedSubclasses()
       createOWLDisjointClassesAxiom(disjointClassesNotPartOfGeneralizationSets, errorMessages)
     logger.info("processUMLClasses: Done")
     errorMessages

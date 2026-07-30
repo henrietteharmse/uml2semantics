@@ -1,0 +1,27 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # Relaxation is confined to the classes that would contradict each other. Person and Worker are
+  # dropped because they share the subclass Employee, but Address and Country share nothing with
+  # anyone and stay disjoint. This is what distinguishes the rule from excluding every parent.
+  Declaration(Class(:Person))
+  AnnotationAssertion(rdfs:label :Person "Person")
+  AnnotationAssertion(rdfs:comment :Person "A human being.")
+  Declaration(Class(:Worker))
+  AnnotationAssertion(rdfs:label :Worker "Worker")
+  AnnotationAssertion(rdfs:comment :Worker "Something that does work.")
+  Declaration(Class(:Employee))
+  AnnotationAssertion(rdfs:label :Employee "Employee")
+  AnnotationAssertion(rdfs:comment :Employee "A person who does work.")
+  Declaration(Class(:Address))
+  AnnotationAssertion(rdfs:label :Address "Address")
+  AnnotationAssertion(rdfs:comment :Address "Where something is located.")
+  Declaration(Class(:Country))
+  AnnotationAssertion(rdfs:label :Country "Country")
+  AnnotationAssertion(rdfs:comment :Country "A sovereign state.")
+  SubClassOf(:Employee :Person)
+  SubClassOf(:Employee :Worker)
+  DisjointClasses(:Address :Country)
+)

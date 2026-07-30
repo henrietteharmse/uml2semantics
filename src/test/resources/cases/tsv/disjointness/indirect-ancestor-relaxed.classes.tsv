@@ -1,0 +1,7 @@
+Name	Curie	Definition	Parents
+Animal		A living creature.
+Mammal		An animal that suckles its young.	Animal
+Pet		An animal kept for company.
+Dog		A domesticated canine.	Mammal|Pet
+Address		Where something is located.
+Country		A sovereign state.

@@ -1,0 +1,25 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # Dog has two ancestors, Mammal and Animal, but only one of them is eligible for the global
+  # axiom — Mammal is excluded as a child. One class cannot contradict itself, so nothing is
+  # relaxed and Animal stays disjoint from Address. Counting ancestors alone would have wrongly
+  # relaxed every hierarchy deeper than two levels.
+  Declaration(Class(:Animal))
+  AnnotationAssertion(rdfs:label :Animal "Animal")
+  AnnotationAssertion(rdfs:comment :Animal "A living creature.")
+  Declaration(Class(:Mammal))
+  AnnotationAssertion(rdfs:label :Mammal "Mammal")
+  AnnotationAssertion(rdfs:comment :Mammal "An animal that suckles its young.")
+  Declaration(Class(:Dog))
+  AnnotationAssertion(rdfs:label :Dog "Dog")
+  AnnotationAssertion(rdfs:comment :Dog "A domesticated canine.")
+  Declaration(Class(:Address))
+  AnnotationAssertion(rdfs:label :Address "Address")
+  AnnotationAssertion(rdfs:comment :Address "Where something is located.")
+  SubClassOf(:Mammal :Animal)
+  SubClassOf(:Dog :Mammal)
+  DisjointClasses(:Animal :Address)
+)

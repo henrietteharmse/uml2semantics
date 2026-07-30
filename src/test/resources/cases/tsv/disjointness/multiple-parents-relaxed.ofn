@@ -3,9 +3,10 @@ Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
 
 Ontology(<https://uml2semantics.com/test/ontology>
 
-  # Because parents stay in the global axiom, multiple inheritance under the default makes the
-  # child unsatisfiable: Employee is a subclass of two classes declared disjoint. The writer
-  # asserts this without complaint, which is what --no-global-disjointness exists to avoid.
+  # Person and Worker share the subclass Employee, so declaring them disjoint would make Employee
+  # unsatisfiable. Both are dropped from the global axiom rather than one of them, because which
+  # one to keep would be arbitrary. Nothing else is left eligible, so no DisjointClasses axiom is
+  # written at all.
   Declaration(Class(:Person))
   AnnotationAssertion(rdfs:label :Person "Person")
   AnnotationAssertion(rdfs:comment :Person "A human being.")
@@ -17,5 +18,4 @@ Ontology(<https://uml2semantics.com/test/ontology>
   AnnotationAssertion(rdfs:comment :Employee "A person who does work.")
   SubClassOf(:Employee :Person)
   SubClassOf(:Employee :Worker)
-  DisjointClasses(:Person :Worker)
 )

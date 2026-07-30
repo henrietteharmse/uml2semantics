@@ -73,8 +73,9 @@ val argParser =
     opt[Unit]("no-global-disjointness")
       .action((_, c) => c.copy(globalDisjointness = false))
       .text("Disables the default behavior of making all classes that are not part of a generalization set " +
-        "mutually disjoint. Use this when a class has more than one parent, which global disjointness " +
-        "would render unsatisfiable."),
+        "mutually disjoint. Use this when the model is not meant to assume that classes denote disjoint " +
+        "sets at all; multiple inheritance alone does not need it, since classes that share a subclass " +
+        "are left out of the global axiom anyway."),
     opt[String]("overrides")
       .valueName("<XMI> | <TSV>")
       .validate(o =>

@@ -37,6 +37,8 @@ enum DiagnosticCode:
   case UnresolvableCurie
   /** A multiplicity of the form [*, n] — an unbounded minimum is meaningless. */
   case UnboundedMinMultiplicity
+  /** Ancestors of a multiply-inherited class were dropped from the global disjointness axiom. */
+  case GlobalDisjointnessRelaxed
   /** Enumeration TSV input was supplied, but enumeration parsing is not implemented. */
   case EnumerationInputIgnored
   /** No input file was supplied at all. */
