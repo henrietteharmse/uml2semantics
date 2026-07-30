@@ -3,8 +3,8 @@ Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
 
 Ontology(<https://uml2semantics.com/test/ontology>
 
-  # Only children are excluded from the global axiom. Person owns a generalization set but is
-  # still declared disjoint from Address, while its child Employee is left out.
+  # Having children does not exclude a class. Person is a root, so it is still declared disjoint
+  # from Address, while its child Employee is left out for having a parent.
   Declaration(Class(:Person))
   AnnotationAssertion(rdfs:label :Person "Person")
   AnnotationAssertion(rdfs:comment :Person "A human being.")

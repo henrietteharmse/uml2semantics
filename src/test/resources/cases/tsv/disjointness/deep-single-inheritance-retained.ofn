@@ -3,10 +3,10 @@ Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
 
 Ontology(<https://uml2semantics.com/test/ontology>
 
-  # Dog has two ancestors, Mammal and Animal, but only one of them is eligible for the global
-  # axiom — Mammal is excluded as a child. One class cannot contradict itself, so nothing is
-  # relaxed and Animal stays disjoint from Address. Counting ancestors alone would have wrongly
-  # relaxed every hierarchy deeper than two levels.
+  # Dog has two ancestors, Mammal and Animal, but only Animal is a root — Mammal has a parent of
+  # its own. One root cannot contradict itself, so nothing is relaxed and Animal stays disjoint
+  # from Address. Counting ancestors rather than root ancestors would have wrongly relaxed every
+  # hierarchy deeper than two levels.
   Declaration(Class(:Animal))
   AnnotationAssertion(rdfs:label :Animal "Animal")
   AnnotationAssertion(rdfs:comment :Animal "A living creature.")

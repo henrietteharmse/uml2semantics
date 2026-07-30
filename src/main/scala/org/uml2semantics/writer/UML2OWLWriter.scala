@@ -37,11 +37,13 @@ class UML2OWLWriter(ontologyIRI: String,
   private val allIncompleteOverlappingOWLClasses: mutable.Set[OWLClass] = mutable.Set[OWLClass]()
 
   /**
-   * All classes in a UML class diagram are disjoint by default, unless they are part of a generalization set. For
-   * generalization sets, disjointness are defined as part of generalization set and thus dealt with when the
-   * generalization set is processed.
+   * The classes that take part in the global disjointness axiom: those with no parents, less any that
+   * share a descendant with another root. A class with a parent is left out because disjointness within
+   * a hierarchy is the generalization set's business, and because a class is never disjoint from its own
+   * superclass. A class having *children* does not exclude it — that says nothing about how it relates
+   * to classes outside its hierarchy.
    */
-  private val disjointClassesNotPartOfGeneralizationSets: mutable.Set[OWLClass] = mutable.Set[OWLClass]()
+  private val rootClassesForGlobalDisjointness: mutable.Set[OWLClass] = mutable.Set[OWLClass]()
 
   /**
    * Creates an OWLClass for a UMLClass and annotates it with definition and label.
@@ -59,7 +61,7 @@ class UML2OWLWriter(ontologyIRI: String,
     if !allCompleteDisjointOWLClasses.contains(owlClass) && !allCompleteOverlappingOWLClasses.contains(owlClass) &&
       !allIncompleteDisjointOWLClasses.contains(owlClass) &&  !allIncompleteOverlappingOWLClasses.contains(owlClass)
     then
-      disjointClassesNotPartOfGeneralizationSets += owlClass
+      rootClassesForGlobalDisjointness += owlClass
 
     umlClass.children.setOfGeneralizationSets.foreach { generalizationSet =>
       (generalizationSet.coveringConstraint, generalizationSet.disjointConstraint) match
@@ -77,7 +79,7 @@ class UML2OWLWriter(ontologyIRI: String,
       createDefinitionAnnotation(owlClass, classDefinition.definition, errorMessages))
     createLabelAnnotation(owlClass, umlClass.classIdentity.getLabel, errorMessages)
     logger.trace(s"createAndAnnotateOWLClass: Done. allIncompleteOverlappingOWLClasses=$allIncompleteOverlappingOWLClasses, " +
-      s"disjointClassesNotPartOfGeneralizationSets=$disjointClassesNotPartOfGeneralizationSets ${Code.source}")
+      s"rootClassesForGlobalDisjointness=$rootClassesForGlobalDisjointness ${Code.source}")
     owlClass
 
   private def createAndAnnotateOWLAttribute(umlAttribute: UMLAttribute,
@@ -250,7 +252,7 @@ class UML2OWLWriter(ontologyIRI: String,
       val childClass = createOWLClass(child, errorMessages)
       completeDisjointOWLClasses += childClass
       allCompleteDisjointOWLClasses += childClass
-      disjointClassesNotPartOfGeneralizationSets -= childClass
+      rootClassesForGlobalDisjointness -= childClass
       completeDisjointClassesAsIRIs += childClass.getIRI
       createOWLSubClassAxiom(childClass, owlClass, errorMessages)
     }
@@ -267,7 +269,7 @@ class UML2OWLWriter(ontologyIRI: String,
       val childClass: OWLClass = createOWLClass(child, errorMessages)
       completeOverlappingOWLClasses += childClass
       allCompleteOverlappingOWLClasses += childClass
-      disjointClassesNotPartOfGeneralizationSets -= childClass
+      rootClassesForGlobalDisjointness -= childClass
       completeOverlappingClassesAsIRIs += childClass.getIRI
       createOWLSubClassAxiom(childClass, owlClass, errorMessages)
     }
@@ -284,7 +286,7 @@ class UML2OWLWriter(ontologyIRI: String,
       val childClass = createOWLClass(child, errorMessages)
       incompleteDisjointOWLClasses += childClass
       allIncompleteDisjointOWLClasses += childClass
-      disjointClassesNotPartOfGeneralizationSets -= childClass
+      rootClassesForGlobalDisjointness -= childClass
       incompleteDisjointClassesAsIRIs += childClass.getIRI
       createOWLSubClassAxiom(childClass, owlClass, errorMessages)
     }
@@ -300,7 +302,7 @@ class UML2OWLWriter(ontologyIRI: String,
     generalizationSet.generalizationSet.foreach { child =>
       val childClass = createOWLClass(child, errorMessages)
       allIncompleteOverlappingOWLClasses += childClass
-      disjointClassesNotPartOfGeneralizationSets -= childClass
+      rootClassesForGlobalDisjointness -= childClass
       incompleteOverlappingClassesAsIRIs += childClass.getIRI
       createOWLSubClassAxiom(childClass, owlClass, errorMessages)
     }
@@ -357,19 +359,21 @@ class UML2OWLWriter(ontologyIRI: String,
     owlClass
 
   /**
-   * Drops from the global disjointness axiom any class that shares a subclass with another member of
-   * that axiom. Two classes declared disjoint cannot have a common subclass — the subclass would be
-   * unsatisfiable — and excluding a generalization set's children only covers the direct parent-child
-   * pair, where the shared subclass is the child itself. Two ancestors of the same class are the case
-   * left over, and they are what this removes.
+   * Enforces the second half of the global disjointness rule: root classes are mutually disjoint
+   * *except where two roots share a descendant*. Two classes declared disjoint cannot have a common
+   * subclass, or that subclass is unsatisfiable, and two roots can perfectly well share one. Those
+   * roots are what this removes.
    *
-   * Eligibility is read from a snapshot taken before anything is removed, so the result does not
-   * depend on the order classes happen to be visited in. All of a class's eligible ancestors are
+   * Descendants, not children: a root can contradict another through a grandchild, so the test is
+   * whether a class has more than one root among its *ancestors*. Where it does, all of them are
    * dropped rather than the one that would suffice, because which one to keep would be arbitrary.
-   * Single inheritance is untouched however deep it runs: a chain leaves only its root eligible, and
-   * one class cannot contradict itself.
+   * Single inheritance is untouched however deep it runs — a chain has exactly one root, and one
+   * class cannot contradict itself.
+   *
+   * Membership is read from a snapshot taken before anything is removed. Being a root is static, so
+   * this changes no outcome; it only keeps the loop from reading a set it is modifying.
    */
-  private def relaxGlobalDisjointnessForSharedSubclasses(): Unit =
+  private def relaxGlobalDisjointnessForSharedDescendants(): Unit =
     val parentIRIsByChildIRI = mutable.Map[String, mutable.Set[String]]()
     val labelsByIRI = mutable.Map[String, String]()
     classes.foreach { umlClass =>
@@ -391,15 +395,15 @@ class UML2OWLWriter(ontologyIRI: String,
           pending.pushAll(parentIRIsByChildIRI.getOrElse(ancestor, mutable.Set[String]()))
       ancestors.toSet
 
-    val eligibleIRIs = disjointClassesNotPartOfGeneralizationSets.map(_.getIRI.toString).toSet
-    parentIRIsByChildIRI.keys.toSeq.sorted.foreach { childIRI =>
-      val contradictoryAncestorIRIs = ancestorsOf(childIRI).intersect(eligibleIRIs)
-      if contradictoryAncestorIRIs.size > 1 then
-        contradictoryAncestorIRIs.foreach(ancestorIRI =>
-          disjointClassesNotPartOfGeneralizationSets -= dataFactory.getOWLClass(ancestorIRI))
-        val childLabel = labelsByIRI.getOrElse(childIRI, childIRI)
-        val ancestorLabels = contradictoryAncestorIRIs.toSeq
-          .map(ancestorIRI => labelsByIRI.getOrElse(ancestorIRI, ancestorIRI)).sorted
+    val rootIRIs = rootClassesForGlobalDisjointness.map(_.getIRI.toString).toSet
+    parentIRIsByChildIRI.keys.toSeq.sorted.foreach { descendantIRI =>
+      val contradictoryRootIRIs = ancestorsOf(descendantIRI).intersect(rootIRIs)
+      if contradictoryRootIRIs.size > 1 then
+        contradictoryRootIRIs.foreach(rootIRI =>
+          rootClassesForGlobalDisjointness -= dataFactory.getOWLClass(rootIRI))
+        val childLabel = labelsByIRI.getOrElse(descendantIRI, descendantIRI)
+        val ancestorLabels = contradictoryRootIRIs.toSeq
+          .map(rootIRI => labelsByIRI.getOrElse(rootIRI, rootIRI)).sorted
         diagnostics.warn(DiagnosticCode.GlobalDisjointnessRelaxed,
           s"$childLabel inherits from ${ancestorLabels.mkString(" and ")}, which the default disjointness " +
             s"assumption would have declared mutually disjoint, making $childLabel unsatisfiable. They were " +
@@ -450,8 +454,8 @@ class UML2OWLWriter(ontologyIRI: String,
     classes.foreach(umlClass =>
         val owlClass = createAndAnnotateOWLClass(umlClass, errorMessages))
     if globalDisjointness then
-      relaxGlobalDisjointnessForSharedSubclasses()
-      createOWLDisjointClassesAxiom(disjointClassesNotPartOfGeneralizationSets, errorMessages)
+      relaxGlobalDisjointnessForSharedDescendants()
+      createOWLDisjointClassesAxiom(rootClassesForGlobalDisjointness, errorMessages)
     logger.info("processUMLClasses: Done")
     errorMessages
   end processUMLClasses

@@ -3,8 +3,8 @@ Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
 
 Ontology(<https://uml2semantics.com/test/ontology>
 
-  # Relaxation is confined to the classes that would contradict each other. Person and Worker are
-  # dropped because they share the subclass Employee, but Address and Country share nothing with
+  # Relaxation is confined to the roots that would contradict each other. Person and Worker are
+  # dropped because they share the descendant Employee, but Address and Country share nothing with
   # anyone and stay disjoint. This is what distinguishes the rule from excluding every parent.
   Declaration(Class(:Person))
   AnnotationAssertion(rdfs:label :Person "Person")

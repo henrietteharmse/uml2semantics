@@ -3,10 +3,10 @@ Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
 
 Ontology(<https://uml2semantics.com/test/ontology>
 
-  # The contradiction reaches past direct parents. Dog inherits from Mammal and Pet, but Mammal is
-  # excluded as a child, so the pair that would have been declared disjoint is Animal and Pet —
-  # and Animal is Dog's grandparent, not its parent. Both are dropped; Address and Country, which
-  # share nothing with Dog, keep their disjointness.
+  # A shared descendant, not a shared child. Dog inherits from Mammal and Pet, but Mammal is not a
+  # root, so the two roots that would have been declared disjoint are Animal and Pet — and Animal
+  # is Dog's grandparent. Both are dropped; Address and Country, which share nothing with Dog,
+  # keep their disjointness.
   Declaration(Class(:Animal))
   AnnotationAssertion(rdfs:label :Animal "Animal")
   AnnotationAssertion(rdfs:comment :Animal "A living creature.")
