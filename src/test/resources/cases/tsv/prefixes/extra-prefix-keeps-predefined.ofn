@@ -1,0 +1,24 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # -x replaces the prefix list rather than adding to it, but xsd, rdf, rdfs and owl remain
+  # resolvable regardless, so a datatype still works alongside a newly supplied prefix.
+  Declaration(Class(<https://uml2semantics.com/test/ontology/Person>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Person> "Person")
+  AnnotationAssertion(rdfs:comment <https://uml2semantics.com/test/ontology/Person> "A human being.")
+  Declaration(DataProperty(<https://uml2semantics.com/test/ontology/Person#name>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Person#name> "name")
+  AnnotationAssertion(rdfs:comment <https://uml2semantics.com/test/ontology/Person#name> "The name of a person.")
+  DataPropertyDomain(<https://uml2semantics.com/test/ontology/Person#name> <https://uml2semantics.com/test/ontology/Person>)
+  DataPropertyRange(<https://uml2semantics.com/test/ontology/Person#name> xsd:string)
+  SubClassOf(<https://uml2semantics.com/test/ontology/Person> DataExactCardinality(1 <https://uml2semantics.com/test/ontology/Person#name> xsd:string))
+  Declaration(ObjectProperty(<https://uml2semantics.com/test/ontology/Person#knows>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Person#knows> "knows")
+  AnnotationAssertion(rdfs:comment <https://uml2semantics.com/test/ontology/Person#knows> "Someone this person knows.")
+  ObjectPropertyDomain(<https://uml2semantics.com/test/ontology/Person#knows> <https://uml2semantics.com/test/ontology/Person>)
+  ObjectPropertyRange(<https://uml2semantics.com/test/ontology/Person#knows> <https://schema.org/Person>)
+  Declaration(Class(<https://schema.org/Person>))
+)

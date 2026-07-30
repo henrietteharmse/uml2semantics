@@ -1,0 +1,22 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # A type that is neither a datatype, a known class nor a curie becomes a placeholder class,
+  # built on the fly. It has no definition, and it counts towards global disjointness.
+  Declaration(Class(:Person))
+  AnnotationAssertion(rdfs:label :Person "Person")
+  AnnotationAssertion(rdfs:comment :Person "A human being.")
+  Declaration(Class(:Widget))
+  AnnotationAssertion(rdfs:label :Widget "Widget")
+  Declaration(ObjectProperty(<https://uml2semantics.com/test/ontology/Person#gadget>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Person#gadget> "gadget")
+  AnnotationAssertion(rdfs:comment <https://uml2semantics.com/test/ontology/Person#gadget> "A gadget the person owns.")
+  ObjectPropertyDomain(<https://uml2semantics.com/test/ontology/Person#gadget> :Person)
+  ObjectPropertyRange(<https://uml2semantics.com/test/ontology/Person#gadget> :Widget)
+  SubClassOf(:Person ObjectExactCardinality(1 <https://uml2semantics.com/test/ontology/Person#gadget> owl:Thing))
+  DisjointClasses(:Person :Widget)
+)

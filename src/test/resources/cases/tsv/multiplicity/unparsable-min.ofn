@@ -1,0 +1,17 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # An unparsable cardinality warns and falls back to 1, so the attribute survives as [1,5].
+  Declaration(Class(:Person))
+  AnnotationAssertion(rdfs:label :Person "Person")
+  AnnotationAssertion(rdfs:comment :Person "A human being.")
+  Declaration(DataProperty(<https://uml2semantics.com/test/ontology/Person#value>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Person#value> "value")
+  AnnotationAssertion(rdfs:comment <https://uml2semantics.com/test/ontology/Person#value> "A value of a person.")
+  DataPropertyDomain(<https://uml2semantics.com/test/ontology/Person#value> :Person)
+  DataPropertyRange(<https://uml2semantics.com/test/ontology/Person#value> xsd:string)
+  SubClassOf(:Person ObjectIntersectionOf(DataMinCardinality(1 <https://uml2semantics.com/test/ontology/Person#value> xsd:string) DataMaxCardinality(5 <https://uml2semantics.com/test/ontology/Person#value> xsd:string)))
+)

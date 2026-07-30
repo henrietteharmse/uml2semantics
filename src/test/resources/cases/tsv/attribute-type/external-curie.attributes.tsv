@@ -1,0 +1,2 @@
+Class	Curie	Name	ClassEnumOrPrimitiveType	MinMultiplicity	MaxMultiplicity	Definition
+Person		knows	schema:Person	0	*	Someone this person knows.

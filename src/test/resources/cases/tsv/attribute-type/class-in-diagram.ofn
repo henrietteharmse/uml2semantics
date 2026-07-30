@@ -1,0 +1,23 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # A type naming a class in the diagram makes the attribute an object property. Object
+  # property restrictions range over owl:Thing, not over the range class.
+  Declaration(Class(:Employer))
+  AnnotationAssertion(rdfs:label :Employer "Employer")
+  AnnotationAssertion(rdfs:comment :Employer "A person who employs people.")
+  Declaration(Class(:Employee))
+  AnnotationAssertion(rdfs:label :Employee "Employee")
+  AnnotationAssertion(rdfs:comment :Employee "A person who does work.")
+  Declaration(ObjectProperty(<https://uml2semantics.com/test/ontology/Employer#employs>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Employer#employs> "employs")
+  AnnotationAssertion(rdfs:comment <https://uml2semantics.com/test/ontology/Employer#employs> "An employer employs one or more employees.")
+  ObjectPropertyDomain(<https://uml2semantics.com/test/ontology/Employer#employs> :Employer)
+  ObjectPropertyRange(<https://uml2semantics.com/test/ontology/Employer#employs> :Employee)
+  SubClassOf(:Employer ObjectMinCardinality(1 <https://uml2semantics.com/test/ontology/Employer#employs> owl:Thing))
+  DisjointClasses(:Employer :Employee)
+)

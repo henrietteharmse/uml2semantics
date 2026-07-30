@@ -1,0 +1,12 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # A name-only identity mints its IRI under the ontology prefix, and labels itself with the name.
+  Declaration(Class(:Person))
+  AnnotationAssertion(rdfs:label :Person "Person")
+  AnnotationAssertion(rdfs:comment :Person "A human being.")
+
+  # Global disjointness needs at least two eligible classes, so no DisjointClasses axiom here.
+)

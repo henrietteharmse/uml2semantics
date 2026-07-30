@@ -1,0 +1,10 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # With both halves present the curie wins the IRI and the name wins the label.
+  Declaration(Class(:Human))
+  AnnotationAssertion(rdfs:label :Human "Person")
+  AnnotationAssertion(rdfs:comment :Human "A human being.")
+)

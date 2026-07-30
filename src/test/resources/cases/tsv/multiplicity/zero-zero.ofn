@@ -1,0 +1,18 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # [0,0] is excluded from the exact-cardinality rule, so it falls through to a max of 0 —
+  # which says the property may not be used at all.
+  Declaration(Class(:Person))
+  AnnotationAssertion(rdfs:label :Person "Person")
+  AnnotationAssertion(rdfs:comment :Person "A human being.")
+  Declaration(DataProperty(<https://uml2semantics.com/test/ontology/Person#value>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Person#value> "value")
+  AnnotationAssertion(rdfs:comment <https://uml2semantics.com/test/ontology/Person#value> "A value of a person.")
+  DataPropertyDomain(<https://uml2semantics.com/test/ontology/Person#value> :Person)
+  DataPropertyRange(<https://uml2semantics.com/test/ontology/Person#value> xsd:string)
+  SubClassOf(:Person DataMaxCardinality(0 <https://uml2semantics.com/test/ontology/Person#value> xsd:string))
+)

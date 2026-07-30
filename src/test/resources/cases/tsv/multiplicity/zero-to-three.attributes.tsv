@@ -1,0 +1,2 @@
+Class	Curie	Name	ClassEnumOrPrimitiveType	MinMultiplicity	MaxMultiplicity	Definition
+Person		value	xsd:string	0	3	A value of a person.

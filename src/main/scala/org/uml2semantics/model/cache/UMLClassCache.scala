@@ -1,5 +1,6 @@
 package org.uml2semantics.model.cache
 
+import org.uml2semantics.diagnostics.{DiagnosticCode, UMLModelException}
 import org.uml2semantics.model.UMLClassIdentity.ClassIdentityBuilder
 import org.uml2semantics.model.{PrefixNamespace, UMLClass, UMLClassCurie, UMLClassDefinition, UMLClassIdentifier, UMLClassIdentity, UMLClassName}
 
@@ -46,7 +47,10 @@ object ClassIdentityBuilderCache:
     (UMLClassCurie(name), UMLClassName(name)) match
       case (Some(curie), _) => classIdentityByClassCurie.get(curie)
       case (_, Some(className)) => classIdentityByClassName.get(className)
-      case _ => throw new IllegalArgumentException(
+      case _ if name.isBlank =>
+        throw new UMLModelException(DiagnosticCode.BlankIdentity,
+          "A class needs a name or a curie; a blank identifier was given.")
+      case _ => throw new UMLModelException(DiagnosticCode.UnresolvableCurie,
         s"Could not interpret '$name' as a class name or curie. If it is intended to be a curie, its prefix " +
           s"must be configured via the -p or -x command line options.")
 

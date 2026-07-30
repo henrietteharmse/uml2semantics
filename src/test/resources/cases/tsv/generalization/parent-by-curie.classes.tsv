@@ -1,0 +1,3 @@
+Name	Curie	Definition	Parents
+	t:Human	A human being.	
+Employee		A person who does work.	t:Human

@@ -1,0 +1,15 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # A parent may be referenced by curie rather than by name; the two halves of an identity are
+  # interchangeable as references.
+  Declaration(Class(:Human))
+  AnnotationAssertion(rdfs:label :Human "t:Human")
+  AnnotationAssertion(rdfs:comment :Human "A human being.")
+  Declaration(Class(:Employee))
+  AnnotationAssertion(rdfs:label :Employee "Employee")
+  AnnotationAssertion(rdfs:comment :Employee "A person who does work.")
+  SubClassOf(:Employee :Human)
+)

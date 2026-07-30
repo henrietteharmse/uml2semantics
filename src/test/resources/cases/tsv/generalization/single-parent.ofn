@@ -1,0 +1,17 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # TSV cannot express covering or disjointness, so a generalization set from TSV is always
+  # {incomplete, overlapping} and yields subclass axioms and nothing else.
+  Declaration(Class(:Person))
+  AnnotationAssertion(rdfs:label :Person "Person")
+  AnnotationAssertion(rdfs:comment :Person "A human being.")
+  Declaration(Class(:Employee))
+  AnnotationAssertion(rdfs:label :Employee "Employee")
+  AnnotationAssertion(rdfs:comment :Employee "A person who does work.")
+  SubClassOf(:Employee :Person)
+
+  # Only Person is eligible for global disjointness, and one class is too few for the axiom.
+)

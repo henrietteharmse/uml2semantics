@@ -1,0 +1,19 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # Two siblings, and still no DisjointClasses between them: an incomplete overlapping
+  # generalization set says nothing about how its children relate to each other.
+  Declaration(Class(:Person))
+  AnnotationAssertion(rdfs:label :Person "Person")
+  AnnotationAssertion(rdfs:comment :Person "A human being.")
+  Declaration(Class(:Employer))
+  AnnotationAssertion(rdfs:label :Employer "Employer")
+  AnnotationAssertion(rdfs:comment :Employer "A person who employs people.")
+  Declaration(Class(:Employee))
+  AnnotationAssertion(rdfs:label :Employee "Employee")
+  AnnotationAssertion(rdfs:comment :Employee "A person who does work.")
+  SubClassOf(:Employer :Person)
+  SubClassOf(:Employee :Person)
+)

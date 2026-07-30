@@ -1,0 +1,21 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # A curie that is not a supported datatype and names no class in the diagram denotes an
+  # external class. Run with -x so the schema prefix resolves. [0,*] yields no restriction.
+  # The external class picks up a declaration through RDF/XML serialisation, but no label or
+  # definition: nothing is known about it beyond its IRI.
+  Declaration(Class(:Person))
+  AnnotationAssertion(rdfs:label :Person "Person")
+  AnnotationAssertion(rdfs:comment :Person "A human being.")
+  Declaration(ObjectProperty(<https://uml2semantics.com/test/ontology/Person#knows>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Person#knows> "knows")
+  AnnotationAssertion(rdfs:comment <https://uml2semantics.com/test/ontology/Person#knows> "Someone this person knows.")
+  ObjectPropertyDomain(<https://uml2semantics.com/test/ontology/Person#knows> :Person)
+  ObjectPropertyRange(<https://uml2semantics.com/test/ontology/Person#knows> <https://schema.org/Person>)
+  Declaration(Class(<https://schema.org/Person>))
+)

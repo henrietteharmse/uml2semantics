@@ -9,7 +9,7 @@ uml2semantics converts UML class diagrams into OWL 2 ontologies. It accepts inpu
 ## Build & Run Commands
 
 - **Compile**: `sbt clean compile`
-- **Test**: `sbt test` (munit; integration test compares generated ontologies semantically against expected outputs in `src/test/resources/scenarios/`)
+- **Test**: `sbt test` (munit). Two kinds of test, both driving the real CLI entry point: *cases* in `src/test/resources/cases/<format>/<group>/` isolate one behaviour each against a hand-authored golden in OWL Functional Syntax, and *scenarios* in `src/test/resources/scenarios/` check that a realistic model composes. Suites run sequentially because the model caches are global mutable singletons — see `src/test/CONTEXT.md`.
 - **Build assembly JAR**: `sbt assembly` (outputs `target/scala-3.6.3/uml2semantics.jar`)
 - **Run**: `java -jar target/scala-3.6.3/uml2semantics.jar [options]`
 - **Manual test**: `./runTest.sh` (runs a sample XMI-to-OWL conversion)

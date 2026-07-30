@@ -6,6 +6,7 @@ import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat
 import org.semanticweb.owlapi.model.*
 import org.semanticweb.owlapi.model.parameters.ChangeApplied
 import org.semanticweb.owlapi.model.parameters.ChangeApplied.UNSUCCESSFULLY
+import org.uml2semantics.diagnostics.{Diagnostic, DiagnosticCode, Diagnostics}
 import org.uml2semantics.inline.Code
 import org.uml2semantics.model.*
 import org.uml2semantics.model.SupportedDataType.getIRI
@@ -22,6 +23,7 @@ class UML2OWLWriter(ontologyIRI: String,
                     globalDisjointness: Boolean = true):
 
   private val logger = Logger("UML2OWLWriter")
+  private val diagnostics = new Diagnostics
   private val manager = OWLManager.createOWLOntologyManager
   private val ontology = manager.createOntology(IRI.create(ontologyIRI))
   private val dataFactory = manager.getOWLDataFactory
@@ -180,9 +182,9 @@ class UML2OWLWriter(ontologyIRI: String,
         if manager.addAxiom(ontology, axiom) == UNSUCCESSFULLY then
           errorMessages += s"Could not add subclass axiom representing cardinalities for [$minCardinality, *] " +
             s"${umlAttribute.attributeIdentity.getLabel}"
-      case UMLMultiplicity(UMLInfiniteCardinality(_), UMLNonNegativeCardinality(maxCardinality)) =>
-        errorMessages += s"Multiplicity error found with multiplicity = [*, $maxCardinality] for attribute = " +
-          s"${umlAttribute.attributeIdentity.getLabel}."
+      // Unreachable: an unbounded min fails the model's multiplicity invariant, which reports
+      // UnboundedMinMultiplicity and substitutes [0,*]. Kept for exhaustivity.
+      case UMLMultiplicity(UMLInfiniteCardinality(_), UMLNonNegativeCardinality(_)) =>
       case UMLMultiplicity(UMLNonNegativeCardinality(_), UMLInfiniteCardinality(_)) =>
       case UMLMultiplicity(UMLInfiniteCardinality(_), UMLInfiniteCardinality(_)) =>
     errorMessages
@@ -216,9 +218,9 @@ class UML2OWLWriter(ontologyIRI: String,
         if manager.addAxiom(ontology, axiom) == UNSUCCESSFULLY then
           errorMessages += s"Could not add subclass axiom representing cardinalities for [$minCardinality, *] " +
             s"${umlAttribute.attributeIdentity.getLabel}"
-      case UMLMultiplicity(UMLInfiniteCardinality(_), UMLNonNegativeCardinality(maxCardinality)) =>
-        errorMessages += s"Multiplicity error found with multiplicity = [*, $maxCardinality] for attribute = " +
-          s"${umlAttribute.attributeIdentity.getLabel}."
+      // Unreachable: an unbounded min fails the model's multiplicity invariant, which reports
+      // UnboundedMinMultiplicity and substitutes [0,*]. Kept for exhaustivity.
+      case UMLMultiplicity(UMLInfiniteCardinality(_), UMLNonNegativeCardinality(_)) =>
       case UMLMultiplicity(UMLNonNegativeCardinality(_), UMLInfiniteCardinality(_)) =>
       case UMLMultiplicity(UMLInfiniteCardinality(_), UMLInfiniteCardinality(_)) =>
 
@@ -400,19 +402,25 @@ class UML2OWLWriter(ontologyIRI: String,
 
 
 
-  def generateOWL: Either[String, ListBuffer[String]] =
+  /**
+   * Builds the ontology and writes it to the output file, returning everything that went wrong.
+   * A failed axiom does not abort the run: the axiom is dropped, a diagnostic is recorded, and
+   * the rest of the ontology is still written.
+   */
+  def generateOWL: Seq[Diagnostic] =
     logger.info("generateOWL: Start")
     val errorMessages = new ListBuffer[String]()
     errorMessages.appendAll(processUMLClasses)
     errorMessages.appendAll(processUMLAttributes)
+    errorMessages.foreach(diagnostics.error(DiagnosticCode.AxiomAdditionFailed, _))
     try
       manager.saveOntology(ontology, new RDFXMLDocumentFormat(), IRI.create(owlOntologyFile))
-      logger.info("generateOWL: Done")
-      Right(errorMessages)
     catch
       case e: OWLOntologyStorageException =>
-        logger.info("generateOWL: Done")
-        Left(e.getMessage)
+        diagnostics.error(DiagnosticCode.OntologySaveFailed,
+          s"Could not save the ontology to $owlOntologyFile: ${e.getMessage}")
+    logger.info("generateOWL: Done")
+    diagnostics.toSeq
   end generateOWL
   
 end UML2OWLWriter

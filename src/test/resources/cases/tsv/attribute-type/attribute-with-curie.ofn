@@ -1,0 +1,19 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # An attribute curie expands to give the property its IRI, bypassing minting, while the name
+  # still supplies the label.
+  Declaration(Class(:Person))
+  AnnotationAssertion(rdfs:label :Person "Person")
+  AnnotationAssertion(rdfs:comment :Person "A human being.")
+  Declaration(DataProperty(<https://uml2semantics.com/test/ontology/hasName>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/hasName> "name")
+  AnnotationAssertion(rdfs:comment <https://uml2semantics.com/test/ontology/hasName> "The name of a person.")
+  DataPropertyDomain(<https://uml2semantics.com/test/ontology/hasName> :Person)
+  DataPropertyRange(<https://uml2semantics.com/test/ontology/hasName> xsd:string)
+  SubClassOf(:Person DataExactCardinality(1 <https://uml2semantics.com/test/ontology/hasName> xsd:string))
+)

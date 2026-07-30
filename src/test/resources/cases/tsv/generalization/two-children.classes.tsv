@@ -1,0 +1,4 @@
+Name	Curie	Definition	Parents
+Person		A human being.	
+Employer		A person who employs people.	Person
+Employee		A person who does work.	Person

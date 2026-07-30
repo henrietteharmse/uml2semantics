@@ -1,0 +1,2 @@
+Class	Curie	Name	ClassEnumOrPrimitiveType	MinMultiplicity	MaxMultiplicity	Definition
+Person		gadget	nope:Widget	1	1	A gadget the person owns.

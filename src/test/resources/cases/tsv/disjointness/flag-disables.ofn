@@ -1,0 +1,14 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # The same input run with --no-global-disjointness: the default assumption is switched off
+  # entirely, so nothing is declared disjoint.
+  Declaration(Class(:Person))
+  AnnotationAssertion(rdfs:label :Person "Person")
+  AnnotationAssertion(rdfs:comment :Person "A human being.")
+  Declaration(Class(:Address))
+  AnnotationAssertion(rdfs:label :Address "Address")
+  AnnotationAssertion(rdfs:comment :Address "Where something is located.")
+)

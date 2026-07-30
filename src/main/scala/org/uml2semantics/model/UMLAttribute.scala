@@ -1,6 +1,7 @@
 package org.uml2semantics.model
 
 import com.typesafe.scalalogging.Logger
+import org.uml2semantics.diagnostics.{DiagnosticCode, Diagnostics, SourceLocation, UMLModelException}
 import org.uml2semantics.inline.Code
 import org.uml2semantics.model.UMLCardinality.>=
 import org.uml2semantics.model.cache.{AttributeBuilderCache, AttributeIdentityBuilderCache, ClassBuilderCache}
@@ -39,13 +40,13 @@ case class UMLAttributeIdentity(classIdentity: UMLClassIdentity,
         iri + (if iri.matches(".*#$") then classIdentity.getLabel + PATH_SEPARATOR + name.getName
           else if iri.matches(".*/$") then classIdentity.getLabel + FRAGMENT_SEPARATOR + name.getName
           else  s"$PATH_SEPARATOR" + classIdentity.getLabel + FRAGMENT_SEPARATOR + name.getName)
-      case _ => throw new IllegalArgumentException("Name and curie must not be empty.")
+      case _ => throw new UMLModelException(DiagnosticCode.BlankIdentity, "Name and curie must not be empty.")
 
   def getLabel: String =
     (curieOption, nameOption) match
       case (_, Some(name)) => name.getName
       case (Some(curie), _) => curie.getName
-      case _ => throw new IllegalArgumentException("Name and curie must not be empty.")
+      case _ => throw new UMLModelException(DiagnosticCode.BlankIdentity, "Name and curie must not be empty.")
 
 object UMLAttributeIdentity:
   def apply(classIdentity: UMLClassIdentity, attributeIdentifier: String): UMLAttributeIdentity =
@@ -53,7 +54,7 @@ object UMLAttributeIdentity:
       UMLAttributeName(classIdentity.getClassIdentifier, attributeIdentifier)) match
       case (Some(curie), _) => UMLAttributeIdentity(classIdentity, None, Some(curie))
       case (_, Some(name)) => UMLAttributeIdentity(classIdentity, Some(name), None)
-      case _ => throw new IllegalArgumentException(
+      case _ => throw new UMLModelException(DiagnosticCode.UnresolvableCurie,
         s"Could not interpret '$attributeIdentifier' as an attribute name or curie. If it is intended to be a " +
           s"curie, its prefix must be configured via the -p or -x command line options.")
       
@@ -105,16 +106,25 @@ object UMLAttributeIdentity:
       val classIdentity = classIdentityBuilder.build
 
       if nameOption.isEmpty && curieOption.isEmpty then
-        throw new IllegalArgumentException("Name and curie must not be empty.")
+        throw new UMLModelException(DiagnosticCode.BlankIdentity, "Name and curie must not be empty.")
 
       val attributeNameOption: Option[UMLAttributeName] = nameOption.flatMap(UMLAttributeName(
         classIdentity.getClassIdentifier, _))
       val attributeCurieOption: Option[UMLAttributeCurie] = curieOption.flatMap(UMLAttributeCurie(
         classIdentity.getClassIdentifier, _))
       if attributeNameOption.isEmpty && attributeCurieOption.isEmpty then
-        throw new IllegalArgumentException(
-          s"Could not interpret '${curieOption.orElse(nameOption).get}' as an attribute name or curie. If it is " +
-            s"intended to be a curie, its prefix must be configured via the -p or -x command line options.")
+        (nameOption.filterNot(_.isBlank), curieOption.filterNot(_.isBlank)) match
+          case (None, None) =>
+            throw new UMLModelException(DiagnosticCode.BlankIdentity,
+              "An attribute needs a name or a curie; both were blank.")
+          case (Some(nameWithColon), None) =>
+            throw new UMLModelException(DiagnosticCode.NameContainsColon,
+              s"Could not interpret '$nameWithColon' as an attribute name, because a name may not contain a colon. " +
+                s"If it is intended to be a curie, put it in the Curie column.")
+          case (_, Some(unresolvableCurie)) =>
+            throw new UMLModelException(DiagnosticCode.UnresolvableCurie,
+              s"Could not interpret '$unresolvableCurie' as a curie. Its prefix must be configured via the -p or " +
+                s"-x command line options.")
       val thisAttributeIdentity: UMLAttributeIdentity = UMLAttributeIdentity(classIdentity, attributeNameOption, attributeCurieOption)
       if attributeNameOption.isDefined && attributeCurieOption.isDefined then
         AttributeIdentityBuilderCache.cacheUMLAttributeIdentity(thisAttributeIdentity,  this)
@@ -158,15 +168,26 @@ case class UMLNonNegativeCardinality(nonNegativeInteger: UMLNonNegativeInteger) 
 object UMLCardinality:
   private val logger = Logger[this.type]
 
-  def apply(s: String): UMLCardinality =
+  private val One = UMLNonNegativeCardinality(UMLNonNegativeInteger(1))
+
+  /**
+   * A cardinality defaults to 1 when it is unspecified, in line with the UML specification,
+   * and also when it cannot be parsed — a typo degrades to the default rather than losing the
+   * attribute. The unparsable case is reported as a warning so the modeller can find the typo.
+   */
+  def apply(s: String,
+            diagnostics: Diagnostics = Diagnostics.discarding,
+            location: Option[SourceLocation] = None): UMLCardinality =
     logger.debug(s"s=$s ${Code.source}")
     s match
       case UMLNonNegativeInteger(i) => UMLNonNegativeCardinality(i)
       case UMLInfinite() => UMLInfiniteCardinality(UMLInfinite())
-      // An unspecified cardinality defaults to 1, in line with the UML specification.
-      case _ if s.isBlank => UMLNonNegativeCardinality(UMLNonNegativeInteger(1))
-      case _ => throw new IllegalArgumentException(
-        s"Invalid cardinality '$s'. Expected a non-negative integer or '*'.")
+      case _ if s.isBlank => One
+      case _ =>
+        val message = s"Could not read '$s' as a cardinality; expected a non-negative integer or '*'. Using 1."
+        logger.warn(message)
+        diagnostics.warn(DiagnosticCode.UnparsableCardinality, message, location)
+        One
 
   def >=(c1: UMLCardinality, c2: UMLCardinality): Boolean =
     logger.debug(s"c1=$c1, c2=$c2 ${Code.source}")
@@ -194,12 +215,34 @@ object UMLMultiplicity:
     logger.debug(s"${Code.source}")
     new UMLMultiplicity()
 
-  def apply(min: UMLCardinality, max: UMLCardinality): UMLMultiplicity =
+  /** [0,*] — the multiplicity that constrains nothing, and so asserts nothing. */
+  private val Unconstrained =
+    new UMLMultiplicity(UMLNonNegativeCardinality(UMLNonNegativeInteger(0)), UMLInfiniteCardinality(UMLInfinite()))
+
+  /**
+   * An unusable multiplicity costs the attribute its cardinality restriction, not its existence.
+   * The pair falls back to [0,*] — asserting nothing about cardinality — and the attribute keeps its
+   * type, its bounds' owner, its label and its definition. Asserting no cardinality is weaker than
+   * the modeller intended; asserting a repaired one would be a constraint they never wrote, and a
+   * wrong exact cardinality can make otherwise sound instance data inconsistent.
+   */
+  def apply(min: UMLCardinality, max: UMLCardinality,
+            diagnostics: Diagnostics, location: Option[SourceLocation]): UMLMultiplicity =
     logger.debug(s"min=$min, max=$max ${Code.source}")
-    require(>=(max, min),
-      s"""Max cardinality must be greater or equal than min cardinality,
-         but "min=$min" and "max=$max" found.""")
-    new UMLMultiplicity(min, max)
+    (min, max) match
+      case (UMLInfiniteCardinality(_), UMLNonNegativeCardinality(maxCardinality)) =>
+        val message = s"An unbounded min cardinality is meaningless: [*, $maxCardinality] asserts no " +
+          s"cardinality restriction."
+        logger.error(message)
+        diagnostics.error(DiagnosticCode.UnboundedMinMultiplicity, message, location)
+        Unconstrained
+      case _ if !(>=(max, min)) =>
+        val message = s"Max cardinality must be greater than or equal to min cardinality, but min=$min " +
+          s"and max=$max found; no cardinality restriction is asserted."
+        logger.error(message)
+        diagnostics.error(DiagnosticCode.MaxBelowMin, message, location)
+        Unconstrained
+      case _ => new UMLMultiplicity(min, max)
 
 sealed trait UMLAttributeType
 case class UMLXMLDataType(attributeType: SupportedDataType) extends UMLAttributeType
@@ -211,6 +254,12 @@ object UMLAttributeType:
 
   def apply(attributeTypeName: String, ontologyPrefix: PrefixNamespace): UMLAttributeType =
     logger.debug(s"s=$attributeTypeName ${Code.source}")
+    // Precondition guard. A blank type is handled by AttributeBuilder.withType, which is the only
+    // place that can express "no type"; without this, resolution would fall through to building a
+    // class from the blank string and report a blank *class identity* — the wrong column entirely.
+    if attributeTypeName.isBlank then
+      throw new UMLModelException(DiagnosticCode.BlankAttributeType,
+        "An attribute needs a type; a blank type matches no datatype, no class and no curie.")
     val curieOption = Curie.fromString(attributeTypeName)
     val attributeType = curieOption.flatMap(curie => SupportedDataType(curie))
       .orElse(ClassBuilderCache.getUMLClass(attributeTypeName))
@@ -275,14 +324,31 @@ object UMLAttribute:
       this.typeOfAttribute = Some(attributeType)
       this
 
-    def withType(attributeType: String): AttributeBuilder =
-      this.typeOfAttribute = Some(UMLAttributeType(attributeType, prefixNamespace))
+    /**
+     * A blank type leaves the attribute genuinely untyped rather than rejecting it. Two kinds of
+     * modeller use this tool: one converting a finished UML diagram, for whom a missing type is an
+     * omission, and one drafting an ontology through UML because they are not fluent in OWL, for
+     * whom an untyped attribute is a legitimate intermediate state. Since the tool cannot tell them
+     * apart, it accepts the attribute and warns.
+     */
+    def withType(attributeType: String,
+                 diagnostics: Diagnostics = Diagnostics.discarding,
+                 location: Option[SourceLocation] = None): AttributeBuilder =
+      if attributeType.isBlank then
+        diagnostics.warn(DiagnosticCode.BlankAttributeType,
+          "No type given; the attribute becomes an object property with a domain but no range.",
+          location)
+        this.typeOfAttribute = None
+      else
+        this.typeOfAttribute = Some(UMLAttributeType(attributeType, prefixNamespace))
       this
 
-    def withMultiplicity(min: String, max: String): AttributeBuilder =
-      val minCardinality = UMLCardinality(min)
-      val maxCardinality = UMLCardinality(max)
-      this.multiplicity = UMLMultiplicity(minCardinality, maxCardinality)
+    def withMultiplicity(min: String, max: String,
+                         diagnostics: Diagnostics = Diagnostics.discarding,
+                         location: Option[SourceLocation] = None): AttributeBuilder =
+      val minCardinality = UMLCardinality(min, diagnostics, location)
+      val maxCardinality = UMLCardinality(max, diagnostics, location)
+      this.multiplicity = UMLMultiplicity(minCardinality, maxCardinality, diagnostics, location)
       this
 
     def withDefinition(definition: String): AttributeBuilder =

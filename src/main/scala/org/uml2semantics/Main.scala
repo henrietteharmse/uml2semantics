@@ -1,17 +1,9 @@
 package org.uml2semantics
 
 import com.typesafe.scalalogging.Logger
-import org.uml2semantics.InputParameters
-import org.uml2semantics.Overrides.XMI
+import org.uml2semantics.diagnostics.DiagnosticSeverity
 import org.uml2semantics.inline.Code
 import org.uml2semantics.model.PrefixNamespace
-import org.uml2semantics.model.cache.AttributeBuilderCache
-import org.uml2semantics.model.cache.AttributeIdentityBuilderCache
-import org.uml2semantics.model.cache.ClassBuilderCache
-import org.uml2semantics.model.cache.ClassIdentityBuilderCache
-import org.uml2semantics.reader.TSVReader
-import org.uml2semantics.reader.XMIReader
-import org.uml2semantics.writer.UML2OWLWriter
 import scopt.OParser
 
 import java.io.File
@@ -98,63 +90,22 @@ val argParser =
   )
 
 
+/**
+ * Parses command line arguments and runs the conversion, returning its result. Returns None when
+ * the arguments themselves could not be parsed, in which case scopt has already reported why.
+ *
+ * Both the CLI and the test suite enter here, so tests exercise argument handling rather than
+ * assuming it.
+ */
+def convertFromArguments(arguments: Seq[String]): Option[ConversionResult] =
+  OParser.parse(argParser, arguments, InputParameters()).map(convert)
+
 @main def uml2owl(arguments: String*): Unit =
   val logger = Logger[this.type]
-  OParser.parse(argParser, arguments, InputParameters()) match
-    case Some(input) =>
-      logger.debug(s"Some input=$input at ${Code.source}")
-
-      PrefixNamespace.cachePrefixes(input.prefixes)
-      PrefixNamespace.cachePrefix(input.ontologyPrefix)
-
-      if input.enumerationsTsv.isDefined || input.enumerationValuesTsv.isDefined then
-        logger.warn("Enumeration TSV files (-e, -n) are not supported yet and will be ignored.")
-
-      // Determine if TSV input is provided (classes or attributes)
-      val hasTsvInput = input.classesTsv.isDefined || input.attributesTsv.isDefined
-      val hasXmiInput = input.xmiFile.isDefined
-
-      // Determine override behavior
-      val overrideType = Overrides(input.overrides)
-
-      // Process inputs based on what's provided
-      (hasTsvInput, hasXmiInput) match
-        case (true, false) =>
-          // Only TSV input provided
-          logger.info("Processing TSV input files")
-          TSVReader.parseUMLClassDiagram(input)
-        
-        case (false, true) =>
-          // Only XMI input provided
-          logger.info("Processing XMI input file")
-          XMIReader.parseUMLClassDiagram(input)
-        
-        case (true, true) =>
-          // Both TSV and XMI provided - apply override logic
-          overrideType match
-            case Overrides.XMI =>
-              // XMI overrides TSV: process TSV first, then XMI
-              logger.info("Processing TSV input files first, then XMI will override")
-              TSVReader.parseUMLClassDiagram(input)
-              XMIReader.parseUMLClassDiagram(input)
-            case Overrides.TSV =>
-              // TSV overrides XMI: process XMI first, then TSV
-              logger.info("Processing XMI input file first, then TSV will override")
-              XMIReader.parseUMLClassDiagram(input)
-              TSVReader.parseUMLClassDiagram(input)
-        
-        case (false, false) =>
-          logger.error("No input files specified. Please provide either TSV files (-c, -a) or an XMI file (-m)")
-
-      if input.owlOntologyFile.isDefined then
-        val owlWriter = new UML2OWLWriter(input.ontologyIRI,
-          input.owlOntologyFile.get,
-          ClassBuilderCache.getClasses,
-          AttributeBuilderCache.getAttributes,
-          input.globalDisjointness)
-        owlWriter.generateOWL match
-          case Right(errorMessages) => errorMessages.foreach(errorMessage => logger.error(errorMessage))
-          case Left(errorMessage) =>
-            logger.error(s"Could not save the ontology to ${input.owlOntologyFile.get}: $errorMessage")
-    case _ => logger.error(s"Could not parse the provided arguments. ${Code.sourceDetail}")
+  convertFromArguments(arguments) match
+    case Some(result) =>
+      result.diagnostics.foreach(diagnostic =>
+        if diagnostic.severity == DiagnosticSeverity.Error then logger.error(diagnostic.toString)
+        else logger.warn(diagnostic.toString))
+    case None => logger.error(s"Could not parse the provided arguments. ${Code.sourceDetail}")
   logger.info("Done")

@@ -1,5 +1,6 @@
 package org.uml2semantics.model
 
+import org.uml2semantics.diagnostics.{DiagnosticCode, UMLModelException}
 import org.uml2semantics.model.cache.{ClassBuilderCache, ClassIdentityBuilderCache}
 
 import scala.collection.mutable
@@ -33,19 +34,19 @@ case class UMLClassIdentity(nameOption: Option[UMLClassName] = None,
       case (Some(curie), _) => curie.curie.getIRI
       case (_, Some(name)) =>   val iri = ontologyPrefix.prefixIRI.iri
         iri + (if iri.matches(".*[/#]$") then name.getName else "/" + name.getName)
-      case _ => throw new IllegalArgumentException("Name and curie must not be empty.")
+      case _ => throw new UMLModelException(DiagnosticCode.BlankIdentity, "Name and curie must not be empty.")
 
   def getLabel: String =
     (curieOption, nameOption) match
       case (_, Some(name)) => name.getName
       case (Some(curie), _) => curie.getName
-      case _ => throw new IllegalArgumentException("Name and curie must not be empty.")
+      case _ => throw new UMLModelException(DiagnosticCode.BlankIdentity, "Name and curie must not be empty.")
       
   def getClassIdentifier:  UMLClassIdentifier =
     (nameOption, curieOption) match
       case (_, Some(curie)) => curie
       case (Some(name), _) => name
-      case _ => throw new IllegalArgumentException("Name and curie must not be empty.") 
+      case _ => throw new UMLModelException(DiagnosticCode.BlankIdentity, "Name and curie must not be empty.") 
 
 object UMLClassIdentity:
 
@@ -53,7 +54,10 @@ object UMLClassIdentity:
     (UMLClassCurie(identifier), UMLClassName(identifier)) match
       case (Some(curie), _) => UMLClassIdentity(None, Some(curie), prefixNamespace)
       case (_, Some(name)) => UMLClassIdentity(Some(name), None, prefixNamespace)
-      case _ => throw new IllegalArgumentException(
+      case _ if identifier.isBlank =>
+        throw new UMLModelException(DiagnosticCode.BlankIdentity,
+          "A class needs a name or a curie; a blank identifier was given.")
+      case _ => throw new UMLModelException(DiagnosticCode.UnresolvableCurie,
         s"Could not interpret '$identifier' as a class name or curie. If it is intended to be a curie, its prefix " +
           s"must be configured via the -p or -x command line options.")
 
@@ -99,13 +103,22 @@ object UMLClassIdentity:
 
     def build: UMLClassIdentity =
       if name.isEmpty && curie.isEmpty then
-        throw new IllegalArgumentException("Name and curie must not be empty.")
+        throw new UMLModelException(DiagnosticCode.BlankIdentity, "Name and curie must not be empty.")
       val classNameOption = name.flatMap(UMLClassName(_))
       val classCurieOption = curie.flatMap(UMLClassCurie(_))
       if classNameOption.isEmpty && classCurieOption.isEmpty then
-        throw new IllegalArgumentException(
-          s"Could not interpret '${curie.orElse(name).get}' as a class name or curie. If it is intended to be a " +
-            s"curie, its prefix must be configured via the -p or -x command line options.")
+        (name.filterNot(_.isBlank), curie.filterNot(_.isBlank)) match
+          case (None, None) =>
+            throw new UMLModelException(DiagnosticCode.BlankIdentity,
+              "A class needs a name or a curie; both were blank.")
+          case (Some(nameWithColon), None) =>
+            throw new UMLModelException(DiagnosticCode.NameContainsColon,
+              s"Could not interpret '$nameWithColon' as a class name, because a name may not contain a colon. " +
+                s"If it is intended to be a curie, put it in the Curie column.")
+          case (_, Some(unresolvableCurie)) =>
+            throw new UMLModelException(DiagnosticCode.UnresolvableCurie,
+              s"Could not interpret '$unresolvableCurie' as a curie. Its prefix must be configured via the -p or " +
+                s"-x command line options.")
 
       // Assume this class identity is the one to use if it has both a name and a curie.
       val thisClassIdentity = UMLClassIdentity(classNameOption, classCurieOption, prefixNamespace)
@@ -224,7 +237,7 @@ object UMLClass:
 
     def withNameAndCurie(name: String, curie: String): ClassBuilder =
       if name.isEmpty && curie.isEmpty then
-        throw new IllegalArgumentException("Name and curie of attributemust not be empty.")
+        throw new UMLModelException(DiagnosticCode.BlankIdentity, "Name and curie must not be empty.")
       this.classIdentityBuilder = classIdentityBuilder.withNameAndCurie(name, curie)
       this
 

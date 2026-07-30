@@ -1,0 +1,15 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # UML classes are taken to denote disjoint sets unless a generalization set says otherwise,
+  # so two unrelated classes are declared mutually disjoint.
+  Declaration(Class(:Person))
+  AnnotationAssertion(rdfs:label :Person "Person")
+  AnnotationAssertion(rdfs:comment :Person "A human being.")
+  Declaration(Class(:Address))
+  AnnotationAssertion(rdfs:label :Address "Address")
+  AnnotationAssertion(rdfs:comment :Address "Where something is located.")
+  DisjointClasses(:Person :Address)
+)

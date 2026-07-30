@@ -1,0 +1,18 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # A supported datatype makes the attribute a data property, ranging over that datatype.
+  Declaration(Class(:Person))
+  AnnotationAssertion(rdfs:label :Person "Person")
+  AnnotationAssertion(rdfs:comment :Person "A human being.")
+  Declaration(DataProperty(<https://uml2semantics.com/test/ontology/Person#name>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Person#name> "name")
+  AnnotationAssertion(rdfs:comment <https://uml2semantics.com/test/ontology/Person#name> "The name of a person.")
+  DataPropertyDomain(<https://uml2semantics.com/test/ontology/Person#name> :Person)
+  DataPropertyRange(<https://uml2semantics.com/test/ontology/Person#name> xsd:string)
+  SubClassOf(:Person DataExactCardinality(1 <https://uml2semantics.com/test/ontology/Person#name> xsd:string))
+)

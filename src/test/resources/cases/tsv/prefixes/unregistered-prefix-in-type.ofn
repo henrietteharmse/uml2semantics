@@ -1,0 +1,12 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # A type containing a colon can only be a curie, and its prefix was never configured, so it
+  # resolves to nothing and the attribute row is dropped.
+  Declaration(Class(<https://uml2semantics.com/test/ontology/Person>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Person> "Person")
+  AnnotationAssertion(rdfs:comment <https://uml2semantics.com/test/ontology/Person> "A human being.")
+)

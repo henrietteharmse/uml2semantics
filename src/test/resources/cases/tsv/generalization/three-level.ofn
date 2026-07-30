@@ -1,0 +1,19 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # Each generalization set contributes its own subclass axiom. Nothing is inferred: there is
+  # no SubClassOf(:Dog :Animal), because the writer asserts only what the model states.
+  Declaration(Class(:Animal))
+  AnnotationAssertion(rdfs:label :Animal "Animal")
+  AnnotationAssertion(rdfs:comment :Animal "A living creature.")
+  Declaration(Class(:Mammal))
+  AnnotationAssertion(rdfs:label :Mammal "Mammal")
+  AnnotationAssertion(rdfs:comment :Mammal "An animal that suckles its young.")
+  Declaration(Class(:Dog))
+  AnnotationAssertion(rdfs:label :Dog "Dog")
+  AnnotationAssertion(rdfs:comment :Dog "A domesticated canine.")
+  SubClassOf(:Mammal :Animal)
+  SubClassOf(:Dog :Mammal)
+)

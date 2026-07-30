@@ -23,6 +23,9 @@ lazy val root = (project in file("."))
         "org.scalameta" %% "munit" % "1.0.3" % Test
     ),
     dependencyOverrides += "org.scala-lang" % "scala3-library" % scalaVersion.value,
+    // The model caches and the prefix map are global mutable singletons shared by every suite, so
+    // suites must not run concurrently. The base suite resets them between tests.
+    Test / parallelExecution := false,
     assembly / assemblyMergeStrategy := {
       case PathList("module-info.class") => MergeStrategy.discard
       case PathList("reference.conf") => MergeStrategy.concat

@@ -2,6 +2,7 @@ package org.uml2semantics.reader
 
 import com.typesafe.scalalogging.Logger
 import org.uml2semantics.InputParameters
+import org.uml2semantics.diagnostics.{Diagnostic, DiagnosticCode, Diagnostics, SourceLocation, UMLModelException}
 import org.uml2semantics.inline.Code
 import org.uml2semantics.model.*
 import org.uml2semantics.model.UMLClass.ClassBuilder
@@ -19,9 +20,11 @@ import scala.util.control.NonFatal
 object XMIReader extends UMLClassDiagramReader :
   val logger = Logger("XMIReader")
 
-  override def parseUMLClassDiagram(input: InputParameters): Unit =
+  override def parseUMLClassDiagram(input: InputParameters): Seq[Diagnostic] =
     logger.debug(s"start xmi parsing ${Code.source}")
     val ontologyPrefix: PrefixNamespace = PrefixNamespace(input.ontologyPrefix)
+    val diagnostics = new Diagnostics
+    val location = SourceLocation(input.xmiFile.get.getName)
     // The DocumentBuilderFactory is deliberately left namespace-UNaware. Every XPath query in this
     // reader addresses namespaced attributes by their unprefixed local-ish form (@type, @id, @idref
     // instead of xmi:type, xmi:id, xmi:idref), which only matches because the parser treats "xmi:type"
@@ -29,9 +32,11 @@ object XMIReader extends UMLClassDiagramReader :
     // setNamespaceAware(true) would silently break every query in this file unless they are all
     // rewritten with a NamespaceContext.
     val xmiDocument: Document = DocumentBuilderFactory.newInstance.newDocumentBuilder.parse(input.xmiFile.get)
-    parseClasses(ontologyPrefix, XPathFactory.newInstance.newXPath, xmiDocument)
+    parseClasses(ontologyPrefix, XPathFactory.newInstance.newXPath, xmiDocument, diagnostics, location)
+    diagnostics.toSeq
 
-  private def parseClasses(ontologyPrefix: PrefixNamespace, xPath: XPath, xmiDocument: Document): Unit =
+  private def parseClasses(ontologyPrefix: PrefixNamespace, xPath: XPath, xmiDocument: Document,
+                           diagnostics: Diagnostics, location: SourceLocation): Unit =
     val classNodes: immutable.Seq[Node] = doXPathQueryGetAsSeqOfNodes(xPath, xmiDocument, "//packagedElement[@type='uml:Class']")
     val parentToGeneralizationSetMap = mutable.Map[String, XMIGeneralizationSet]()
 
@@ -45,7 +50,7 @@ object XMIReader extends UMLClassDiagramReader :
       if definition.nonEmpty then
         classBuilder = classBuilder.withDefinition(definition)
       val umlClass = classBuilder.build
-      parseClassAttributes(xPath, xmiDocument, classNode, umlClass.classIdentity)
+      parseClassAttributes(xPath, xmiDocument, classNode, umlClass.classIdentity, diagnostics, location)
 
 
     populateParentsWithTheirChildren(parentToGeneralizationSetMap, ontologyPrefix)
@@ -116,7 +121,8 @@ object XMIReader extends UMLClassDiagramReader :
     classesToRebuild.foreach(classBuilder => classBuilder.build)
 
   private def parseClassAttributes(xPath: XPath, xmiDocument: Document, classNode: Node,
-                                   umlClassIdentity: UMLClassIdentity): Unit =
+                                   umlClassIdentity: UMLClassIdentity,
+                                   diagnostics: Diagnostics, location: SourceLocation): Unit =
 
     val classId = classNode.getAttributes.getNamedItem("xmi:id").getNodeValue
     val classAttributeNodes = doXPathQueryGetAsSeqOfNodes(xPath, xmiDocument,
@@ -137,6 +143,8 @@ object XMIReader extends UMLClassDiagramReader :
       catch
         case NonFatal(t) =>
           logger.error(s"Error while extracting an attribute of class ${umlClassIdentity.getLabel}: ${t.getMessage}", t)
+          diagnostics.error(DiagnosticCode.RowRejected,
+            s"Could not extract an attribute of class ${umlClassIdentity.getLabel}: ${t.getMessage}", Some(location))
           None
     }
 
@@ -145,14 +153,19 @@ object XMIReader extends UMLClassDiagramReader :
         UMLAttribute.builder(umlClassIdentity.ontologyPrefix)
           .withClassIdentity(umlClassIdentity)
           .withNameOrCurie(xmiAttribute.name)
-          .withType(xmiAttribute.typeOfAttribute)
-          .withMultiplicity(xmiAttribute.bounds.lowerBound, xmiAttribute.bounds.upperBound)
+          .withType(xmiAttribute.typeOfAttribute, diagnostics, Some(location))
+          .withMultiplicity(xmiAttribute.bounds.lowerBound, xmiAttribute.bounds.upperBound,
+            diagnostics, Some(location))
           .withDefinition(xmiAttribute.definition)
           .build
       catch
+        case e: UMLModelException =>
+          logger.error(s"Skipped attribute ${xmiAttribute.name} of class ${umlClassIdentity.getLabel}: ${e.getMessage}")
+          diagnostics.error(e.code, e.getMessage, Some(location))
         case NonFatal(t) =>
           logger.error(s"Error while processing attribute ${xmiAttribute.name} of class " +
             s"${umlClassIdentity.getLabel}: ${t.getMessage}", t)
+          diagnostics.error(DiagnosticCode.RowRejected, t.getMessage, Some(location))
     }
 
   private def doXPathQueryGetAsSeqOfNodes(xPath: XPath, node: Node, query: String): immutable.Seq[Node] =

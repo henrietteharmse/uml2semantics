@@ -1,0 +1,26 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # Ghost is named only as the owning class of an attribute, never declared in the classes file. It
+  # is built on the fly all the same, so it is labelled and it counts towards global disjointness
+  # exactly like the two classes that do have rows. Which file first mentioned a class does not
+  # change what it is.
+  Declaration(Class(:Person))
+  AnnotationAssertion(rdfs:label :Person "Person")
+  AnnotationAssertion(rdfs:comment :Person "A human being.")
+  Declaration(Class(:Address))
+  AnnotationAssertion(rdfs:label :Address "Address")
+  AnnotationAssertion(rdfs:comment :Address "Where something is located.")
+  Declaration(Class(:Ghost))
+  AnnotationAssertion(rdfs:label :Ghost "Ghost")
+  Declaration(DataProperty(<https://uml2semantics.com/test/ontology/Ghost#sightings>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Ghost#sightings> "sightings")
+  AnnotationAssertion(rdfs:comment <https://uml2semantics.com/test/ontology/Ghost#sightings> "How often it was seen.")
+  DataPropertyDomain(<https://uml2semantics.com/test/ontology/Ghost#sightings> :Ghost)
+  DataPropertyRange(<https://uml2semantics.com/test/ontology/Ghost#sightings> xsd:integer)
+  SubClassOf(:Ghost DataExactCardinality(1 <https://uml2semantics.com/test/ontology/Ghost#sightings> xsd:integer))
+  DisjointClasses(:Person :Address :Ghost)
+)

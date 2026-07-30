@@ -1,0 +1,17 @@
+<configuration>
+    <!--
+        Tests deliberately provoke rejected rows and defaulted values, so the main logback.xml's
+        trace-level output would bury the test report in the noise it is designed to produce.
+        Diagnostics are asserted on directly rather than read from the log; errors are still printed
+        because they are useful when a case fails unexpectedly.
+    -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%-5level %logger{20} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="error">
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>

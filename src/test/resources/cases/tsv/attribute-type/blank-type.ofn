@@ -1,0 +1,19 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # A blank type leaves the attribute genuinely untyped: an object property with a domain and no
+  # range. The modeller drafting an ontology through UML gets a usable property; the modeller
+  # converting a finished diagram gets a warning telling them a type is missing.
+  Declaration(Class(:Person))
+  AnnotationAssertion(rdfs:label :Person "Person")
+  AnnotationAssertion(rdfs:comment :Person "A human being.")
+  Declaration(ObjectProperty(<https://uml2semantics.com/test/ontology/Person#name>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Person#name> "name")
+  AnnotationAssertion(rdfs:comment <https://uml2semantics.com/test/ontology/Person#name> "The name of a person.")
+  ObjectPropertyDomain(<https://uml2semantics.com/test/ontology/Person#name> :Person)
+  SubClassOf(:Person ObjectExactCardinality(1 <https://uml2semantics.com/test/ontology/Person#name> owl:Thing))
+)

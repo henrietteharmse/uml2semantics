@@ -1,0 +1,10 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # A curie bypasses IRI minting by expanding its prefix, and with no name the label is the curie.
+  Declaration(Class(:Human))
+  AnnotationAssertion(rdfs:label :Human "t:Human")
+  AnnotationAssertion(rdfs:comment :Human "A human being.")
+)
