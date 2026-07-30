@@ -1,5 +1,6 @@
 package org.uml2semantics.model.cache
 
+import org.uml2semantics.diagnostics.{DiagnosticCode, UMLModelException}
 import org.uml2semantics.model.{UMLAttribute, UMLAttributeCurie, UMLAttributeDefinition, UMLAttributeIdentifier, UMLAttributeIdentity, UMLAttributeName, UMLClassCurie, UMLClassIdentifier, UMLClassIdentity, UMLClassName, UMLMultiplicity}
 import org.uml2semantics.model.UMLAttributeIdentity.AttributeIdentityBuilder
 import org.uml2semantics.model.cache.ClassIdentityBuilderCache
@@ -71,7 +72,8 @@ object AttributeIdentityBuilderCache:
         case (Some(attributeName), _) =>
           cachedClassIdentity.nameOption.flatMap(attributeIdentityByClassNameAttributeName.get(_).flatMap(_.get(attributeName)))
             .orElse(cachedClassIdentity.curieOption.flatMap(attributeIdentityByClassCurieAttributeName.get(_).flatMap(_.get(attributeName))))
-        case _ => throw new IllegalArgumentException("Name and curie must not be empty.")
+        case _ => throw new UMLModelException(DiagnosticCode.BlankIdentity,
+          "An attribute identity must have a name or a curie.")
     }
 
   def getUMLAttributeIdentity(attributeIdentity: UMLAttributeIdentity): Option[UMLAttributeIdentity] =
@@ -121,7 +123,8 @@ object AttributeIdentityBuilderCache:
       case (None, Some(name)) =>
         buildersByClassNameAttributeName.get(classIdentity.nameOption.get)
           .flatMap(_.get(name))
-      case (None, None) => throw new IllegalArgumentException("AttributeIdentity must have a name or curie")
+      case (None, None) => throw new UMLModelException(DiagnosticCode.BlankIdentity,
+        "An attribute identity must have a name or a curie.")
 
 
 object AttributeBuilderCache:

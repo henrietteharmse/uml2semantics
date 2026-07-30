@@ -28,5 +28,6 @@ The internal vocabulary for describing a UML class diagram, independent of input
 
 - A class belongs to at most one generalization set — a simplifying assumption; UML allows several (`@Todo` in `ClassBuilder`).
 - Generalization set names are not yet supported.
-- Every identity must have a name or a curie; builders throw `IllegalArgumentException` otherwise.
+- Every identity must have a name or a curie. Builders and caches throw a *coded model exception* (see the reader context) rather than a bare `IllegalArgumentException`, so a reader can report which rule was broken: `BlankIdentity` when neither half was given, `NameContainsColon` when a name was used where only a curie could go, `UnresolvableCurie` when a curie's prefix was never configured.
+- A bare `IllegalArgumentException` is reserved for programming errors rather than bad input — a generalization set built before its children, a blank literal reaching the writer. Those degrade to a `RowRejected` diagnostic, which is the right outcome for a fault the modeller cannot act on.
 - The default covering/disjoint constraints are {incomplete, overlapping} everywhere (`UMLGeneralizationSet`, `GeneralizationSetBuilder`, and the XMI reader's internal representation), matching the UML spec defaults of `isCovering = false` and `isDisjoint = false`.

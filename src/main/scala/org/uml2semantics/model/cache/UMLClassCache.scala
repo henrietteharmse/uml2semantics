@@ -65,7 +65,8 @@ object ClassIdentityBuilderCache:
         .orElse(buildersByClassName.get(name))
       case (Some(curie), None) => buildersByClassCurie.get(curie)
       case (None, Some(name)) => buildersByClassName.get(name)
-      case (None, None) => throw new IllegalArgumentException("ClassIdentity must have a name or curie")
+      case (None, None) => throw new UMLModelException(DiagnosticCode.BlankIdentity,
+        "A class identity must have a name or a curie.")
       
   def getClassIdentity(classIdentity: UMLClassIdentity):  Option[UMLClassIdentity] =
     (classIdentity.curieOption, classIdentity.nameOption) match
@@ -73,7 +74,8 @@ object ClassIdentityBuilderCache:
         .orElse(classIdentityByClassName.get(name))
       case (Some(curie), None) => classIdentityByClassCurie.get(curie)
       case (None, Some(name)) => classIdentityByClassName.get(name)
-      case (None, None) => throw new IllegalArgumentException("ClassIdentity must have a name or curie") 
+      case (None, None) => throw new UMLModelException(DiagnosticCode.BlankIdentity,
+        "A class identity must have a name or a curie.") 
 
 object ClassBuilderCache:
   private val buildersByClassIdentity = mutable.Map[UMLClassIdentity, UMLClass.ClassBuilder]()
