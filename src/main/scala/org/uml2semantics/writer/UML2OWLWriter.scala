@@ -182,9 +182,15 @@ class UML2OWLWriter(ontologyIRI: String,
         if manager.addAxiom(ontology, axiom) == UNSUCCESSFULLY then
           errorMessages += s"Could not add subclass axiom representing cardinalities for [$minCardinality, *] " +
             s"${umlAttribute.attributeIdentity.getLabel}"
-      // Unreachable: an unbounded min fails the model's multiplicity invariant, which reports
-      // UnboundedMinMultiplicity and substitutes [0,*]. Kept for exhaustivity.
-      case UMLMultiplicity(UMLInfiniteCardinality(_), UMLNonNegativeCardinality(_)) =>
+      // Unreachable: the model rejects an unbounded min and substitutes [0,*], and UMLMultiplicity's
+      // constructor is private so nothing can build one behind its back. Kept because the compiler
+      // cannot prove that, and reported rather than ignored: if this ever does arrive, the ontology
+      // would otherwise be silently weaker than the model, with nothing to say why.
+      case UMLMultiplicity(UMLInfiniteCardinality(_), UMLNonNegativeCardinality(maxCardinality)) =>
+        diagnostics.error(DiagnosticCode.UnboundedMinMultiplicity,
+          s"Reached the writer with multiplicity [*, $maxCardinality] on attribute " +
+            s"${umlAttribute.attributeIdentity.getLabel}, which the model should have rejected. No " +
+            s"cardinality restriction was asserted.")
       case UMLMultiplicity(UMLNonNegativeCardinality(_), UMLInfiniteCardinality(_)) =>
       case UMLMultiplicity(UMLInfiniteCardinality(_), UMLInfiniteCardinality(_)) =>
     errorMessages
@@ -218,9 +224,15 @@ class UML2OWLWriter(ontologyIRI: String,
         if manager.addAxiom(ontology, axiom) == UNSUCCESSFULLY then
           errorMessages += s"Could not add subclass axiom representing cardinalities for [$minCardinality, *] " +
             s"${umlAttribute.attributeIdentity.getLabel}"
-      // Unreachable: an unbounded min fails the model's multiplicity invariant, which reports
-      // UnboundedMinMultiplicity and substitutes [0,*]. Kept for exhaustivity.
-      case UMLMultiplicity(UMLInfiniteCardinality(_), UMLNonNegativeCardinality(_)) =>
+      // Unreachable: the model rejects an unbounded min and substitutes [0,*], and UMLMultiplicity's
+      // constructor is private so nothing can build one behind its back. Kept because the compiler
+      // cannot prove that, and reported rather than ignored: if this ever does arrive, the ontology
+      // would otherwise be silently weaker than the model, with nothing to say why.
+      case UMLMultiplicity(UMLInfiniteCardinality(_), UMLNonNegativeCardinality(maxCardinality)) =>
+        diagnostics.error(DiagnosticCode.UnboundedMinMultiplicity,
+          s"Reached the writer with multiplicity [*, $maxCardinality] on attribute " +
+            s"${umlAttribute.attributeIdentity.getLabel}, which the model should have rejected. No " +
+            s"cardinality restriction was asserted.")
       case UMLMultiplicity(UMLNonNegativeCardinality(_), UMLInfiniteCardinality(_)) =>
       case UMLMultiplicity(UMLInfiniteCardinality(_), UMLInfiniteCardinality(_)) =>
 

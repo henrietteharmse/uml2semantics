@@ -16,7 +16,7 @@ Mapping the cached UML model to semantic-web artifacts. `UML2OWLWriter` (working
   - `[0,n]` → max n only;
   - `[n,*]`, n > 0 → min n only;
   - `[0,*]` and `[*,*]` → no restriction;
-  - `[*,n]` → unreachable. The model rejects an unbounded min and substitutes `[0,*]`, so the writer only ever sees usable multiplicities; the branch survives for match exhaustivity. Validating in the model rather than here is deliberate: the model is where the modeller's own input is, so the diagnostic can name the file and row.
+  - `[*,n]` → unreachable. The model rejects an unbounded min and substitutes `[0,*]`, so the writer only ever sees usable multiplicities; the branch survives because the compiler cannot prove that. It reports rather than ignoring: an impossible state that silently weakened the output would be invisible, which is the failure mode the diagnostics exist to prevent. Validating in the model rather than here is deliberate — the model is where the modeller's own input is, so the diagnostic can name the file and row.
   Object properties restrict over `owl:Thing`; data properties restrict over the range datatype.
 - **Generalization set translation** — every child gets a `SubClassOf(child, parent)` axiom, plus per constraint combination:
   - *complete disjoint* → `DisjointUnion(parent, children)`;

@@ -205,8 +205,13 @@ object UMLCardinality:
       case (UMLNonNegativeCardinality(_), UMLInfiniteCardinality(_)) => false
       case (UMLNonNegativeCardinality(t1), UMLNonNegativeCardinality(t2)) => t1 == t2
 
-case class UMLMultiplicity(min: UMLCardinality = UMLCardinality("1"),
-                           max: UMLCardinality = UMLCardinality("1"))
+/**
+ * The constructor is private so that `apply` is the only way in. Without that, the synthesized
+ * two-argument constructor would build multiplicities that break the invariant while bypassing the
+ * check entirely — an invariant that is declared but not enforced.
+ */
+case class UMLMultiplicity private (min: UMLCardinality = UMLCardinality("1"),
+                                    max: UMLCardinality = UMLCardinality("1"))
 
 object UMLMultiplicity:
   private val logger = Logger[this.type]
