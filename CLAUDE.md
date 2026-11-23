@@ -42,12 +42,12 @@ The pipeline follows a **Read → Cache → Write** pattern:
 Readers populate global mutable caches rather than returning data:
 - **ClassBuilderCache / ClassIdentityBuilderCache** — stores UML classes
 - **AttributeBuilderCache / AttributeIdentityBuilderCache** — stores UML attributes
-- **EnumerationCache** — stores UML enumerations, each holding its values (read from TSV, not yet written to OWL)
+- **EnumerationCache** — stores UML enumerations, each holding its values (read from TSV only)
 - Key model types: `UMLClass`, `UMLAttribute`, `UMLEnumeration`, `LabeledIRI`, `PrefixNamespace`, `SupportedDataType`
 - `UMLClass` supports generalization sets with covering (complete/incomplete) and disjointness constraints
 
 ### Writer (`writer/`)
-- **UML2OWLWriter** — reads from caches, generates OWL 2 ontology using OWL API. Handles all four generalization set constraint combinations (complete/incomplete × disjoint/overlapping).
+- **UML2OWLWriter** — reads from caches, generates OWL 2 ontology using OWL API. Handles all four generalization set constraint combinations (complete/incomplete × disjoint/overlapping), and translates an enumeration to a class equivalent to the one-of of its values.
 - **UML2SHACLWriter** — SHACL output (in development)
 
 ### Utilities

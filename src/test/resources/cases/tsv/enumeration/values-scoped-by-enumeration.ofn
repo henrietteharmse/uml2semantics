@@ -1,5 +1,32 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
 Ontology(<https://uml2semantics.com/test/ontology>
 
-  # Enumerations are read into the model but not translated to OWL yet, so they leave no trace in
-  # the ontology.
+  # Other is two individuals, one per enumeration, because a name-only value is qualified by its
+  # enumeration. That matters here: the two enumerations are disjoint, so one shared individual
+  # would make the ontology inconsistent.
+  Declaration(Class(:PaymentSchedule))
+  AnnotationAssertion(rdfs:label :PaymentSchedule "PaymentSchedule")
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly> "Weekly")
+  ClassAssertion(:PaymentSchedule <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly>)
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/PaymentSchedule#Other>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/PaymentSchedule#Other> "Other")
+  AnnotationAssertion(rdfs:comment <https://uml2semantics.com/test/ontology/PaymentSchedule#Other> "Any other payment schedule.")
+  ClassAssertion(:PaymentSchedule <https://uml2semantics.com/test/ontology/PaymentSchedule#Other>)
+  EquivalentClasses(:PaymentSchedule ObjectOneOf(<https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly> <https://uml2semantics.com/test/ontology/PaymentSchedule#Other>))
+  DifferentIndividuals(<https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly> <https://uml2semantics.com/test/ontology/PaymentSchedule#Other>)
+  Declaration(Class(:ContractType))
+  AnnotationAssertion(rdfs:label :ContractType "ContractType")
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/ContractType#Permanent>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/ContractType#Permanent> "Permanent")
+  ClassAssertion(:ContractType <https://uml2semantics.com/test/ontology/ContractType#Permanent>)
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/ContractType#Other>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/ContractType#Other> "Other")
+  AnnotationAssertion(rdfs:comment <https://uml2semantics.com/test/ontology/ContractType#Other> "Any other contract type.")
+  ClassAssertion(:ContractType <https://uml2semantics.com/test/ontology/ContractType#Other>)
+  EquivalentClasses(:ContractType ObjectOneOf(<https://uml2semantics.com/test/ontology/ContractType#Permanent> <https://uml2semantics.com/test/ontology/ContractType#Other>))
+  DifferentIndividuals(<https://uml2semantics.com/test/ontology/ContractType#Permanent> <https://uml2semantics.com/test/ontology/ContractType#Other>)
+  DisjointClasses(:PaymentSchedule :ContractType)
 )

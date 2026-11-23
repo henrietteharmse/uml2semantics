@@ -1,0 +1,20 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(ex:=<https://example.org/vocabulary/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # A name-only value is qualified by its enumeration's label. An enumeration known only by a curie
+  # is labelled with the curie, so the curie text appears in the value's IRI, as it does for an
+  # attribute of a curie-only class.
+  Declaration(Class(ex:PaymentSchedule))
+  AnnotationAssertion(rdfs:label ex:PaymentSchedule "ex:PaymentSchedule")
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/ex:PaymentSchedule#Daily>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/ex:PaymentSchedule#Daily> "Daily")
+  ClassAssertion(ex:PaymentSchedule <https://uml2semantics.com/test/ontology/ex:PaymentSchedule#Daily>)
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/ex:PaymentSchedule#Weekly>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/ex:PaymentSchedule#Weekly> "Weekly")
+  ClassAssertion(ex:PaymentSchedule <https://uml2semantics.com/test/ontology/ex:PaymentSchedule#Weekly>)
+  EquivalentClasses(ex:PaymentSchedule ObjectOneOf(<https://uml2semantics.com/test/ontology/ex:PaymentSchedule#Daily> <https://uml2semantics.com/test/ontology/ex:PaymentSchedule#Weekly>))
+  DifferentIndividuals(<https://uml2semantics.com/test/ontology/ex:PaymentSchedule#Daily> <https://uml2semantics.com/test/ontology/ex:PaymentSchedule#Weekly>)
+)

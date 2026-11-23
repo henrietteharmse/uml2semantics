@@ -1,5 +1,24 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(ex:=<https://example.org/vocabulary/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
 Ontology(<https://uml2semantics.com/test/ontology>
 
-  # Enumerations are read into the model but not translated to OWL yet, so they leave no trace in
-  # the ontology.
+  # One enumeration, whichever half a value row named it by. Its IRI comes from the curie and its
+  # label from the name. The name-only value is minted under the ontology prefix and qualified by
+  # the enumeration's label, not by its curie.
+  Declaration(Class(ex:SalarySchedule))
+  AnnotationAssertion(rdfs:label ex:SalarySchedule "PaymentSchedule")
+  AnnotationAssertion(rdfs:comment ex:SalarySchedule "Defines the frequency of payments.")
+  Declaration(NamedIndividual(ex:Daily))
+  AnnotationAssertion(rdfs:label ex:Daily "ex:Daily")
+  ClassAssertion(ex:SalarySchedule ex:Daily)
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly> "Weekly")
+  ClassAssertion(ex:SalarySchedule <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly>)
+  Declaration(NamedIndividual(ex:Monthly))
+  AnnotationAssertion(rdfs:label ex:Monthly "ex:Monthly")
+  ClassAssertion(ex:SalarySchedule ex:Monthly)
+  EquivalentClasses(ex:SalarySchedule ObjectOneOf(ex:Daily <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly> ex:Monthly))
+  DifferentIndividuals(ex:Daily <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly> ex:Monthly)
 )

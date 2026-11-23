@@ -1,5 +1,18 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
 Ontology(<https://uml2semantics.com/test/ontology>
 
-  # Enumerations are read into the model but not translated to OWL yet, so they leave no trace in
-  # the ontology.
+  # An enumeration built on the fly from its value rows is translated like a declared one. It has no
+  # definition, so it gets no comment.
+  Declaration(Class(:PaymentSchedule))
+  AnnotationAssertion(rdfs:label :PaymentSchedule "PaymentSchedule")
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/PaymentSchedule#Daily>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/PaymentSchedule#Daily> "Daily")
+  ClassAssertion(:PaymentSchedule <https://uml2semantics.com/test/ontology/PaymentSchedule#Daily>)
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly> "Weekly")
+  ClassAssertion(:PaymentSchedule <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly>)
+  EquivalentClasses(:PaymentSchedule ObjectOneOf(<https://uml2semantics.com/test/ontology/PaymentSchedule#Daily> <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly>))
+  DifferentIndividuals(<https://uml2semantics.com/test/ontology/PaymentSchedule#Daily> <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly>)
 )

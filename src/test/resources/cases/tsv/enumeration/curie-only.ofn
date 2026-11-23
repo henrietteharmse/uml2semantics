@@ -1,5 +1,19 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(ex:=<https://example.org/vocabulary/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
 Ontology(<https://uml2semantics.com/test/ontology>
 
-  # Enumerations are read into the model but not translated to OWL yet, so they leave no trace in
-  # the ontology.
+  # A curie supplies the IRI directly, for the enumeration and for each value, and with no name to
+  # prefer the curie is also the label.
+  Declaration(Class(ex:PaymentSchedule))
+  AnnotationAssertion(rdfs:label ex:PaymentSchedule "ex:PaymentSchedule")
+  Declaration(NamedIndividual(ex:Daily))
+  AnnotationAssertion(rdfs:label ex:Daily "ex:Daily")
+  ClassAssertion(ex:PaymentSchedule ex:Daily)
+  Declaration(NamedIndividual(ex:Weekly))
+  AnnotationAssertion(rdfs:label ex:Weekly "ex:Weekly")
+  ClassAssertion(ex:PaymentSchedule ex:Weekly)
+  EquivalentClasses(ex:PaymentSchedule ObjectOneOf(ex:Daily ex:Weekly))
+  DifferentIndividuals(ex:Daily ex:Weekly)
 )

@@ -1,5 +1,13 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
 Ontology(<https://uml2semantics.com/test/ontology>
 
-  # Enumerations are read into the model but not translated to OWL yet, so they leave no trace in
-  # the ontology.
+  # The rejected row leaves no trace. The row that was read is translated as usual.
+  Declaration(Class(:ContractType))
+  AnnotationAssertion(rdfs:label :ContractType "ContractType")
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/ContractType#Permanent>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/ContractType#Permanent> "Permanent")
+  ClassAssertion(:ContractType <https://uml2semantics.com/test/ontology/ContractType#Permanent>)
+  EquivalentClasses(:ContractType ObjectOneOf(<https://uml2semantics.com/test/ontology/ContractType#Permanent>))
 )

@@ -1,0 +1,18 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # With a prefix IRI ending in #, the separators swap round as they do for attributes: the
+  # enumeration follows the # and its value follows a /.
+  Declaration(Class(<https://uml2semantics.com/test/ontology#PaymentSchedule>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology#PaymentSchedule> "PaymentSchedule")
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology#PaymentSchedule/Daily>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology#PaymentSchedule/Daily> "Daily")
+  ClassAssertion(<https://uml2semantics.com/test/ontology#PaymentSchedule> <https://uml2semantics.com/test/ontology#PaymentSchedule/Daily>)
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology#PaymentSchedule/Weekly>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology#PaymentSchedule/Weekly> "Weekly")
+  ClassAssertion(<https://uml2semantics.com/test/ontology#PaymentSchedule> <https://uml2semantics.com/test/ontology#PaymentSchedule/Weekly>)
+  EquivalentClasses(<https://uml2semantics.com/test/ontology#PaymentSchedule> ObjectOneOf(<https://uml2semantics.com/test/ontology#PaymentSchedule/Daily> <https://uml2semantics.com/test/ontology#PaymentSchedule/Weekly>))
+  DifferentIndividuals(<https://uml2semantics.com/test/ontology#PaymentSchedule/Daily> <https://uml2semantics.com/test/ontology#PaymentSchedule/Weekly>)
+)

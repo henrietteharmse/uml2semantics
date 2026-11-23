@@ -1,11 +1,9 @@
 # TSV specification: enumerations and enumeration values
 
-**Status: reading is implemented, translation is not.** The TSV reader reads both files into the
-model as specified here. Enumerations are not written to the ontology yet, so every run that is
-given `-e` or `-n` carries an `EnumerationsNotTranslated` warning. This document covers *what the
-modeller writes*. How an enumeration becomes OWL is the next step and is deliberately left out,
-apart from the points listed under
-[Deferred to the translation step](#deferred-to-the-translation-step).
+**Status: implemented.** The TSV reader reads both files into the model as specified here, and the
+OWL writer translates the result. This document covers *what the modeller writes*.
+[Translation to OWL](#translation-to-owl) summarises what it becomes; the mapping itself is defined
+in the writer `CONTEXT.md`.
 
 Terms used here (*name*, *curie*, *identity*, *enrichment*, *built on the fly*, *diagnostic*) are
 the ones defined in the model and reader `CONTEXT.md` files.
@@ -154,19 +152,47 @@ A name with a colon or a curie with an unconfigured prefix is an error even when
 the identity is fine. This is stricter than the classes file, which drops an unresolvable curie
 without comment when the row also has a name.
 
-`EnumerationInputIgnored` is retired. Until enumerations are translated, `EnumerationsNotTranslated`
-takes its place: one warning per run that is given `-e` or `-n`.
+`EnumerationInputIgnored` is retired: the files are read and translated.
 
-## Deferred to the translation step
+## Translation to OWL
 
-These are consequences of the format that the model and writer work must settle. They are listed so
-that nothing here is mistaken for a decision already made.
+For the `PaymentSchedule` example above, in Manchester syntax:
 
-- The OWL shape of an enumeration and of its values, and of an attribute typed by an enumeration.
-  In the meantime such an attribute is written like an untyped one, an object property with a
-  domain and no range, which asserts nothing about what an enumeration becomes.
-- The IRI minted for a name-only value. Rule 3 implies it must be qualified by its enumeration, as
-  an attribute IRI is qualified by its class.
-- What an enumeration without values translates to.
-- Whether enumerations take part in the default disjointness assumption.
+```
+Class: PaymentSchedule
+  EquivalentTo: {Daily, Weekly, Monthly}
+Individual: Daily
+  Types: PaymentSchedule
+Individual: Weekly
+  Types: PaymentSchedule
+Individual: Monthly
+  Types: PaymentSchedule
+DifferentIndividuals: Daily, Weekly, Monthly
+
+ObjectProperty: paymentSchedule
+  Domain: Renumeration
+  Range: PaymentSchedule
+```
+
+- **Enumeration.** A class, with its IRI minted as a class IRI is, labelled and commented like a
+  class, and equivalent to the one-of of its values.
+- **Value.** A named individual of that class, with a label and, if it has a definition, a comment.
+  The values of an enumeration are declared pairwise different.
+- **IRI of a value.** A curie expands directly. A name-only value is minted under the ontology
+  prefix and qualified by the label of its enumeration, as an attribute is by its class:
+  `PaymentSchedule#Daily`. This is what makes rule 3 hold in the ontology. For an enumeration known
+  only by a curie the label is the curie text, so that text appears in the IRI.
+- **Attribute typed by an enumeration.** An object property ranging over the enumeration's class,
+  with its multiplicity translated as for any object property.
+- **Enumeration without values.** A class and nothing more. It is not made equivalent to an empty
+  one-of, which is not valid OWL 2 and would say the class is empty.
+- **Enumeration with one value.** The one-of is written; the different-individuals axiom is not,
+  since it needs at least two.
+- **Global disjointness.** Enumeration classes join the global disjointness axiom with the root
+  classes, under the same `--no-global-disjointness` switch. Two enumerations given the same curie
+  for a value share that individual, and declaring them disjoint would make the ontology
+  inconsistent. Both are left out of the axiom, reported as `GlobalDisjointnessRelaxed`.
+
+## Not yet supported
+
 - Reading enumerations from XMI, and how `--overrides` applies to them.

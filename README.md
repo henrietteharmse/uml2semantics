@@ -7,7 +7,7 @@ provides the related Manchester syntax and SROIQ semantics.
 
 # Project status
 `uml2semantics` is in the very early stages of development and thus is missing many features. Currently it has support 
-for specifying classes and attributes/associations using TSV files.
+for specifying classes, attributes/associations and enumerations using TSV files.
 
 
 # Assumption
@@ -26,6 +26,8 @@ Java 11+
 |-------|------|----------|-------------|
 | `-c` | `--classes` | No | TSV file containing UML class information |
 | `-a` | `--attributes` | No | TSV file containing UML class attribute information |
+| `-e` | `--enumerations` | No | TSV file containing UML enumerations |
+| `-n` | `--enumeration-values` | No | TSV file containing the values of UML enumerations |
 | `-m` | `--xmi` | No | An XMI file exported from a UML tool |
 | `-o` | `--ontology` | **Yes** | Output OWL ontology file |
 | `-i` | `--ontologyIRI` | **Yes** | IRI of the ontology (e.g., `https://example.com/ontology`) |
@@ -50,14 +52,14 @@ UML class diagram information can be specified using TSV files. First create
 the TSV file for your classes. It has the following format:
 
 
-| Curie | Name     | Definition | ParentNames | 
+| Curie | Name     | Definition | Parents     | 
 |-------|----------|------------|-------------|
 |       | Person   |            |             |
 |       | Employee |            | Person      |
 |       | Employer |            | Person      |
 
 Here we only specify the name for each class, hence the reason we used the **Name** column to define our classes. Since
-`Employee` and `Employer` both extend the `Person` class, we add `Person` to **ParentNames** column. Multiple parents are
+`Employee` and `Employer` both extend the `Person` class, we add `Person` to **Parents** column. Multiple parents are
 separated by `|`. Curie refer to compact URI based on the [W3C CURIE syntax](https://www.w3.org/TR/2010/NOTE-curie-20101216/).
 
 To specify attributes we use the following format. 
@@ -74,6 +76,26 @@ To specify attributes we use the following format.
 but we again only used names for now. The type of an attribute can be a primitive or a class. Currenlty XML primitive data
 types as used in [Protege Desktop](https://protege.stanford.edu/) data types are supported. When no multiplicity is given,
 [1..1] is assumed. `*` is to refer to infinite as per usual.
+
+#### Enumerations
+An enumeration is specified using two more TSV files. The first lists the enumerations:
+
+| Name            | Curie | Definition                                  |
+|-----------------|-------|---------------------------------------------|
+| PaymentSchedule |       | The frequency at which an employee is paid. |
+
+The second lists the values of each enumeration, where **Enumeration** refers to the enumeration a value belongs to:
+
+| Enumeration     | Name    | Curie | Definition |
+|-----------------|---------|-------|------------|
+| PaymentSchedule | Daily   |       |            |
+| PaymentSchedule | Weekly  |       |            |
+| PaymentSchedule | Monthly |       |            |
+
+To use an enumeration as the type of an attribute, give its name or curie in the **ClassEnumOrPrimitiveType** column of
+the attributes file. An enumeration is translated to an OWL class that is equivalent to the set of its values, each
+value being an individual. The full rules are in the [TSV enumerations specification](./docs/specs/tsv-enumerations.md).
+Enumerations are passed using the `-e` and `-n` options.
 
 A Google spreadsheet for this UML class diagram can be found [here](https://docs.google.com/spreadsheets/d/1FXpbc52Ag24Htj3Qq36Z743QB5SzlShzjeg98uxd2Xo/edit?usp=sharing).
 Save the classes and attributes tabs as TSV files.

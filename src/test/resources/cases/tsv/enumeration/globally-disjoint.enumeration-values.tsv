@@ -1,0 +1,5 @@
+Enumeration	Name	Curie	Definition
+PaymentSchedule	Daily		
+PaymentSchedule	Weekly		
+ContractType	Permanent		
+ContractType	Temporary		

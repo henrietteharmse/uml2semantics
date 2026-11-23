@@ -4,8 +4,8 @@ Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
 
 Ontology(<https://uml2semantics.com/test/ontology>
 
-  # An enumeration owns no attributes: the row naming Colour as its class is rejected, and no class
-  # is built for it. The row owned by a real class is unaffected.
+  # The attribute row naming Colour as its class was rejected, so Colour is only an enumeration: it
+  # gains no property and is not also built as a UML class.
   Declaration(Class(:Person))
   AnnotationAssertion(rdfs:label :Person "Person")
   AnnotationAssertion(rdfs:comment :Person "A human being.")
@@ -14,4 +14,11 @@ Ontology(<https://uml2semantics.com/test/ontology>
   DataPropertyDomain(<https://uml2semantics.com/test/ontology/Person#name> :Person)
   DataPropertyRange(<https://uml2semantics.com/test/ontology/Person#name> xsd:string)
   SubClassOf(:Person DataExactCardinality(1 <https://uml2semantics.com/test/ontology/Person#name> xsd:string))
+  Declaration(Class(:Colour))
+  AnnotationAssertion(rdfs:label :Colour "Colour")
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/Colour#Red>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Colour#Red> "Red")
+  ClassAssertion(:Colour <https://uml2semantics.com/test/ontology/Colour#Red>)
+  EquivalentClasses(:Colour ObjectOneOf(<https://uml2semantics.com/test/ontology/Colour#Red>))
+  DisjointClasses(:Person :Colour)
 )

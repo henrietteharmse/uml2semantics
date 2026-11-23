@@ -3,9 +3,16 @@ Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
 
 Ontology(<https://uml2semantics.com/test/ontology>
 
-  # Colour is a class, so the enumeration of the same name is rejected. The class is unaffected, and
-  # the enumeration that does not clash is read.
+  # Colour stays a class and nothing more: the enumeration of the same name was rejected. Size is
+  # translated, and as an enumeration it is disjoint from the class.
   Declaration(Class(:Colour))
   AnnotationAssertion(rdfs:label :Colour "Colour")
   AnnotationAssertion(rdfs:comment :Colour "A colour something can be.")
+  Declaration(Class(:Size))
+  AnnotationAssertion(rdfs:label :Size "Size")
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/Size#Small>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Size#Small> "Small")
+  ClassAssertion(:Size <https://uml2semantics.com/test/ontology/Size#Small>)
+  EquivalentClasses(:Size ObjectOneOf(<https://uml2semantics.com/test/ontology/Size#Small>))
+  DisjointClasses(:Colour :Size)
 )

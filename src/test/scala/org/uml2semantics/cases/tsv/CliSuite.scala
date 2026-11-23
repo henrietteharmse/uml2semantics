@@ -1,7 +1,7 @@
 package org.uml2semantics.cases.tsv
 
-import org.uml2semantics.diagnostics.DiagnosticCode.{EnumerationsNotTranslated, NoInputSupplied}
-import org.uml2semantics.diagnostics.DiagnosticSeverity.{Error, Warning}
+import org.uml2semantics.diagnostics.DiagnosticCode.NoInputSupplied
+import org.uml2semantics.diagnostics.DiagnosticSeverity.Error
 import org.uml2semantics.{Uml2SemanticsSuite, convertFromArguments}
 
 import java.io.File
@@ -10,15 +10,11 @@ import java.io.File
  * Cases for the command line surface itself, rather than for what a file contains.
  *
  * That -c alone and -a alone both work is pinned by IdentitySuite and by the class-not-declared
- * case in AttributeTypeSuite. That -i sets the ontology IRI is pinned by every case, because
+ * case in AttributeTypeSuite; that -e alone and -n alone both work is pinned by the without-values
+ * and built-on-the-fly cases in EnumerationSuite. That -i sets the ontology IRI is pinned by every case, because
  * ontology IRIs are compared as part of every golden.
  */
 class CliSuite extends Uml2SemanticsSuite:
-
-  test("enumeration input is read, but warned about as not translated yet") {
-    val result = runCase("tsv/cli/enumerations-not-translated")
-    assertDiagnostics(result, Warning -> EnumerationsNotTranslated)
-  }
 
   test("supplying no input at all is an error, not a silent empty ontology") {
     val outputFile = new File("test-output/cases/tsv/cli/no-input.rdf")

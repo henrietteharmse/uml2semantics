@@ -45,7 +45,15 @@ case class UMLEnumerationName(name: String)
  */
 case class UMLEnumerationIdentity(nameOption: Option[UMLEnumerationName] = None,
                                   curieOption: Option[Curie] = None,
-                                  ontologyPrefix: PrefixNamespace):
+                                  ontologyPrefix: PrefixNamespace) extends LabeledIRI:
+
+  /** Minted as a class IRI is: the curie if there is one, otherwise the name under the ontology prefix. */
+  def getIRI: String =
+    (curieOption, nameOption) match
+      case (Some(curie), _) => curie.getIRI
+      case (_, Some(name)) => val iri = ontologyPrefix.prefixIRI.iri
+        iri + (if iri.matches(".*[/#]$") then name.name else s"$PATH_SEPARATOR" + name.name)
+      case _ => throw new UMLModelException(DiagnosticCode.BlankIdentity, "Name and curie must not be empty.")
 
   /** The label prefers the name over the curie, as it does for a class. */
   def getLabel: String =
@@ -66,7 +74,8 @@ case class UMLEnumerationValueName(name: String)
 
 /**
  * How a value is known within its enumeration. A value carries no reference to its enumeration:
- * it lives inside it, which is what scopes its name.
+ * it lives inside it, which is what scopes its name. For the same reason it cannot mint its own
+ * IRI; see `UMLEnumeration.getValueIRI`.
  */
 case class UMLEnumerationValueIdentity(nameOption: Option[UMLEnumerationValueName] = None,
                                        curieOption: Option[Curie] = None):
@@ -150,6 +159,24 @@ case class UMLEnumeration(identity: UMLEnumerationIdentity,
                           values: Set[UMLEnumerationValue] = Set.empty):
 
   def getLabel: String = identity.getLabel
+
+  def getIRI: String = identity.getIRI
+
+  /**
+   * The IRI of one of this enumeration's values. A curie expands directly. A name-only value is
+   * minted under the ontology prefix and qualified by the label of this enumeration, exactly as a
+   * name-only attribute is qualified by its class, so that `Other` in two enumerations is two IRIs.
+   * It cannot collide with an attribute's IRI, because a class and an enumeration never share a
+   * label.
+   */
+  def getValueIRI(value: UMLEnumerationValue): String =
+    (value.identity.curieOption, value.identity.nameOption) match
+      case (Some(curie), _) => curie.getIRI
+      case (_, Some(name)) => val iri = identity.ontologyPrefix.prefixIRI.iri
+        iri + (if iri.matches(".*#$") then getLabel + PATH_SEPARATOR + name.name
+          else if iri.matches(".*/$") then getLabel + FRAGMENT_SEPARATOR + name.name
+          else s"$PATH_SEPARATOR" + getLabel + FRAGMENT_SEPARATOR + name.name)
+      case _ => throw new UMLModelException(DiagnosticCode.BlankIdentity, "Name and curie must not be empty.")
 
   /**
    * This enumeration with whatever `newer` supplies laid over it. A half of the identity or a

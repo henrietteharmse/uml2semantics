@@ -4,7 +4,7 @@ import com.typesafe.scalalogging.Logger
 import org.uml2semantics.diagnostics.{Diagnostic, DiagnosticCode, DiagnosticSeverity, Diagnostics}
 import org.uml2semantics.inline.Code
 import org.uml2semantics.model.PrefixNamespace
-import org.uml2semantics.model.cache.{AttributeBuilderCache, ClassBuilderCache}
+import org.uml2semantics.model.cache.{AttributeBuilderCache, ClassBuilderCache, EnumerationCache}
 import org.uml2semantics.reader.{TSVReader, XMIReader}
 import org.uml2semantics.writer.UML2OWLWriter
 
@@ -38,11 +38,6 @@ def convert(input: InputParameters): ConversionResult =
 
   PrefixNamespace.cachePrefixes(input.prefixes)
   PrefixNamespace.cachePrefix(input.ontologyPrefix)
-
-  if input.enumerationsTsv.isDefined || input.enumerationValuesTsv.isDefined then
-    diagnostics.warn(DiagnosticCode.EnumerationsNotTranslated,
-      "Enumeration TSV files (-e, -n) are read, but enumerations are not translated to OWL yet; " +
-        "they are missing from the ontology.")
 
   val hasTsvInput = input.classesTsv.isDefined || input.attributesTsv.isDefined ||
     input.enumerationsTsv.isDefined || input.enumerationValuesTsv.isDefined
@@ -78,6 +73,7 @@ def convert(input: InputParameters): ConversionResult =
       owlOntologyFile,
       ClassBuilderCache.getClasses,
       AttributeBuilderCache.getAttributes,
+      EnumerationCache.getEnumerations,
       input.globalDisjointness)
     val writerDiagnostics = owlWriter.generateOWL
     diagnostics.addAll(writerDiagnostics)

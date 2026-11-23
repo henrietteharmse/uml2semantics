@@ -22,6 +22,17 @@
     
 
 
+    <!-- http://purl.org/dc/terms/relation -->
+
+
+    <owl:ObjectProperty rdf:about="http://purl.org/dc/terms/relation">
+        <rdfs:domain rdf:resource="http://www.w3.org/ns/dcat#Relationship"/>
+        <rdfs:comment>dct:relation SHOULD be used where the nature of the relationship between a cataloged item and related resources is not known. A more specific sub-property SHOULD be used if the nature of the relationship of the link is known. The property dcat:distribution SHOULD be used to link from a dcat:Dataset to a representation of the dataset, described as a dcat:Distribution</rdfs:comment>
+        <rdfs:label>dct:relation</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
     <!-- http://www.w3.org/ns/dcat#Catalog/catalog -->
 
 
@@ -41,17 +52,6 @@
         <rdfs:range rdf:resource="http://www.w3.org/ns/dcat#Relationship"/>
         <rdfs:comment>The function of an entity or agent with respect to another entity or resource</rdfs:comment>
         <rdfs:label>hadRole</rdfs:label>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://www.w3.org/ns/dcat#Relationship/dct:relation -->
-
-
-    <owl:ObjectProperty rdf:about="http://www.w3.org/ns/dcat#Relationship/dct:relation">
-        <rdfs:domain rdf:resource="http://www.w3.org/ns/dcat#Relationship"/>
-        <rdfs:comment>dct:relation SHOULD be used where the nature of the relationship between a cataloged item and related resources is not known. A more specific sub-property SHOULD be used if the nature of the relationship of the link is known. The property dcat:distribution SHOULD be used to link from a dcat:Dataset to a representation of the dataset, described as a dcat:Distribution</rdfs:comment>
-        <rdfs:label>dct:relation</rdfs:label>
     </owl:ObjectProperty>
     
 
@@ -131,8 +131,7 @@
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="http://www.w3.org/ns/dcat#Catalog/catalog"/>
-                <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
-                <owl:onClass rdf:resource="http://www.w3.org/ns/dcat#Catalog"/>
+                <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:cardinality>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:comment>A curated collection of metadata about resources (e.g., datasets and data services in the context of a data catalog)</rdfs:comment>
@@ -145,7 +144,6 @@
 
 
     <owl:Class rdf:about="http://www.w3.org/ns/dcat#CatalogRecord">
-        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
         <rdfs:comment>Represents a metadata item in the catalog, primarily concerning the registration information, such as who added the item and when</rdfs:comment>
         <rdfs:label>CatalogRecord</rdfs:label>
     </owl:Class>
@@ -178,17 +176,15 @@
 
 
     <owl:Class rdf:about="http://www.w3.org/ns/dcat#Relationship">
-        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://www.w3.org/ns/dcat#Relationship/hadRole"/>
-                <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
-                <owl:onClass rdf:resource="http://www.w3.org/ns/dcat#Relationship"/>
+                <owl:onProperty rdf:resource="http://purl.org/dc/terms/relation"/>
+                <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:cardinality>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://www.w3.org/ns/dcat#Relationship/dct:relation"/>
+                <owl:onProperty rdf:resource="http://www.w3.org/ns/dcat#Relationship/hadRole"/>
                 <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:cardinality>
             </owl:Restriction>
         </rdfs:subClassOf>
@@ -202,19 +198,16 @@
 
 
     <owl:Class rdf:about="http://www.w3.org/ns/dcat#Resource">
-        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="http://www.w3.org/ns/dcat#Resource/contactPoint"/>
-                <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
-                <owl:onClass rdf:resource="http://www.w3.org/2006/vcard/ns#Kind"/>
+                <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:cardinality>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="http://www.w3.org/ns/dcat#Resource/landingPage"/>
-                <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
-                <owl:onClass rdf:resource="http://xmlns.com/foaf/0.1/Document"/>
+                <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:cardinality>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -233,10 +226,30 @@
 
 
     <owl:Class rdf:about="http://xmlns.com/foaf/0.1/Document"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // General axioms
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    <rdf:Description>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://www.w3.org/ns/dcat#CatalogRecord"/>
+            <rdf:Description rdf:about="http://www.w3.org/ns/dcat#Relationship"/>
+            <rdf:Description rdf:about="http://www.w3.org/ns/dcat#Resource"/>
+        </owl:members>
+    </rdf:Description>
 </rdf:RDF>
 
 
 
-<!-- Generated by the OWL API (version 5.5.0.2023-01-14T12:41:38Z) https://github.com/owlcs/owlapi/ -->
+<!-- Generated by the OWL API (version 5.5.1.2024-09-07T21:41:32Z) https://github.com/owlcs/owlapi/ -->
 
 

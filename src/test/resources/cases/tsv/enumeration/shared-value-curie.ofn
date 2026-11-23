@@ -1,0 +1,37 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(ex:=<https://example.org/vocabulary/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # Both enumerations give a value the curie ex:Other, so they share that individual. Declaring them
+  # disjoint would make the ontology inconsistent, so both are left out of the global disjointness
+  # axiom, which keeps the classes.
+  Declaration(Class(:Person))
+  AnnotationAssertion(rdfs:label :Person "Person")
+  AnnotationAssertion(rdfs:comment :Person "A human being.")
+  Declaration(Class(:Organisation))
+  AnnotationAssertion(rdfs:label :Organisation "Organisation")
+  AnnotationAssertion(rdfs:comment :Organisation "A body of people.")
+  Declaration(Class(:PaymentSchedule))
+  AnnotationAssertion(rdfs:label :PaymentSchedule "PaymentSchedule")
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly> "Weekly")
+  ClassAssertion(:PaymentSchedule <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly>)
+  Declaration(NamedIndividual(ex:Other))
+  AnnotationAssertion(rdfs:label ex:Other "ex:Other")
+  ClassAssertion(:PaymentSchedule ex:Other)
+  EquivalentClasses(:PaymentSchedule ObjectOneOf(<https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly> ex:Other))
+  DifferentIndividuals(<https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly> ex:Other)
+  Declaration(Class(:ContractType))
+  AnnotationAssertion(rdfs:label :ContractType "ContractType")
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/ContractType#Permanent>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/ContractType#Permanent> "Permanent")
+  ClassAssertion(:ContractType <https://uml2semantics.com/test/ontology/ContractType#Permanent>)
+  Declaration(NamedIndividual(ex:Other))
+  AnnotationAssertion(rdfs:label ex:Other "ex:Other")
+  ClassAssertion(:ContractType ex:Other)
+  EquivalentClasses(:ContractType ObjectOneOf(<https://uml2semantics.com/test/ontology/ContractType#Permanent> ex:Other))
+  DifferentIndividuals(<https://uml2semantics.com/test/ontology/ContractType#Permanent> ex:Other)
+  DisjointClasses(:Person :Organisation)
+)
