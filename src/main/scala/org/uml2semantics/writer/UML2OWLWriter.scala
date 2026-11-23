@@ -95,6 +95,10 @@ class UML2OWLWriter(ontologyIRI: String,
           createObjectProperty(umlAttribute, owlClass, attributeType, errorMessages)
         case UMLClassType(attributeType) =>
           createObjectProperty(umlAttribute, owlClass, attributeType, errorMessages)
+        // Enumerations are not translated yet. Until they are, an attribute typed by one is written
+        // like an untyped attribute, which asserts nothing about what an enumeration becomes.
+        case UMLEnumerationType(_) =>
+          createObjectProperty(umlAttribute, owlClass, errorMessages)
     }.getOrElse {
       createObjectProperty(umlAttribute, owlClass, errorMessages)
     }

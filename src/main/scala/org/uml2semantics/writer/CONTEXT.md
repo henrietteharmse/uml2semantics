@@ -8,7 +8,8 @@ Mapping the cached UML model to semantic-web artifacts. `UML2OWLWriter` (working
 - **Attribute translation** — depends on the attribute type:
   - *supported data type* → an `owl:DatatypeProperty` with the owning class as domain and the datatype as range;
   - *class or curie type* → an `owl:ObjectProperty` with the owning class as domain and the type class as range;
-  - *untyped* → an `owl:ObjectProperty` with a domain but no range.
+  - *untyped* → an `owl:ObjectProperty` with a domain but no range;
+  - *enumeration type* → for now written exactly like an untyped attribute. Enumerations themselves are not translated yet and are not handed to the writer, so this is a stand-in that asserts nothing about what an enumeration becomes.
   Properties get the same label/definition annotations as classes.
 - **Multiplicity translation** — a subclass-of-restriction axiom on the domain class:
   - `[n,n]`, n ≠ 0 → exact cardinality n;

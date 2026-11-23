@@ -40,10 +40,12 @@ def convert(input: InputParameters): ConversionResult =
   PrefixNamespace.cachePrefix(input.ontologyPrefix)
 
   if input.enumerationsTsv.isDefined || input.enumerationValuesTsv.isDefined then
-    diagnostics.warn(DiagnosticCode.EnumerationInputIgnored,
-      "Enumeration TSV files (-e, -n) are not supported yet and were ignored.")
+    diagnostics.warn(DiagnosticCode.EnumerationsNotTranslated,
+      "Enumeration TSV files (-e, -n) are read, but enumerations are not translated to OWL yet; " +
+        "they are missing from the ontology.")
 
-  val hasTsvInput = input.classesTsv.isDefined || input.attributesTsv.isDefined
+  val hasTsvInput = input.classesTsv.isDefined || input.attributesTsv.isDefined ||
+    input.enumerationsTsv.isDefined || input.enumerationValuesTsv.isDefined
   val hasXmiInput = input.xmiFile.isDefined
 
   // The overriding source is parsed last, so its values win during cache enrichment.
@@ -69,7 +71,7 @@ def convert(input: InputParameters): ConversionResult =
 
     case (false, false) =>
       diagnostics.error(DiagnosticCode.NoInputSupplied,
-        "No input files specified. Provide either TSV files (-c, -a) or an XMI file (-m).")
+        "No input files specified. Provide either TSV files (-c, -a, -e, -n) or an XMI file (-m).")
 
   val writtenFile = input.owlOntologyFile.flatMap { owlOntologyFile =>
     val owlWriter = new UML2OWLWriter(input.ontologyIRI,

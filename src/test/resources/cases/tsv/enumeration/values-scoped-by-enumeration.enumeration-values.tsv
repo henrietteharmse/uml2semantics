@@ -1,0 +1,5 @@
+Enumeration	Name	Curie	Definition
+PaymentSchedule	Weekly		
+ContractType	Permanent		
+PaymentSchedule	Other		Any other payment schedule.
+ContractType	Other		Any other contract type.

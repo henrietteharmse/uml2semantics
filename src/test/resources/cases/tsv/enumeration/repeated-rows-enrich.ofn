@@ -1,0 +1,5 @@
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # Enumerations are read into the model but not translated to OWL yet, so they leave no trace in
+  # the ontology.
+)

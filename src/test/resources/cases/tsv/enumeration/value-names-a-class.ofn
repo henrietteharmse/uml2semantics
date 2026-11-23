@@ -1,0 +1,10 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # A value row may not build an enumeration on the fly under a name a class already has.
+  Declaration(Class(:Colour))
+  AnnotationAssertion(rdfs:label :Colour "Colour")
+  AnnotationAssertion(rdfs:comment :Colour "A colour something can be.")
+)

@@ -1,0 +1,4 @@
+Enumeration	Name	Curie	Definition
+PaymentSchedule	Daily		The employee is paid at the end of each day.
+PaymentSchedule	Weekly		The employee is paid at the end of each week.
+PaymentSchedule	Monthly		The employee is paid on the last day of the month.

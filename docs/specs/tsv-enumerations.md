@@ -1,10 +1,11 @@
 # TSV specification: enumerations and enumeration values
 
-**Status: draft, not implemented.** The CLI already accepts `-e` and `-n`, but today both files are
-ignored with an `EnumerationInputIgnored` warning. This document fixes the input format first, so
-the model, reader and writer work can be driven from it. It covers *what the modeller writes*. How
-an enumeration becomes OWL is the next step and is deliberately left out, apart from the points
-listed under [Deferred to the translation step](#deferred-to-the-translation-step).
+**Status: reading is implemented, translation is not.** The TSV reader reads both files into the
+model as specified here. Enumerations are not written to the ontology yet, so every run that is
+given `-e` or `-n` carries an `EnumerationsNotTranslated` warning. This document covers *what the
+modeller writes*. How an enumeration becomes OWL is the next step and is deliberately left out,
+apart from the points listed under
+[Deferred to the translation step](#deferred-to-the-translation-step).
 
 Terms used here (*name*, *curie*, *identity*, *enrichment*, *built on the fly*, *diagnostic*) are
 the ones defined in the model and reader `CONTEXT.md` files.
@@ -137,7 +138,7 @@ The enumeration and its values in these examples are those of `SimpleEmployerWit
 
 Rows are handled as elsewhere in the TSV reader: a row that cannot be honoured is reported and
 skipped, and reading continues. Existing codes are reused where the fault is the same. The two
-codes marked *new* are proposals.
+codes marked *new* were added for enumerations.
 
 | Situation | Severity | Code |
 |-----------|----------|------|
@@ -149,7 +150,12 @@ codes marked *new* are proposals.
 | An enumeration has no values (rule 7) | Warning | `EnumerationWithoutValues` (*new*) |
 | A required column is missing from the header | Error on every row | `RowRejected` |
 
-`EnumerationInputIgnored` is retired once the files are read.
+A name with a colon or a curie with an unconfigured prefix is an error even when the other half of
+the identity is fine. This is stricter than the classes file, which drops an unresolvable curie
+without comment when the row also has a name.
+
+`EnumerationInputIgnored` is retired. Until enumerations are translated, `EnumerationsNotTranslated`
+takes its place: one warning per run that is given `-e` or `-n`.
 
 ## Deferred to the translation step
 
@@ -157,6 +163,8 @@ These are consequences of the format that the model and writer work must settle.
 that nothing here is mistaken for a decision already made.
 
 - The OWL shape of an enumeration and of its values, and of an attribute typed by an enumeration.
+  In the meantime such an attribute is written like an untyped one, an object property with a
+  domain and no range, which asserts nothing about what an enumeration becomes.
 - The IRI minted for a name-only value. Rule 3 implies it must be qualified by its enumeration, as
   an attribute IRI is qualified by its class.
 - What an enumeration without values translates to.

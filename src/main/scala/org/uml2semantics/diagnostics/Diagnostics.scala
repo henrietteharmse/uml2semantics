@@ -39,8 +39,12 @@ enum DiagnosticCode:
   case UnboundedMinMultiplicity
   /** Ancestors of a multiply-inherited class were dropped from the global disjointness axiom. */
   case GlobalDisjointnessRelaxed
-  /** Enumeration TSV input was supplied, but enumeration parsing is not implemented. */
-  case EnumerationInputIgnored
+  /** A name or curie was used for both a class and an enumeration; the second use was dropped. */
+  case ClassifierKindConflict
+  /** An enumeration was given no values. */
+  case EnumerationWithoutValues
+  /** Enumeration TSV input was read into the model, but enumerations are not translated to OWL yet. */
+  case EnumerationsNotTranslated
   /** No input file was supplied at all. */
   case NoInputSupplied
   /** An axiom could not be added to the ontology. */

@@ -4,7 +4,7 @@ import com.typesafe.scalalogging.Logger
 import org.uml2semantics.diagnostics.{DiagnosticCode, Diagnostics, SourceLocation, UMLModelException}
 import org.uml2semantics.inline.Code
 import org.uml2semantics.model.UMLCardinality.>=
-import org.uml2semantics.model.cache.{AttributeBuilderCache, AttributeIdentityBuilderCache, ClassBuilderCache}
+import org.uml2semantics.model.cache.{AttributeBuilderCache, AttributeIdentityBuilderCache, ClassBuilderCache, EnumerationCache}
 
 sealed trait UMLAttributeIdentifier(classIdentifier: UMLClassIdentifier) extends UMLNamedElement
 
@@ -253,6 +253,8 @@ sealed trait UMLAttributeType
 case class UMLXMLDataType(attributeType: SupportedDataType) extends UMLAttributeType
 case class UMLClassType(attributeType: UMLClass) extends UMLAttributeType
 case class CurieBasedUMLClassAttributeType(attributeType: Curie) extends UMLAttributeType
+/** Holds the identity rather than the enumeration, so the type cannot go stale as values are added. */
+case class UMLEnumerationType(attributeType: UMLEnumerationIdentity) extends UMLAttributeType
 
 object UMLAttributeType:
   private val logger = Logger[this.type]
@@ -268,6 +270,8 @@ object UMLAttributeType:
     val curieOption = Curie.fromString(attributeTypeName)
     val attributeType = curieOption.flatMap(curie => SupportedDataType(curie))
       .orElse(ClassBuilderCache.getUMLClass(attributeTypeName))
+      // Before the curie step, so that the curie of a known enumeration is not taken for an external class.
+      .orElse(EnumerationCache.getUMLEnumeration(attributeTypeName))
       .orElse(curieOption.flatMap(_ => curieOption))
       .orElse(Some(UMLClass.builder(ontologyPrefix).withNameOrCurie(attributeTypeName).build))
       .get
@@ -275,6 +279,7 @@ object UMLAttributeType:
     attributeType match
       case dataType: SupportedDataType => UMLXMLDataType(dataType)
       case umlClass: UMLClass => UMLClassType(umlClass)
+      case umlEnumeration: UMLEnumeration => UMLEnumerationType(umlEnumeration.identity)
       case curie: Curie => CurieBasedUMLClassAttributeType(curie)
 
 case class UMLAttributeDefinition(definition: String)

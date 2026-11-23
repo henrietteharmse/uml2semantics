@@ -1,0 +1,16 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # The type is the curie half of a known enumeration. It resolves to that enumeration before it is
+  # considered as an external class, so the property gets no range onto ex:SalarySchedule.
+  Declaration(Class(:Renumeration))
+  AnnotationAssertion(rdfs:label :Renumeration "Renumeration")
+  AnnotationAssertion(rdfs:comment :Renumeration "What an employee is paid.")
+  Declaration(ObjectProperty(<https://uml2semantics.com/test/ontology/Renumeration#paymentSchedule>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Renumeration#paymentSchedule> "paymentSchedule")
+  ObjectPropertyDomain(<https://uml2semantics.com/test/ontology/Renumeration#paymentSchedule> :Renumeration)
+  SubClassOf(:Renumeration ObjectExactCardinality(1 <https://uml2semantics.com/test/ontology/Renumeration#paymentSchedule> owl:Thing))
+)

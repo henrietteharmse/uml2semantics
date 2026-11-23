@@ -1,6 +1,6 @@
 package org.uml2semantics.cases.tsv
 
-import org.uml2semantics.diagnostics.DiagnosticCode.{EnumerationInputIgnored, NoInputSupplied}
+import org.uml2semantics.diagnostics.DiagnosticCode.{EnumerationsNotTranslated, NoInputSupplied}
 import org.uml2semantics.diagnostics.DiagnosticSeverity.{Error, Warning}
 import org.uml2semantics.{Uml2SemanticsSuite, convertFromArguments}
 
@@ -15,13 +15,9 @@ import java.io.File
  */
 class CliSuite extends Uml2SemanticsSuite:
 
-  private val casesDirectory = "src/test/resources/cases/tsv/cli"
-
-  test("enumeration input is warned about and ignored") {
-    val result = runCase("tsv/cli/enumerations-ignored", Seq(
-      "-e", s"$casesDirectory/enumerations-ignored.enumerations.tsv",
-      "-n", s"$casesDirectory/enumerations-ignored.enumeration-values.tsv"))
-    assertDiagnostics(result, Warning -> EnumerationInputIgnored)
+  test("enumeration input is read, but warned about as not translated yet") {
+    val result = runCase("tsv/cli/enumerations-not-translated")
+    assertDiagnostics(result, Warning -> EnumerationsNotTranslated)
   }
 
   test("supplying no input at all is an error, not a silent empty ontology") {

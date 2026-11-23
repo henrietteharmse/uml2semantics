@@ -6,7 +6,8 @@ The vocabulary of the automated test suite. Tests are the one place that spans a
 
 - **Case** — a fixture isolating exactly one behaviour: the smallest input that provokes it, plus the single *golden* it must produce. Lives in `src/test/resources/cases/<input-format>/<group>/`, with every file prefixed by the case name.
 - **Scenario** — a realistic model expressed in one or more input encodings, with one or more expected outputs, under `src/test/resources/scenarios/<name>/`. `employer` is one model with five XMI variants sharing a single TSV. *Avoid* using this word for a case: a scenario proves that many behaviours compose, a case proves that one behaviour is right.
-- **Group** — a cluster of cases covering one axis of behaviour (identity and IRI minting, generalization, global disjointness, attribute type resolution, multiplicity, prefixes, CLI plumbing). One munit suite per group.
+- **Group** — a cluster of cases covering one axis of behaviour (identity and IRI minting, generalization, global disjointness, attribute type resolution, multiplicity, prefixes, enumerations, CLI plumbing). One munit suite per group.
+- **Model assertion** — a case's claim about what the reader left in the model caches, made in addition to its golden. Used by the enumeration group, because enumerations are read but not translated yet: the golden can only show that they leave the ontology untouched, so the behaviour under test is visible only in the model.
 - **Golden** — the expected ontology for a case, written in OWL Functional Syntax and hand-authored by transcribing the mapping rules in the writer context *before* the code is run. *Avoid*: snapshot, baseline, recorded output — a golden is predicted, not captured, which is what makes it able to fail.
 - **Matrix** — the enumeration of cases per input format that defines what "exhaustive" means for that format. A behaviour reachable from an input format but absent from the matrix is a coverage hole, and is recorded as such rather than left implicit.
 - **Diagnostic assertion** — a case's claim about the severity and code of the diagnostics a malformed input produces. Cases assert severity and code, never message wording, so messages stay free to improve.
@@ -20,14 +21,20 @@ The vocabulary of the automated test suite. Tests are the one place that spans a
 
 ## The TSV matrix
 
-Seven groups, one suite each, under `org.uml2semantics.cases.tsv`: identity and IRI minting,
-generalization, global disjointness, attribute type resolution, multiplicity, prefixes, and CLI
-plumbing. Together they are exhaustive for what TSV can express.
+Eight groups, one suite each, under `org.uml2semantics.cases.tsv`: identity and IRI minting,
+generalization, global disjointness, attribute type resolution, multiplicity, prefixes,
+enumerations, and CLI plumbing. Together they are exhaustive for what TSV can express.
+
+The enumeration group follows `docs/specs/tsv-enumerations.md` rule by rule. Its goldens will be
+rewritten when enumerations are translated; its model assertions will not.
 
 Behaviours deliberately absent, and why:
 
 - The four generalization-set constraint combinations — TSV has no covering or disjointness
   columns, so only XMI can reach them.
+- Enriching the values of two partial enumerations when a later row ties them together — the only
+  row that can tie the halves is in the enumerations file, which is read before any value exists.
+  The cache merges values regardless, for the day a second source can supply enumerations.
 - The writer's `[*,n]` branch — the model rejects an unbounded min and substitutes `[0,*]`, so the
   writer never sees one. The `UnboundedMinMultiplicity` diagnostic itself *is* covered, from the
   model.

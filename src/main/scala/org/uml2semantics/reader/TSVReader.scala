@@ -5,7 +5,7 @@ import com.typesafe.scalalogging.Logger
 import org.uml2semantics.InputParameters
 import org.uml2semantics.diagnostics.{Diagnostic, DiagnosticCode, Diagnostics, SourceLocation, UMLModelException}
 import org.uml2semantics.model.*
-import org.uml2semantics.model.cache.ClassBuilderCache
+import org.uml2semantics.model.cache.{ClassBuilderCache, EnumerationCache}
 import org.uml2semantics.reader.ReaderHelper.populateParentsWithTheirChildren
 
 import java.io.File
@@ -34,6 +34,12 @@ object TSVReader extends UMLClassDiagramReader:
     val diagnostics = new Diagnostics
     if (input.classesTsv.isDefined)
       parseClasses(input.classesTsv, ontologyPrefix, diagnostics)
+    // Enumerations are read before attributes, whatever order the flags came in, so that an
+    // attribute type naming an enumeration finds it instead of becoming a placeholder class.
+    val declaredEnumerations = input.enumerationsTsv.toSeq.flatMap(parseEnumerations(_, ontologyPrefix, diagnostics))
+    input.enumerationValuesTsv.foreach(parseEnumerationValues(_, ontologyPrefix, diagnostics))
+    if input.enumerationsTsv.isDefined || input.enumerationValuesTsv.isDefined then
+      reportEnumerationsWithoutValues(declaredEnumerations, diagnostics)
     if (input.attributesTsv.isDefined)
       parseClassAttributes(input.attributesTsv, ontologyPrefix, diagnostics)
     diagnostics.toSeq
@@ -101,6 +107,57 @@ object TSVReader extends UMLClassDiagramReader:
       )
 
 
+  /**
+   * Reads the enumerations file. Returns each enumeration a row declared with where it was
+   * declared, so that a later finding about the enumeration can point at its row.
+   */
+  private def parseEnumerations(tsvFile: File, ontologyPrefix: PrefixNamespace,
+                                diagnostics: Diagnostics): Seq[(UMLEnumeration, SourceLocation)] =
+    import EnumerationsHeader.*
+    logger.info("Start")
+
+    val declaredEnumerations = mutable.ArrayBuffer[(UMLEnumeration, SourceLocation)]()
+
+    forEachRow(tsvFile, diagnostics) { (row, location) =>
+      val umlEnumeration = UMLEnumeration.builder(ontologyPrefix)
+        .withNameAndCurie(row(Name.toString), row(Curie.toString))
+        .withDefinition(row(Definition.toString))
+        .build
+      declaredEnumerations += (umlEnumeration -> location)
+    }
+
+    declaredEnumerations.toSeq
+
+  private def parseEnumerationValues(tsvFile: File, ontologyPrefix: PrefixNamespace,
+                                     diagnostics: Diagnostics): Unit =
+    import EnumerationValuesHeader.*
+    logger.info("Start")
+
+    forEachRow(tsvFile, diagnostics) { (row, _) =>
+      UMLEnumerationValue.builder(ontologyPrefix)
+        .withEnumeration(row(Enumeration.toString))
+        .withNameAndCurie(row(Name.toString), row(Curie.toString))
+        .withDefinition(row(Definition.toString))
+        .build
+    }
+
+  /**
+   * An enumeration without values is accepted, for the same reason a blank attribute type is: the
+   * tool cannot tell an omission from a model that is still being drafted, so it keeps the
+   * enumeration and says something. This runs once both files are read, because only then is it
+   * known which enumerations ended up with no values.
+   */
+  private def reportEnumerationsWithoutValues(declaredEnumerations: Seq[(UMLEnumeration, SourceLocation)],
+                                              diagnostics: Diagnostics): Unit =
+    EnumerationCache.getEnumerations.filter(_.values.isEmpty).toSeq.sortBy(_.getLabel).foreach { umlEnumeration =>
+      val location = declaredEnumerations.collectFirst {
+        case (declared, location) if declared.identity.sharesAHalfWith(umlEnumeration.identity) => location
+      }
+      val message = s"Enumeration '${umlEnumeration.getLabel}' has no values."
+      logger.warn(message)
+      diagnostics.warn(DiagnosticCode.EnumerationWithoutValues, message, location)
+    }
+
   private def parseClassAttributes(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespace,
                                    diagnostics: Diagnostics): Unit =
     import ClassAttributesHeader.*
@@ -108,6 +165,12 @@ object TSVReader extends UMLClassDiagramReader:
 
     forEachRow(maybeTsvFile.get, diagnostics) { (row, location) =>
       val classIdentifier = row(Class.toString)
+      // Checked before anything is built for the row, so that the enumeration's name is not also
+      // left behind as a class identity.
+      if EnumerationCache.getUMLEnumeration(classIdentifier).isDefined then
+        throw new UMLModelException(DiagnosticCode.ClassifierKindConflict,
+          s"'$classIdentifier' is an enumeration, and an enumeration owns no attributes. A name or curie " +
+            s"identifies either a class or an enumeration, never both.")
       val classIdentity = UMLClassIdentity.builder(ontologyPrefix)
         .withNameOrCurie(classIdentifier)
         .build

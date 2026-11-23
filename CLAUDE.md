@@ -42,7 +42,8 @@ The pipeline follows a **Read → Cache → Write** pattern:
 Readers populate global mutable caches rather than returning data:
 - **ClassBuilderCache / ClassIdentityBuilderCache** — stores UML classes
 - **AttributeBuilderCache / AttributeIdentityBuilderCache** — stores UML attributes
-- Key model types: `UMLClass`, `UMLAttribute`, `LabeledIRI`, `PrefixNamespace`, `SupportedDataType`
+- **EnumerationCache** — stores UML enumerations, each holding its values (read from TSV, not yet written to OWL)
+- Key model types: `UMLClass`, `UMLAttribute`, `UMLEnumeration`, `LabeledIRI`, `PrefixNamespace`, `SupportedDataType`
 - `UMLClass` supports generalization sets with covering (complete/incomplete) and disjointness constraints
 
 ### Writer (`writer/`)

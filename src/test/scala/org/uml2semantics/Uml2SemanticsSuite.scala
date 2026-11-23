@@ -4,7 +4,7 @@ import munit.FunSuite
 import org.semanticweb.owlapi.model.OWLOntology
 import org.uml2semantics.diagnostics.{Diagnostic, DiagnosticCode, DiagnosticSeverity}
 import org.uml2semantics.model.PrefixNamespace
-import org.uml2semantics.model.cache.{AttributeBuilderCache, AttributeIdentityBuilderCache, ClassBuilderCache, ClassIdentityBuilderCache}
+import org.uml2semantics.model.cache.{AttributeBuilderCache, AttributeIdentityBuilderCache, ClassBuilderCache, ClassIdentityBuilderCache, EnumerationCache}
 import org.uml2semantics.utility.OntologyAssertions
 
 import java.io.File
@@ -32,15 +32,17 @@ abstract class Uml2SemanticsSuite extends FunSuite:
     ClassBuilderCache.clear()
     AttributeIdentityBuilderCache.clear()
     AttributeBuilderCache.clear()
+    EnumerationCache.clear()
     PrefixNamespace.clear()
 
   /**
    * Runs one case and asserts its ontology matches its golden.
    *
    * `caseName` is a path under `src/test/resources/cases`, e.g. `tsv/multiplicity/exact-one`.
-   * Whichever of `<case>.classes.tsv` and `<case>.attributes.tsv` exist are passed as input; the
-   * golden is `<case>.ofn`. The conversion goes through argument parsing, so cases exercise the
-   * CLI surface rather than assuming it.
+   * Whichever of `<case>.classes.tsv`, `<case>.attributes.tsv`, `<case>.enumerations.tsv` and
+   * `<case>.enumeration-values.tsv` exist are passed as input; the golden is `<case>.ofn`. The
+   * conversion goes through argument parsing, so cases exercise the CLI surface rather than
+   * assuming it.
    *
    * Returns the result so a case can go on to assert the diagnostics it expects.
    */
@@ -53,10 +55,15 @@ abstract class Uml2SemanticsSuite extends FunSuite:
 
     val classesTsv = new File(caseDirectory, s"$filePrefix.classes.tsv")
     val attributesTsv = new File(caseDirectory, s"$filePrefix.attributes.tsv")
+    val enumerationsTsv = new File(caseDirectory, s"$filePrefix.enumerations.tsv")
+    val enumerationValuesTsv = new File(caseDirectory, s"$filePrefix.enumeration-values.tsv")
     val golden = new File(caseDirectory, s"$filePrefix.ofn")
 
-    assert(classesTsv.exists() || attributesTsv.exists(),
-      s"Case '$caseName' has no input file; expected $classesTsv or $attributesTsv")
+    val inputFiles = Seq("-c" -> classesTsv, "-a" -> attributesTsv,
+      "-e" -> enumerationsTsv, "-n" -> enumerationValuesTsv).filter((_, file) => file.exists())
+
+    assert(inputFiles.nonEmpty, s"Case '$caseName' has no input file; expected at least one of " +
+      s"$classesTsv, $attributesTsv, $enumerationsTsv or $enumerationValuesTsv")
     assert(golden.exists(), s"Case '$caseName' has no golden; expected $golden")
 
     val outputFile = new File(outputRoot, s"$caseName.rdf")
@@ -64,8 +71,7 @@ abstract class Uml2SemanticsSuite extends FunSuite:
 
     val arguments =
       Seq("-i", ontologyIRI, "-p", prefix, "-o", outputFile.getPath) ++
-        (if classesTsv.exists() then Seq("-c", classesTsv.getPath) else Seq.empty) ++
-        (if attributesTsv.exists() then Seq("-a", attributesTsv.getPath) else Seq.empty) ++
+        inputFiles.flatMap((flag, file) => Seq(flag, file.getPath)) ++
         extraArguments
 
     val result = convertFromArguments(arguments).getOrElse(

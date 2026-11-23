@@ -1,0 +1,11 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # The clash is on the curie half: the class and the enumeration have different names but share
+  # t:Colour, so the enumeration is rejected.
+  Declaration(Class(:Colour))
+  AnnotationAssertion(rdfs:label :Colour "Colour")
+  AnnotationAssertion(rdfs:comment :Colour "A colour something can be.")
+)

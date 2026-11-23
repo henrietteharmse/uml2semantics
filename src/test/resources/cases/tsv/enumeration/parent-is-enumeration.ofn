@@ -1,0 +1,14 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # The classes file is read first, so Colour is built on the fly as the parent of Shade. The
+  # enumeration of the same name is read second and rejected.
+  Declaration(Class(:Shade))
+  AnnotationAssertion(rdfs:label :Shade "Shade")
+  AnnotationAssertion(rdfs:comment :Shade "A lighter or darker variant.")
+  Declaration(Class(:Colour))
+  AnnotationAssertion(rdfs:label :Colour "Colour")
+  SubClassOf(:Shade :Colour)
+)

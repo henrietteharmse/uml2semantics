@@ -1,0 +1,3 @@
+Name	Curie	Definition
+PaymentSchedule		The frequency of payments.
+PaymentSchedule	ex:SalarySchedule	

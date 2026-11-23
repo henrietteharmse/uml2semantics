@@ -2,7 +2,7 @@ package org.uml2semantics
 
 import munit.FunSuite
 import org.uml2semantics.model.PrefixNamespace
-import org.uml2semantics.model.cache.{AttributeBuilderCache, AttributeIdentityBuilderCache, ClassBuilderCache, ClassIdentityBuilderCache}
+import org.uml2semantics.model.cache.{AttributeBuilderCache, AttributeIdentityBuilderCache, ClassBuilderCache, ClassIdentityBuilderCache, EnumerationCache}
 import org.uml2semantics.utility.OntologyAssertions
 
 import java.io.File
@@ -14,6 +14,7 @@ class SimpleEmployerIntegrationTest extends FunSuite:
     ClassBuilderCache.clear()
     AttributeIdentityBuilderCache.clear()
     AttributeBuilderCache.clear()
+    EnumerationCache.clear()
     PrefixNamespace.clear()
 
   test("TSV-to-OWL pipeline produces semantically equivalent ontology for SimpleEmployerExample") {
