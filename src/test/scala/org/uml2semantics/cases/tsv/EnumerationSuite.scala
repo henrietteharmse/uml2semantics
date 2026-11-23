@@ -2,7 +2,7 @@ package org.uml2semantics.cases.tsv
 
 import org.uml2semantics.diagnostics.DiagnosticCode.{BlankIdentity, ClassifierKindConflict, EnumerationWithoutValues, GlobalDisjointnessRelaxed, NameContainsColon, RowRejected, UnresolvableCurie}
 import org.uml2semantics.diagnostics.DiagnosticSeverity.{Error, Warning}
-import org.uml2semantics.model.cache.{AttributeBuilderCache, EnumerationCache}
+import org.uml2semantics.model.cache.{AttributeCache, EnumerationCache}
 import org.uml2semantics.model.{UMLAttributeType, UMLEnumerationType}
 import org.uml2semantics.Uml2SemanticsSuite
 
@@ -39,7 +39,7 @@ class EnumerationSuite extends Uml2SemanticsSuite:
     assertEquals(actual, expected.toSet)
 
   private def typeOfAttribute(label: String): Option[UMLAttributeType] =
-    AttributeBuilderCache.getAttributes.find(_.getLabel == label).flatMap(_.typeOfAttribute)
+    AttributeCache.getAttributes.find(_.getLabel == label).flatMap(_.typeOfAttribute)
 
   // --- The two files -------------------------------------------------------------------------
 

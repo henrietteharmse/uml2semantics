@@ -4,7 +4,7 @@ import com.typesafe.scalalogging.Logger
 import org.uml2semantics.diagnostics.{Diagnostic, DiagnosticCode, DiagnosticSeverity, Diagnostics}
 import org.uml2semantics.inline.Code
 import org.uml2semantics.model.PrefixNamespace
-import org.uml2semantics.model.cache.{AttributeBuilderCache, ClassBuilderCache, EnumerationCache}
+import org.uml2semantics.model.cache.{AttributeCache, ClassBuilderCache, EnumerationCache}
 import org.uml2semantics.reader.{TSVReader, XMIReader}
 import org.uml2semantics.writer.UML2OWLWriter
 
@@ -72,7 +72,7 @@ def convert(input: InputParameters): ConversionResult =
     val owlWriter = new UML2OWLWriter(input.ontologyIRI,
       owlOntologyFile,
       ClassBuilderCache.getClasses,
-      AttributeBuilderCache.getAttributes,
+      AttributeCache.getAttributes,
       EnumerationCache.getEnumerations,
       input.globalDisjointness)
     val writerDiagnostics = owlWriter.generateOWL

@@ -4,7 +4,7 @@ import com.typesafe.scalalogging.Logger
 import org.uml2semantics.diagnostics.{DiagnosticCode, Diagnostics, SourceLocation, UMLModelException}
 import org.uml2semantics.inline.Code
 import org.uml2semantics.model.UMLCardinality.>=
-import org.uml2semantics.model.cache.{AttributeBuilderCache, AttributeIdentityBuilderCache, ClassBuilderCache, EnumerationCache}
+import org.uml2semantics.model.cache.{AttributeCache, AttributeIdentityCache, ClassBuilderCache, EnumerationCache}
 
 sealed trait UMLAttributeIdentifier(classIdentifier: UMLClassIdentifier) extends UMLNamedElement
 
@@ -127,11 +127,11 @@ object UMLAttributeIdentity:
                 s"-x command line options.")
       val thisAttributeIdentity: UMLAttributeIdentity = UMLAttributeIdentity(classIdentity, attributeNameOption, attributeCurieOption)
       if attributeNameOption.isDefined && attributeCurieOption.isDefined then
-        AttributeIdentityBuilderCache.cacheUMLAttributeIdentity(thisAttributeIdentity,  this)
+        AttributeIdentityCache.cacheUMLAttributeIdentity(thisAttributeIdentity)
         return thisAttributeIdentity
 
-      AttributeIdentityBuilderCache.getUMLAttributeIdentity(thisAttributeIdentity).getOrElse {
-        AttributeIdentityBuilderCache.cacheUMLAttributeIdentity(thisAttributeIdentity,  this)
+      AttributeIdentityCache.getUMLAttributeIdentity(thisAttributeIdentity).getOrElse {
+        AttributeIdentityCache.cacheUMLAttributeIdentity(thisAttributeIdentity)
       }
 
 
@@ -371,5 +371,5 @@ object UMLAttribute:
         typeOfAttribute,
         multiplicity,
         definition.map(UMLAttributeDefinition.apply(_)))
-      AttributeBuilderCache.cacheUMLAttribute(umlAttribute, this)
+      AttributeCache.cacheUMLAttribute(umlAttribute)
       umlAttribute

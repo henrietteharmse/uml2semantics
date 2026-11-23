@@ -4,7 +4,7 @@ import munit.FunSuite
 import org.semanticweb.owlapi.model.OWLOntology
 import org.uml2semantics.diagnostics.{Diagnostic, DiagnosticCode, DiagnosticSeverity}
 import org.uml2semantics.model.PrefixNamespace
-import org.uml2semantics.model.cache.{AttributeBuilderCache, AttributeIdentityBuilderCache, ClassBuilderCache, ClassIdentityBuilderCache, EnumerationCache}
+import org.uml2semantics.model.cache.{AttributeCache, AttributeIdentityCache, ClassBuilderCache, ClassIdentityBuilderCache, EnumerationCache}
 import org.uml2semantics.utility.OntologyAssertions
 
 import java.io.File
@@ -30,8 +30,8 @@ abstract class Uml2SemanticsSuite extends FunSuite:
   override def beforeEach(context: BeforeEach): Unit =
     ClassIdentityBuilderCache.clear()
     ClassBuilderCache.clear()
-    AttributeIdentityBuilderCache.clear()
-    AttributeBuilderCache.clear()
+    AttributeIdentityCache.clear()
+    AttributeCache.clear()
     EnumerationCache.clear()
     PrefixNamespace.clear()
 

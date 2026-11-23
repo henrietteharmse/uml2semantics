@@ -104,7 +104,7 @@ object ClassBuilderCache:
           classToCache = classToCache.copy(classDefinitionOption = mergedDefinition, children = mergedChildren)
         }
         // Update attributes that still reference the old partial class identity
-        AttributeBuilderCache.updateClassIdentity(partialIdentity, umlClass.classIdentity)
+        AttributeCache.updateClassIdentity(partialIdentity, umlClass.classIdentity)
         removeUMLClass(partialIdentity)
       }
     buildersByClassIdentity += (classToCache.classIdentity -> builder)
