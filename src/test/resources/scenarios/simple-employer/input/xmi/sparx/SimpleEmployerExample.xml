@@ -6,7 +6,7 @@
 			<packagedElement xmi:type="uml:Class" xmi:id="EAID_A8606A15_ADC2_4a27_A68E_0CE7570153F5" name="Employee" visibility="public">
 				<generalization xmi:type="uml:Generalization" xmi:id="EAID_DC974F0C_D746_4fcb_9C18_87DCE6654BD0" general="EAID_E02ECD5E_8B96_4255_AEEB_377650C7F084" isSubstitutable="true"/>
 			</packagedElement>
-			<packagedElement xmi:type="uml:Association" xmi:id="EAID_2F9EEC5B_FDCD_4711_9771_E0B04A671F62" name="employedBy" visibility="public">
+			<packagedElement xmi:type="uml:Association" xmi:id="EAID_2F9EEC5B_FDCD_4711_9771_E0B04A671F62" name="isEmployedBy" visibility="public">
 				<memberEnd xmi:idref="EAID_dst9EEC5B_FDCD_4711_9771_E0B04A671F62"/>
 				<ownedEnd xmi:type="uml:Property" xmi:id="EAID_dst9EEC5B_FDCD_4711_9771_E0B04A671F62" visibility="public" association="EAID_2F9EEC5B_FDCD_4711_9771_E0B04A671F62" isStatic="false" isReadOnly="false" isDerived="false" isOrdered="false" isUnique="true" isDerivedUnion="false" aggregation="none">
 					<type xmi:idref="EAID_EA60BA14_CE98_4ad9_8F26_4801BB2EAFBA"/>
@@ -161,7 +161,7 @@
 			</element>
 		</elements>
 		<connectors>
-			<connector xmi:idref="EAID_2F9EEC5B_FDCD_4711_9771_E0B04A671F62" name="employedBy">
+			<connector xmi:idref="EAID_2F9EEC5B_FDCD_4711_9771_E0B04A671F62" name="isEmployedBy">
 				<source xmi:idref="EAID_A8606A15_ADC2_4a27_A68E_0CE7570153F5">
 					<model ea_localid="7" type="Class" name="Employee"/>
 					<role visibility="Public" targetScope="instance"/>
@@ -178,7 +178,7 @@
 					<role visibility="Public" targetScope="instance"/>
 					<type multiplicity="1" aggregation="none" containment="Unspecified"/>
 					<constraints/>
-					<modifiers isOrdered="false" changeable="none" isNavigable="false"/>
+					<modifiers isOrdered="false" changeable="none" isNavigable="true"/>
 					<style value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Unspecified;"/>
 					<documentation/>
 					<xrefs/>
@@ -190,8 +190,8 @@
 				<parameterSubstitutions/>
 				<documentation/>
 				<appearance linemode="3" linecolor="-1" linewidth="0" seqno="0" headStyle="0" lineStyle="0"/>
-				<labels mt="employedBy" rb="1"/>
-				<extendedProperties virtualInheritance="0"/>
+				<labels mt="isEmployedBy" rb="1"/>
+				<extendedProperties/>
 				<style/>
 				<xrefs/>
 				<tags/>
