@@ -336,7 +336,7 @@ object UMLAttribute:
 
     /**
      * A blank type leaves the attribute genuinely untyped rather than rejecting it. Two kinds of
-     * modeller use this tool: one converting a finished UML diagram, for whom a missing type is an
+     * modeller use this tool: one translating a finished UML diagram, for whom a missing type is an
      * omission, and one drafting an ontology through UML because they are not fluent in OWL, for
      * whom an untyped attribute is a legitimate intermediate state. Since the tool cannot tell them
      * apart, it accepts the attribute and warns.

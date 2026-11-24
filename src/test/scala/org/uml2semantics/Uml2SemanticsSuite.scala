@@ -10,7 +10,7 @@ import org.uml2semantics.utility.OntologyAssertions
 import java.io.File
 
 /**
- * Base suite for everything that drives a conversion.
+ * Base suite for everything that drives a translation.
  *
  * It owns two things that every suite needs and no suite should repeat: resetting the global model
  * caches between tests, and the convention that binds a *case* on disk to a test. Centralising the
@@ -19,7 +19,7 @@ import java.io.File
  */
 abstract class Uml2SemanticsSuite extends FunSuite:
 
-  /** Every case is converted under the same ontology IRI and prefix, so goldens are comparable. */
+  /** Every case is translated under the same ontology IRI and prefix, so goldens are comparable. */
   protected val ontologyIRI = "https://uml2semantics.com/test/ontology"
   protected val ontologyPrefixIRI = "https://uml2semantics.com/test/ontology/"
   protected val ontologyPrefix = s"t:$ontologyPrefixIRI"
@@ -41,14 +41,14 @@ abstract class Uml2SemanticsSuite extends FunSuite:
    * `caseName` is a path under `src/test/resources/cases`, e.g. `tsv/multiplicity/exact-one`.
    * Whichever of `<case>.classes.tsv`, `<case>.attributes.tsv`, `<case>.enumerations.tsv` and
    * `<case>.enumeration-values.tsv` exist are passed as input; the golden is `<case>.ofn`. The
-   * conversion goes through argument parsing, so cases exercise the CLI surface rather than
+   * translation goes through argument parsing, so cases exercise the CLI surface rather than
    * assuming it.
    *
    * Returns the result so a case can go on to assert the diagnostics it expects.
    */
   protected def runCase(caseName: String,
                         extraArguments: Seq[String] = Seq.empty,
-                        prefix: String = ontologyPrefix): ConversionResult =
+                        prefix: String = ontologyPrefix): TranslationResult =
     val casePath = new File(casesRoot, caseName)
     val caseDirectory = casePath.getParentFile
     val filePrefix = casePath.getName
@@ -74,7 +74,7 @@ abstract class Uml2SemanticsSuite extends FunSuite:
         inputFiles.flatMap((flag, file) => Seq(flag, file.getPath)) ++
         extraArguments
 
-    val result = convertFromArguments(arguments).getOrElse(
+    val result = translateFromArguments(arguments).getOrElse(
       fail(s"Case '$caseName': arguments could not be parsed: ${arguments.mkString(" ")}"))
 
     assert(result.owlOntologyFile.isDefined, s"Case '$caseName' wrote no ontology: ${result.errors.mkString("\n")}")
@@ -90,12 +90,12 @@ abstract class Uml2SemanticsSuite extends FunSuite:
    * containment, so a case notices diagnostics nobody asked for. Messages are never matched, so
    * their wording stays free to improve.
    */
-  protected def assertDiagnostics(result: ConversionResult,
+  protected def assertDiagnostics(result: TranslationResult,
                                   expected: (DiagnosticSeverity, DiagnosticCode)*): Unit =
     val actual = result.diagnostics.map(diagnostic => (diagnostic.severity, diagnostic.code))
     assertEquals(actual.sortBy(_.toString()), expected.toSeq.sortBy(_.toString()),
       s"Diagnostics did not match. Actual diagnostics were:\n${result.diagnostics.mkString("\n")}")
 
   /** Asserts a case produced a clean run. */
-  protected def assertNoDiagnostics(result: ConversionResult): Unit =
+  protected def assertNoDiagnostics(result: TranslationResult): Unit =
     assertDiagnostics(result)

@@ -2,7 +2,7 @@ package org.uml2semantics.cases.tsv
 
 import org.uml2semantics.diagnostics.DiagnosticCode.NoInputSupplied
 import org.uml2semantics.diagnostics.DiagnosticSeverity.Error
-import org.uml2semantics.{Uml2SemanticsSuite, convertFromArguments}
+import org.uml2semantics.{Uml2SemanticsSuite, translateFromArguments}
 
 import java.io.File
 
@@ -20,14 +20,14 @@ class CliSuite extends Uml2SemanticsSuite:
     val outputFile = new File("test-output/cases/tsv/cli/no-input.rdf")
     outputFile.getParentFile.mkdirs()
 
-    val result = convertFromArguments(
+    val result = translateFromArguments(
       Seq("-i", ontologyIRI, "-p", ontologyPrefix, "-o", outputFile.getPath)).getOrElse(
       fail("Arguments should have parsed"))
 
     assertDiagnostics(result, Error -> NoInputSupplied)
   }
 
-  test("arguments that do not parse yield no conversion at all") {
+  test("arguments that do not parse yield no translation at all") {
     // -o is required, so omitting it fails before any reader runs.
-    assertEquals(convertFromArguments(Seq("-i", ontologyIRI, "-p", ontologyPrefix)), None)
+    assertEquals(translateFromArguments(Seq("-i", ontologyIRI, "-p", ontologyPrefix)), None)
   }

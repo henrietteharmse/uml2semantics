@@ -7,7 +7,7 @@ Ontology(<https://uml2semantics.com/test/ontology>
 
   # A blank type leaves the attribute genuinely untyped: an object property with a domain and no
   # range. The modeller drafting an ontology through UML gets a usable property; the modeller
-  # converting a finished diagram gets a warning telling them a type is missing.
+  # translating a finished diagram gets a warning telling them a type is missing.
   Declaration(Class(:Person))
   AnnotationAssertion(rdfs:label :Person "Person")
   AnnotationAssertion(rdfs:comment :Person "A human being.")

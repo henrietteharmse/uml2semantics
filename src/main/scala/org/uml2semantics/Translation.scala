@@ -11,10 +11,10 @@ import org.uml2semantics.writer.UML2OWLWriter
 import java.io.File
 
 /**
- * The outcome of one conversion: the ontology file that was written, if it was, and everything
+ * The outcome of one translation: the ontology file that was written, if it was, and everything
  * that could not be honoured along the way.
  */
-case class ConversionResult(owlOntologyFile: Option[File], diagnostics: Seq[Diagnostic]):
+case class TranslationResult(owlOntologyFile: Option[File], diagnostics: Seq[Diagnostic]):
   def errors: Seq[Diagnostic] = diagnostics.filter(_.severity == DiagnosticSeverity.Error)
 
   def warnings: Seq[Diagnostic] = diagnostics.filter(_.severity == DiagnosticSeverity.Warning)
@@ -23,17 +23,17 @@ case class ConversionResult(owlOntologyFile: Option[File], diagnostics: Seq[Diag
 
   def codes: Seq[DiagnosticCode] = diagnostics.map(_.code)
 
-private val conversionLogger = Logger("Conversion")
+private val translationLogger = Logger("Translation")
 
 /**
- * Runs the conversion described by `input`, returning what was produced and what went wrong.
+ * Runs the translation described by `input`, returning what was produced and what went wrong.
  *
  * This is the seam the CLI and the test suite share: `uml2owl` is argument parsing and logging
  * on top of this function and nothing else. Diagnostics are returned rather than only logged,
  * because a caller that cannot see what was rejected cannot react to it — and neither can a test.
  */
-def convert(input: InputParameters): ConversionResult =
-  conversionLogger.debug(s"input=$input at ${Code.source}")
+def translate(input: InputParameters): TranslationResult =
+  translationLogger.debug(s"input=$input at ${Code.source}")
   val diagnostics = new Diagnostics
 
   PrefixNamespace.cachePrefixes(input.prefixes)
@@ -46,21 +46,21 @@ def convert(input: InputParameters): ConversionResult =
   // The overriding source is parsed last, so its values win during cache enrichment.
   (hasTsvInput, hasXmiInput) match
     case (true, false) =>
-      conversionLogger.info("Processing TSV input files")
+      translationLogger.info("Processing TSV input files")
       diagnostics.addAll(TSVReader.parseUMLClassDiagram(input))
 
     case (false, true) =>
-      conversionLogger.info("Processing XMI input file")
+      translationLogger.info("Processing XMI input file")
       diagnostics.addAll(XMIReader.parseUMLClassDiagram(input))
 
     case (true, true) =>
       Overrides(input.overrides) match
         case Overrides.XMI =>
-          conversionLogger.info("Processing TSV input files first, then XMI will override")
+          translationLogger.info("Processing TSV input files first, then XMI will override")
           diagnostics.addAll(TSVReader.parseUMLClassDiagram(input))
           diagnostics.addAll(XMIReader.parseUMLClassDiagram(input))
         case Overrides.TSV =>
-          conversionLogger.info("Processing XMI input file first, then TSV will override")
+          translationLogger.info("Processing XMI input file first, then TSV will override")
           diagnostics.addAll(XMIReader.parseUMLClassDiagram(input))
           diagnostics.addAll(TSVReader.parseUMLClassDiagram(input))
 
@@ -80,4 +80,4 @@ def convert(input: InputParameters): ConversionResult =
     Option.when(!writerDiagnostics.exists(_.code == DiagnosticCode.OntologySaveFailed))(owlOntologyFile)
   }
 
-  ConversionResult(writtenFile, diagnostics.toSeq)
+  TranslationResult(writtenFile, diagnostics.toSeq)

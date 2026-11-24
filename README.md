@@ -1,4 +1,4 @@
-`uml2semantics` is an application that allows you to convert a UML class diagram to an OWL 2 ontology. Translating a UML 
+`uml2semantics` is an application that allows you to translate a UML class diagram to an OWL 2 ontology. Translating a UML 
 class diagram to an OWL 2 ontology allows one to reason over the ontology and thereby discover possible 
 inconsistencies or unintended consequences. The UML to OWL translation we use is based on
 [UML to OWL](https://henrietteharmse.com/uml-vs-owl/uml-class-diagram-to-owl-and-sroiq-reference/), which
@@ -40,7 +40,7 @@ At minimum, you must provide either TSV files (`-c`, `-a`, `-e`, `-n`) or an XMI
 
 # Quick Start
 ## Employer and Employee example 
-As a quick start here is a small UML class diagram that we will convert to OWL. We define a `Person` class 
+As a quick start here is a small UML class diagram that we will translate to OWL. We define a `Person` class 
 that has attributes `name`, `surname` and  `dateOfBirth`. The types we use are `name` and `surname` is `xsd:string` 
 and for `dateOfBirth` we use `xsd:dateTime`. `Employee` and `Employer` extends `Person`. An employee has exactly 1 
 employer and an employer has 1 or more employees. An employee also has exactly 1 `Renumeration`, which has a `rate` of

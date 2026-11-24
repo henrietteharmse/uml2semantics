@@ -1,6 +1,6 @@
 # Context: writer
 
-Mapping the cached UML model to semantic-web artifacts. `UML2OWLWriter` (working) produces an OWL 2 ontology in RDF/XML via the OWL API; `UML2SHACLWriter` (stub, in development) will produce a SHACL shapes graph. Writers receive snapshots (`Set[UMLClass]`, `Set[UMLAttribute]`, `Set[UMLEnumeration]`) taken from the caches by `convert`.
+Mapping the cached UML model to semantic-web artifacts. `UML2OWLWriter` (working) produces an OWL 2 ontology in RDF/XML via the OWL API; `UML2SHACLWriter` (stub, in development) will produce a SHACL shapes graph. Writers receive snapshots (`Set[UMLClass]`, `Set[UMLAttribute]`, `Set[UMLEnumeration]`) taken from the caches by `translate`.
 
 ## Glossary — the UML→OWL mapping
 
@@ -38,5 +38,5 @@ Mapping the cached UML model to semantic-web artifacts. `UML2OWLWriter` (working
 ## Invariants and assumptions
 
 - The writer is a pure consumer: it never mutates the model caches, and all identity/IRI decisions were made in the model context — the writer just calls `getIRI`/`getLabel`.
-- Expected outputs for manual testing live in `src/test/resources/`; `runTest.sh` exercises an XMI-to-OWL conversion end to end.
+- Expected outputs for manual testing live in `src/test/resources/`; `runTest.sh` exercises an XMI-to-OWL translation end to end.
 - Disjoint-classes and equivalent-to-union axioms require at least two classes; smaller sets are logged as warnings and skipped.

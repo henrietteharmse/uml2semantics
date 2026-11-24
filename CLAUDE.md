@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-uml2semantics converts UML class diagrams into OWL 2 ontologies. It accepts input as TSV files (for classes, attributes, enumerations) or XMI files (from tools like Enterprise Architect), and outputs OWL ontologies in RDF/XML format. The project assumes conceptual UML models (no interfaces, access modifiers, or operations).
+uml2semantics translates UML class diagrams into OWL 2 ontologies. It accepts input as TSV files (for classes, attributes, enumerations) or XMI files (from tools like Enterprise Architect), and outputs OWL ontologies in RDF/XML format. The project assumes conceptual UML models (no interfaces, access modifiers, or operations).
 
 ## Build & Run Commands
 
@@ -12,7 +12,7 @@ uml2semantics converts UML class diagrams into OWL 2 ontologies. It accepts inpu
 - **Test**: `sbt test` (munit). Two kinds of test, both driving the real CLI entry point: *cases* in `src/test/resources/cases/<format>/<group>/` isolate one behaviour each against a hand-authored golden in OWL Functional Syntax, and *scenarios* in `src/test/resources/scenarios/` check that a realistic model composes. Suites run sequentially because the model caches are global mutable singletons — see `src/test/CONTEXT.md`.
 - **Build assembly JAR**: `sbt assembly` (outputs `target/scala-3.6.3/uml2semantics.jar`)
 - **Run**: `java -jar target/scala-3.6.3/uml2semantics.jar [options]`
-- **Manual test**: `./runTest.sh` (runs a sample XMI-to-OWL conversion)
+- **Manual test**: `./runTest.sh` (runs a sample XMI-to-OWL translation)
 
 Additional scenarios can also be tested manually via `runTest.sh` by comparing output OWL files against expected outputs in `src/test/resources/`.
 
