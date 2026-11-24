@@ -1,0 +1,26 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(ex:=<https://example.org/vocabulary/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # TSV overrides XMI by default. A row carrying both halves ties the curie to the enumeration drawn by
+  # name, and likewise for the value Daily. The TSV definition of the enumeration wins. The definition
+  # of Daily, which TSV leaves blank, is kept from the diagram. The values of both sources are combined.
+  Declaration(Class(ex:SalarySchedule))
+  AnnotationAssertion(rdfs:label ex:SalarySchedule "PaymentSchedule")
+  AnnotationAssertion(rdfs:comment ex:SalarySchedule "The frequency at which an employee is paid.")
+  Declaration(NamedIndividual(ex:Daily))
+  AnnotationAssertion(rdfs:label ex:Daily "Daily")
+  AnnotationAssertion(rdfs:comment ex:Daily "Paid at the end of each day.")
+  ClassAssertion(ex:SalarySchedule ex:Daily)
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly> "Weekly")
+  ClassAssertion(ex:SalarySchedule <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly>)
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/PaymentSchedule#Monthly>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/PaymentSchedule#Monthly> "Monthly")
+  AnnotationAssertion(rdfs:comment <https://uml2semantics.com/test/ontology/PaymentSchedule#Monthly> "Paid on the last day of the month.")
+  ClassAssertion(ex:SalarySchedule <https://uml2semantics.com/test/ontology/PaymentSchedule#Monthly>)
+  EquivalentClasses(ex:SalarySchedule ObjectOneOf(ex:Daily <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly> <https://uml2semantics.com/test/ontology/PaymentSchedule#Monthly>))
+  DifferentIndividuals(ex:Daily <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly> <https://uml2semantics.com/test/ontology/PaymentSchedule#Monthly>)
+)

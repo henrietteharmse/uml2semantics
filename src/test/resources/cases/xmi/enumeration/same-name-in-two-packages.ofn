@@ -1,0 +1,18 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # Enumerations are read at any package depth, and the package is not part of the identity: the two
+  # are one enumeration holding the values of both.
+  Declaration(Class(:Size))
+  AnnotationAssertion(rdfs:label :Size "Size")
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/Size#Small>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Size#Small> "Small")
+  ClassAssertion(:Size <https://uml2semantics.com/test/ontology/Size#Small>)
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/Size#Large>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Size#Large> "Large")
+  ClassAssertion(:Size <https://uml2semantics.com/test/ontology/Size#Large>)
+  EquivalentClasses(:Size ObjectOneOf(<https://uml2semantics.com/test/ontology/Size#Small> <https://uml2semantics.com/test/ontology/Size#Large>))
+  DifferentIndividuals(<https://uml2semantics.com/test/ontology/Size#Small> <https://uml2semantics.com/test/ontology/Size#Large>)
+)

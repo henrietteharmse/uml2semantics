@@ -1,0 +1,20 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(ex:=<https://example.org/vocabulary/>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # A row that gives the target of an association a curie moves the class to that IRI, and the range of
+  # the property the association became moves with it. There is one class for Employee.
+  Declaration(Class(:Employer))
+  AnnotationAssertion(rdfs:label :Employer "Employer")
+  Declaration(Class(ex:Employee))
+  AnnotationAssertion(rdfs:label ex:Employee "Employee")
+  Declaration(ObjectProperty(<https://uml2semantics.com/test/ontology/Employer#employs>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Employer#employs> "employs")
+  ObjectPropertyDomain(<https://uml2semantics.com/test/ontology/Employer#employs> :Employer)
+  ObjectPropertyRange(<https://uml2semantics.com/test/ontology/Employer#employs> ex:Employee)
+  SubClassOf(:Employer ObjectMinCardinality(1 <https://uml2semantics.com/test/ontology/Employer#employs> owl:Thing))
+  DisjointClasses(:Employer ex:Employee)
+)

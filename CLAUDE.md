@@ -34,7 +34,7 @@ The pipeline follows a **Read → Cache → Write** pattern:
 
 ### Readers (`reader/`)
 - **TSVReader** — reads tab-separated files for classes, attributes, enumerations
-- **XMIReader** — parses XMI/XML using DOM + XPath (handles Enterprise Architect exports)
+- **XMIReader** — parses XMI/XML using the DOM (handles Enterprise Architect exports): classes, generalizations, enumerations, attributes, and associations, each of which becomes an attribute of its source class. Specified in `docs/specs/xmi-enumerations.md` and `docs/specs/xmi-associations.md`.
 - **ReaderHelper** — shared logic for populating parent-child (generalization) relationships
 - When both TSV and XMI are provided, the `--overrides` flag controls processing order (which source takes precedence)
 
@@ -42,7 +42,7 @@ The pipeline follows a **Read → Cache → Write** pattern:
 Readers populate global mutable caches rather than returning data:
 - **ClassBuilderCache / ClassIdentityBuilderCache** — stores UML classes
 - **AttributeCache / AttributeIdentityCache** — stores UML attributes
-- **EnumerationCache** — stores UML enumerations, each holding its values (read from TSV only)
+- **EnumerationCache** — stores UML enumerations, each holding its values
 - Key model types: `UMLClass`, `UMLAttribute`, `UMLEnumeration`, `LabeledIRI`, `PrefixNamespace`, `SupportedDataType`
 - `UMLClass` supports generalization sets with covering (complete/incomplete) and disjointness constraints
 

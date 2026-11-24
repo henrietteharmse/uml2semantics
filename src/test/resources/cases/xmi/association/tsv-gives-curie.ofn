@@ -1,0 +1,22 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(ex:=<https://example.org/vocabulary/>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # Because an association becomes an attribute, a row of the attributes file for the same class and
+  # name enriches it. A row with both halves maps the association onto an existing property without
+  # renaming it in the diagram: the curie gives the IRI and the name stays the label.
+  Declaration(Class(:Employer))
+  AnnotationAssertion(rdfs:label :Employer "Employer")
+  Declaration(Class(:Employee))
+  AnnotationAssertion(rdfs:label :Employee "Employee")
+  Declaration(ObjectProperty(ex:employs))
+  AnnotationAssertion(rdfs:label ex:employs "employs")
+  AnnotationAssertion(rdfs:comment ex:employs "An employer employs one or more employees.")
+  ObjectPropertyDomain(ex:employs :Employer)
+  ObjectPropertyRange(ex:employs :Employee)
+  SubClassOf(:Employer ObjectMinCardinality(1 ex:employs owl:Thing))
+  DisjointClasses(:Employer :Employee)
+)

@@ -1,0 +1,20 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(ex:=<https://example.org/vocabulary/>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # An association name containing a colon is a curie. It gives the property its IRI directly and,
+  # with no name to prefer, is also the label.
+  Declaration(Class(:Employer))
+  AnnotationAssertion(rdfs:label :Employer "Employer")
+  Declaration(Class(:Employee))
+  AnnotationAssertion(rdfs:label :Employee "Employee")
+  Declaration(ObjectProperty(ex:employs))
+  AnnotationAssertion(rdfs:label ex:employs "ex:employs")
+  ObjectPropertyDomain(ex:employs :Employer)
+  ObjectPropertyRange(ex:employs :Employee)
+  SubClassOf(:Employer ObjectMinCardinality(1 ex:employs owl:Thing))
+  DisjointClasses(:Employer :Employee)
+)

@@ -1,0 +1,13 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # There is nothing to name an attribute with, so the ontology gets no property and no restriction
+  # for the association, and it is reported. The classes at its ends are read as usual.
+  Declaration(Class(:Employer))
+  AnnotationAssertion(rdfs:label :Employer "Employer")
+  Declaration(Class(:Employee))
+  AnnotationAssertion(rdfs:label :Employee "Employee")
+  DisjointClasses(:Employer :Employee)
+)

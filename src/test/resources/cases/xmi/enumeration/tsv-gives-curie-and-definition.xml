@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	An enumeration drawn by name, with a definition and two literals, one of them defined. The TSV
+	files of this case give the enumeration a curie and a definition, give the literal Daily a curie,
+	and add the value Monthly.
+-->
+<xmi:XMI xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmi:version="2.1" xmlns:uml="http://schema.omg.org/spec/UML/2.1">
+	<xmi:Documentation exporter="Enterprise Architect" exporterVersion="6.5"/>
+	<uml:Model xmi:type="uml:Model" name="EA_Model" visibility="public">
+		<packagedElement xmi:type="uml:Package" xmi:id="EAPK_Model" name="Model" visibility="public">
+			<packagedElement xmi:type="uml:Enumeration" xmi:id="EAID_PaymentSchedule" name="PaymentSchedule" visibility="public">
+				<ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="EAID_PaymentSchedule_Daily" name="Daily" visibility="public"/>
+				<ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="EAID_PaymentSchedule_Weekly" name="Weekly" visibility="public"/>
+			</packagedElement>
+		</packagedElement>
+	</uml:Model>
+	<xmi:Extension extender="Enterprise Architect" extenderID="6.5">
+		<elements>
+			<element xmi:idref="EAID_PaymentSchedule" xmi:type="uml:Enumeration" name="PaymentSchedule" scope="public">
+				<properties documentation="The frequency of payments, as drawn." isSpecification="false" sType="Enumeration" nType="0" scope="public"/>
+				<attributes>
+					<attribute xmi:idref="EAID_PaymentSchedule_Daily" name="Daily" scope="Public">
+						<documentation value="Paid at the end of each day."/>
+						<properties collection="false" static="0" duplicates="0" changeability="changeable"/>
+						<bounds lower="1" upper="1"/>
+					</attribute>
+					<attribute xmi:idref="EAID_PaymentSchedule_Weekly" name="Weekly" scope="Public">
+						<documentation/>
+						<properties collection="false" static="0" duplicates="0" changeability="changeable"/>
+						<bounds lower="1" upper="1"/>
+					</attribute>
+				</attributes>
+			</element>
+		</elements>
+	</xmi:Extension>
+</xmi:XMI>

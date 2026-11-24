@@ -124,6 +124,10 @@ object UMLEnumerationValue:
       this.curie = Some(curie)
       this
 
+    /** For input that has one field for both: an identifier with a colon is a curie, any other a name. */
+    def withNameOrCurie(nameOrCurie: String): EnumerationValueBuilder =
+      if nameOrCurie.contains(':') then withNameAndCurie("", nameOrCurie) else withNameAndCurie(nameOrCurie, "")
+
     def withDefinition(definition: String): EnumerationValueBuilder =
       this.definition = Some(definition)
       this
@@ -142,9 +146,11 @@ object UMLEnumerationValue:
       val enumerationNameOrCurie = enumeration.filterNot(_.isBlank).getOrElse(
         throw new UMLModelException(DiagnosticCode.BlankIdentity,
           "An enumeration value needs the enumeration it belongs to; none was given."))
-      val enumerationIdentity = EnumerationCache.getUMLEnumeration(enumerationNameOrCurie).map(_.identity)
+      val cachedEnumeration = EnumerationCache.getUMLEnumeration(enumerationNameOrCurie)
+      val enumerationIdentity = cachedEnumeration.map(_.identity)
         .getOrElse(UMLEnumeration.identityOfNewEnumeration(
           IdentityHalves.readNameOrCurie("An enumeration", enumerationNameOrCurie), prefixNamespace))
+      cachedEnumeration.foreach(_.refuseValueWithTakenIRI(value))
 
       EnumerationCache.cacheUMLEnumeration(UMLEnumeration(enumerationIdentity, None, Set(value)))
       value
@@ -167,16 +173,33 @@ case class UMLEnumeration(identity: UMLEnumerationIdentity,
    * minted under the ontology prefix and qualified by the label of this enumeration, exactly as a
    * name-only attribute is qualified by its class, so that `Other` in two enumerations is two IRIs.
    * It cannot collide with an attribute's IRI, because a class and an enumeration never share a
-   * label.
+   * label. Value names are the one kind of name that is often not a plain identifier, so the name is
+   * made safe for an IRI first; the label keeps it as given.
    */
   def getValueIRI(value: UMLEnumerationValue): String =
     (value.identity.curieOption, value.identity.nameOption) match
       case (Some(curie), _) => curie.getIRI
       case (_, Some(name)) => val iri = identity.ontologyPrefix.prefixIRI.iri
-        iri + (if iri.matches(".*#$") then getLabel + PATH_SEPARATOR + name.name
-          else if iri.matches(".*/$") then getLabel + FRAGMENT_SEPARATOR + name.name
-          else s"$PATH_SEPARATOR" + getLabel + FRAGMENT_SEPARATOR + name.name)
+        val safeName = UMLEnumeration.safeInIRI(name.name)
+        iri + (if iri.matches(".*#$") then getLabel + PATH_SEPARATOR + safeName
+          else if iri.matches(".*/$") then getLabel + FRAGMENT_SEPARATOR + safeName
+          else s"$PATH_SEPARATOR" + getLabel + FRAGMENT_SEPARATOR + safeName)
       case _ => throw new UMLModelException(DiagnosticCode.BlankIdentity, "Name and curie must not be empty.")
+
+  /**
+   * Refuses a value about to join this enumeration when another of its values already has the IRI
+   * the newcomer would get, as `Hp 0` and `Hp_0` do once the space has become an underscore. Two
+   * values sharing an IRI would be one individual with two labels. A newcomer that is a value
+   * already here, arriving again to be enriched, is judged as the value it will become.
+   */
+  private[model] def refuseValueWithTakenIRI(newcomer: UMLEnumerationValue): Unit =
+    val (sameValue, otherValues) = values.partition(_.identity.sharesAHalfWith(newcomer.identity))
+    val enriched = sameValue.foldLeft(newcomer)((enriching, older) => older.enrichedBy(enriching))
+    val iri = getValueIRI(enriched)
+    otherValues.find(getValueIRI(_) == iri).foreach(other =>
+      throw new UMLModelException(DiagnosticCode.EnumerationValueIRIConflict,
+        s"Value '${newcomer.getLabel}' of enumeration '$getLabel' would get the IRI $iri, which its value " +
+          s"'${other.getLabel}' already has."))
 
   /**
    * This enumeration with whatever `newer` supplies laid over it. A half of the identity or a
@@ -196,6 +219,16 @@ object UMLEnumeration:
 
   def builder(prefixNamespace: PrefixNamespace): EnumerationBuilder =
     EnumerationBuilder(prefixNamespace)
+
+  /**
+   * A value name as it goes into an IRI. Letters and digits of any script are kept, and so are the
+   * hyphen, the full stop, the underscore and the tilde. Every other character becomes an
+   * underscore, one for one, so `Sh 2/Sh 0` is `Sh_2_Sh_0`.
+   */
+  private def safeInIRI(valueName: String): String =
+    valueName.codePoints().toArray.map(codePoint =>
+      if Character.isLetterOrDigit(codePoint) || "-._~".indexOf(codePoint) >= 0 then Character.toString(codePoint)
+      else "_").mkString
 
   private def withValue(values: Set[UMLEnumerationValue], newer: UMLEnumerationValue): Set[UMLEnumerationValue] =
     val (sameValue, otherValues) = values.partition(_.identity.sharesAHalfWith(newer.identity))
@@ -225,6 +258,10 @@ object UMLEnumeration:
       this.name = Some(name)
       this.curie = Some(curie)
       this
+
+    /** For input that has one field for both: an identifier with a colon is a curie, any other a name. */
+    def withNameOrCurie(nameOrCurie: String): EnumerationBuilder =
+      if nameOrCurie.contains(':') then withNameAndCurie("", nameOrCurie) else withNameAndCurie(nameOrCurie, "")
 
     def withDefinition(definition: String): EnumerationBuilder =
       this.definition = Some(definition)

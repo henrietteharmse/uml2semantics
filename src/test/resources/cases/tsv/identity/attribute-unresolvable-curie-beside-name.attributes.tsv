@@ -1,0 +1,3 @@
+Class	Curie	Name	ClassEnumOrPrimitiveType	MinMultiplicity	MaxMultiplicity	Definition
+Person	nope:givenName	name	xsd:string	1	1	Rejected: the prefix "nope" is not configured, although the name is fine.
+Person		surname	xsd:string	1	1	The surname of a person.

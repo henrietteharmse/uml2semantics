@@ -13,6 +13,62 @@
     <!-- 
     ///////////////////////////////////////////////////////////////////////////////////////
     //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    
+
+
+    <!-- https://uml2semantics.com/ontology/Employee#isEmployedBy -->
+
+
+    <owl:ObjectProperty rdf:about="https://uml2semantics.com/ontology/Employee#isEmployedBy">
+        <rdfs:domain rdf:resource="https://uml2semantics.com/ontology/Employee"/>
+        <rdfs:range rdf:resource="https://uml2semantics.com/ontology/Employer"/>
+        <rdfs:label>isEmployedBy</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://uml2semantics.com/ontology/Employee#renumeration -->
+
+
+    <owl:ObjectProperty rdf:about="https://uml2semantics.com/ontology/Employee#renumeration">
+        <rdfs:domain rdf:resource="https://uml2semantics.com/ontology/Employee"/>
+        <rdfs:range rdf:resource="https://uml2semantics.com/ontology/Renumeration"/>
+        <rdfs:label>renumeration</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://uml2semantics.com/ontology/Employer#employs -->
+
+
+    <owl:ObjectProperty rdf:about="https://uml2semantics.com/ontology/Employer#employs">
+        <rdfs:domain rdf:resource="https://uml2semantics.com/ontology/Employer"/>
+        <rdfs:range rdf:resource="https://uml2semantics.com/ontology/Employee"/>
+        <rdfs:label>employs</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://uml2semantics.com/ontology/Renumeration#paymentSchedule -->
+
+
+    <owl:ObjectProperty rdf:about="https://uml2semantics.com/ontology/Renumeration#paymentSchedule">
+        <rdfs:domain rdf:resource="https://uml2semantics.com/ontology/Renumeration"/>
+        <rdfs:range rdf:resource="https://uml2semantics.com/ontology/PaymentSchedule"/>
+        <rdfs:label>paymentSchedule</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
     // Data properties
     //
     ///////////////////////////////////////////////////////////////////////////////////////
@@ -72,6 +128,18 @@
 
     <owl:Class rdf:about="https://uml2semantics.com/ontology/Employee">
         <rdfs:subClassOf rdf:resource="https://uml2semantics.com/ontology/Person"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://uml2semantics.com/ontology/Employee#isEmployedBy"/>
+                <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:cardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://uml2semantics.com/ontology/Employee#renumeration"/>
+                <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:cardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
         <rdfs:label>Employee</rdfs:label>
     </owl:Class>
     
@@ -82,7 +150,31 @@
 
     <owl:Class rdf:about="https://uml2semantics.com/ontology/Employer">
         <rdfs:subClassOf rdf:resource="https://uml2semantics.com/ontology/Person"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://uml2semantics.com/ontology/Employer#employs"/>
+                <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
         <rdfs:label>Employer</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- https://uml2semantics.com/ontology/PaymentSchedule -->
+
+
+    <owl:Class rdf:about="https://uml2semantics.com/ontology/PaymentSchedule">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:oneOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="https://uml2semantics.com/ontology/PaymentSchedule#Daily"/>
+                    <rdf:Description rdf:about="https://uml2semantics.com/ontology/PaymentSchedule#Monthly"/>
+                    <rdf:Description rdf:about="https://uml2semantics.com/ontology/PaymentSchedule#Weekly"/>
+                </owl:oneOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:label>PaymentSchedule</rdfs:label>
     </owl:Class>
     
 
@@ -112,7 +204,6 @@
                 <owl:onDataRange rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <owl:disjointWith rdf:resource="https://uml2semantics.com/ontology/Renumeration"/>
         <rdfs:label>Person</rdfs:label>
     </owl:Class>
     
@@ -122,8 +213,84 @@
 
 
     <owl:Class rdf:about="https://uml2semantics.com/ontology/Renumeration">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://uml2semantics.com/ontology/Renumeration#paymentSchedule"/>
+                <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:cardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
         <rdfs:label>Renumeration</rdfs:label>
     </owl:Class>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    
+
+
+    <!-- https://uml2semantics.com/ontology/PaymentSchedule#Daily -->
+
+
+    <owl:NamedIndividual rdf:about="https://uml2semantics.com/ontology/PaymentSchedule#Daily">
+        <rdf:type rdf:resource="https://uml2semantics.com/ontology/PaymentSchedule"/>
+        <rdfs:label>Daily</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- https://uml2semantics.com/ontology/PaymentSchedule#Monthly -->
+
+
+    <owl:NamedIndividual rdf:about="https://uml2semantics.com/ontology/PaymentSchedule#Monthly">
+        <rdf:type rdf:resource="https://uml2semantics.com/ontology/PaymentSchedule"/>
+        <rdfs:label>Monthly</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- https://uml2semantics.com/ontology/PaymentSchedule#Weekly -->
+
+
+    <owl:NamedIndividual rdf:about="https://uml2semantics.com/ontology/PaymentSchedule#Weekly">
+        <rdf:type rdf:resource="https://uml2semantics.com/ontology/PaymentSchedule"/>
+        <rdfs:label>Weekly</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // General axioms
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    <rdf:Description>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="https://uml2semantics.com/ontology/PaymentSchedule"/>
+            <rdf:Description rdf:about="https://uml2semantics.com/ontology/Person"/>
+            <rdf:Description rdf:about="https://uml2semantics.com/ontology/Renumeration"/>
+        </owl:members>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDifferent"/>
+        <owl:distinctMembers rdf:parseType="Collection">
+            <rdf:Description rdf:about="https://uml2semantics.com/ontology/PaymentSchedule#Daily"/>
+            <rdf:Description rdf:about="https://uml2semantics.com/ontology/PaymentSchedule#Monthly"/>
+            <rdf:Description rdf:about="https://uml2semantics.com/ontology/PaymentSchedule#Weekly"/>
+        </owl:distinctMembers>
+    </rdf:Description>
 </rdf:RDF>
 
 

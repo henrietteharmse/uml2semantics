@@ -1,0 +1,18 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # The same holds for an attribute: a curie that cannot be expanded rejects the row, and no property
+  # is made under the name alone.
+  Declaration(Class(:Person))
+  AnnotationAssertion(rdfs:label :Person "Person")
+  AnnotationAssertion(rdfs:comment :Person "A human being.")
+  Declaration(DataProperty(<https://uml2semantics.com/test/ontology/Person#surname>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Person#surname> "surname")
+  AnnotationAssertion(rdfs:comment <https://uml2semantics.com/test/ontology/Person#surname> "The surname of a person.")
+  DataPropertyDomain(<https://uml2semantics.com/test/ontology/Person#surname> :Person)
+  DataPropertyRange(<https://uml2semantics.com/test/ontology/Person#surname> xsd:string)
+  SubClassOf(:Person DataExactCardinality(1 <https://uml2semantics.com/test/ontology/Person#surname> xsd:string))
+)

@@ -5,7 +5,7 @@ import org.uml2semantics.diagnostics.{Diagnostic, DiagnosticCode, DiagnosticSeve
 import org.uml2semantics.inline.Code
 import org.uml2semantics.model.PrefixNamespace
 import org.uml2semantics.model.cache.{AttributeCache, ClassBuilderCache, EnumerationCache}
-import org.uml2semantics.reader.{TSVReader, XMIReader}
+import org.uml2semantics.reader.{ReaderHelper, TSVReader, XMIReader}
 import org.uml2semantics.writer.UML2OWLWriter
 
 import java.io.File
@@ -67,6 +67,10 @@ def translate(input: InputParameters): TranslationResult =
     case (false, false) =>
       diagnostics.error(DiagnosticCode.NoInputSupplied,
         "No input files specified. Provide either TSV files (-c, -a, -e, -n) or an XMI file (-m).")
+
+  // Judged here and not by a reader, because one source may declare an enumeration and the other
+  // give it its values.
+  ReaderHelper.reportEnumerationsWithoutValues(diagnostics)
 
   val writtenFile = input.owlOntologyFile.flatMap { owlOntologyFile =>
     val owlWriter = new UML2OWLWriter(input.ontologyIRI,

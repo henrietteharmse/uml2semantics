@@ -1,0 +1,2 @@
+Class	Curie	Name	ClassEnumOrPrimitiveType	MinMultiplicity	MaxMultiplicity	Definition
+Employer	ex:employs	employs	Employee	1	*	An employer employs one or more employees.

@@ -36,10 +36,8 @@ object TSVReader extends UMLClassDiagramReader:
       parseClasses(input.classesTsv, ontologyPrefix, diagnostics)
     // Enumerations are read before attributes, whatever order the flags came in, so that an
     // attribute type naming an enumeration finds it instead of becoming a placeholder class.
-    val declaredEnumerations = input.enumerationsTsv.toSeq.flatMap(parseEnumerations(_, ontologyPrefix, diagnostics))
+    input.enumerationsTsv.foreach(parseEnumerations(_, ontologyPrefix, diagnostics))
     input.enumerationValuesTsv.foreach(parseEnumerationValues(_, ontologyPrefix, diagnostics))
-    if input.enumerationsTsv.isDefined || input.enumerationValuesTsv.isDefined then
-      reportEnumerationsWithoutValues(declaredEnumerations, diagnostics)
     if (input.attributesTsv.isDefined)
       parseClassAttributes(input.attributesTsv, ontologyPrefix, diagnostics)
     diagnostics.toSeq
@@ -85,7 +83,8 @@ object TSVReader extends UMLClassDiagramReader:
         .build
     }
 
-    populateParentsWithTheirChildren(parentToChildrenMap, ontologyPrefix)
+    populateParentsWithTheirChildren(parentToChildrenMap, ontologyPrefix, diagnostics,
+      SourceLocation(maybeTsvFile.get.getName))
 
 
   private def extractParents(parentToChildrenMap: mutable.Map[String, mutable.Set[String]],
@@ -108,25 +107,21 @@ object TSVReader extends UMLClassDiagramReader:
 
 
   /**
-   * Reads the enumerations file. Returns each enumeration a row declared with where it was
-   * declared, so that a later finding about the enumeration can point at its row.
+   * Reads the enumerations file. Where each enumeration was declared is noted in the cache, so
+   * that a later finding about the enumeration can point at its row.
    */
   private def parseEnumerations(tsvFile: File, ontologyPrefix: PrefixNamespace,
-                                diagnostics: Diagnostics): Seq[(UMLEnumeration, SourceLocation)] =
+                                diagnostics: Diagnostics): Unit =
     import EnumerationsHeader.*
     logger.info("Start")
-
-    val declaredEnumerations = mutable.ArrayBuffer[(UMLEnumeration, SourceLocation)]()
 
     forEachRow(tsvFile, diagnostics) { (row, location) =>
       val umlEnumeration = UMLEnumeration.builder(ontologyPrefix)
         .withNameAndCurie(row(Name.toString), row(Curie.toString))
         .withDefinition(row(Definition.toString))
         .build
-      declaredEnumerations += (umlEnumeration -> location)
+      EnumerationCache.recordDeclaration(umlEnumeration.identity, location)
     }
-
-    declaredEnumerations.toSeq
 
   private def parseEnumerationValues(tsvFile: File, ontologyPrefix: PrefixNamespace,
                                      diagnostics: Diagnostics): Unit =
@@ -139,23 +134,6 @@ object TSVReader extends UMLClassDiagramReader:
         .withNameAndCurie(row(Name.toString), row(Curie.toString))
         .withDefinition(row(Definition.toString))
         .build
-    }
-
-  /**
-   * An enumeration without values is accepted, for the same reason a blank attribute type is: the
-   * tool cannot tell an omission from a model that is still being drafted, so it keeps the
-   * enumeration and says something. This runs once both files are read, because only then is it
-   * known which enumerations ended up with no values.
-   */
-  private def reportEnumerationsWithoutValues(declaredEnumerations: Seq[(UMLEnumeration, SourceLocation)],
-                                              diagnostics: Diagnostics): Unit =
-    EnumerationCache.getEnumerations.filter(_.values.isEmpty).toSeq.sortBy(_.getLabel).foreach { umlEnumeration =>
-      val location = declaredEnumerations.collectFirst {
-        case (declared, location) if declared.identity.sharesAHalfWith(umlEnumeration.identity) => location
-      }
-      val message = s"Enumeration '${umlEnumeration.getLabel}' has no values."
-      logger.warn(message)
-      diagnostics.warn(DiagnosticCode.EnumerationWithoutValues, message, location)
     }
 
   private def parseClassAttributes(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespace,

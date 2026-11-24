@@ -1,6 +1,6 @@
 package org.uml2semantics.model.cache
 
-import org.uml2semantics.model.{UMLAttribute, UMLAttributeCurie, UMLAttributeDefinition, UMLAttributeIdentity, UMLAttributeName, UMLClassCurie, UMLClassIdentifier, UMLClassIdentity, UMLClassName, UMLMultiplicity}
+import org.uml2semantics.model.{UMLAttribute, UMLAttributeCurie, UMLAttributeDefinition, UMLAttributeIdentity, UMLAttributeName, UMLClassCurie, UMLClassIdentifier, UMLClassIdentity, UMLClassName, UMLClassType, UMLEnumerationType, UMLMultiplicity}
 
 import scala.collection.mutable
 
@@ -122,4 +122,26 @@ object AttributeCache:
       attributesByAttributeIdentity += (newAttrIdentity -> newAttribute)
     }
 
-  def getAttributes: Set[UMLAttribute] = attributesByAttributeIdentity.values.toSet
+  /**
+   * An attribute with its type as that type is known now.
+   *
+   * An attribute typed by a class or an enumeration records the classifier as it was when the
+   * attribute was built. The classifier may gain the other half of its identity afterwards, as when
+   * a TSV row gives a class of the diagram a curie, and that changes its IRI. The attribute is not
+   * rewritten when that happens. Instead every attribute handed out by this cache has its type
+   * looked up again, so that the range of its property follows the classifier to the IRI the
+   * classifier ends up with.
+   */
+  private def withCurrentType(umlAttribute: UMLAttribute): UMLAttribute =
+    umlAttribute.typeOfAttribute match
+      case Some(UMLClassType(umlClass)) =>
+        val currentClass = ClassIdentityBuilderCache.getClassIdentity(umlClass.classIdentity)
+          .flatMap(ClassBuilderCache.getUMLClass).getOrElse(umlClass)
+        umlAttribute.copy(typeOfAttribute = Some(UMLClassType(currentClass)))
+      case Some(UMLEnumerationType(enumerationIdentity)) =>
+        val currentIdentity = EnumerationCache.getEnumerations.map(_.identity)
+          .find(_.sharesAHalfWith(enumerationIdentity)).getOrElse(enumerationIdentity)
+        umlAttribute.copy(typeOfAttribute = Some(UMLEnumerationType(currentIdentity)))
+      case _ => umlAttribute
+
+  def getAttributes: Set[UMLAttribute] = attributesByAttributeIdentity.values.map(withCurrentType).toSet

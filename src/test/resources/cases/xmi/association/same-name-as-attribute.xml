@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Rule 17. Renumeration has the attribute paymentSchedule with 0..1 and a definition, and is the
+	source of an association of the same name with 1 at the target end and no definition.
+-->
+<xmi:XMI xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmi:version="2.1" xmlns:uml="http://schema.omg.org/spec/UML/2.1">
+	<xmi:Documentation exporter="Enterprise Architect" exporterVersion="6.5"/>
+	<uml:Model xmi:type="uml:Model" name="EA_Model" visibility="public">
+		<packagedElement xmi:type="uml:Package" xmi:id="EAPK_Model" name="Model" visibility="public">
+			<packagedElement xmi:type="uml:Class" xmi:id="EAID_Renumeration" name="Renumeration" visibility="public"/>
+			<packagedElement xmi:type="uml:Enumeration" xmi:id="EAID_PaymentSchedule" name="PaymentSchedule" visibility="public">
+				<ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="EAID_PaymentSchedule_Daily" name="Daily" visibility="public"/>
+			</packagedElement>
+		</packagedElement>
+	</uml:Model>
+	<xmi:Extension extender="Enterprise Architect" extenderID="6.5">
+		<elements>
+			<element xmi:idref="EAID_Renumeration" xmi:type="uml:Class" name="Renumeration" scope="public">
+				<properties isSpecification="false" sType="Class" nType="0" scope="public"/>
+				<attributes>
+					<attribute xmi:idref="EAID_Renumeration_paymentSchedule" name="paymentSchedule" scope="Public">
+						<documentation value="How often the renumeration is paid."/>
+						<properties type="PaymentSchedule" collection="false" static="0" duplicates="0" changeability="changeable"/>
+						<bounds lower="0" upper="1"/>
+					</attribute>
+				</attributes>
+			</element>
+		</elements>
+		<connectors>
+			<connector xmi:idref="EAID_paymentSchedule" name="paymentSchedule">
+				<source xmi:idref="EAID_Renumeration">
+					<model type="Class" name="Renumeration"/>
+					<role visibility="Public" targetScope="instance"/>
+					<type aggregation="none" containment="Unspecified"/>
+					<documentation/>
+				</source>
+				<target xmi:idref="EAID_PaymentSchedule">
+					<model type="Enumeration" name="PaymentSchedule"/>
+					<role visibility="Public" targetScope="instance"/>
+					<type multiplicity="1" aggregation="none" containment="Unspecified"/>
+					<documentation/>
+				</target>
+				<properties ea_type="Association" direction="Unspecified"/>
+				<documentation/>
+			</connector>
+		</connectors>
+	</xmi:Extension>
+</xmi:XMI>

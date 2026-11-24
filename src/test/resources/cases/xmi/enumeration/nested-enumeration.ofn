@@ -1,0 +1,9 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # A nested enumeration is not read, and nothing is reported.
+  Declaration(Class(:Car))
+  AnnotationAssertion(rdfs:label :Car "Car")
+)

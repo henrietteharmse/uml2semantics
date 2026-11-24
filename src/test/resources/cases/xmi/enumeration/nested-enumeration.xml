@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Rule 15. An enumeration owned by a class, which is exported as a nestedClassifier.
+-->
+<xmi:XMI xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmi:version="2.1" xmlns:uml="http://schema.omg.org/spec/UML/2.1">
+	<xmi:Documentation exporter="Enterprise Architect" exporterVersion="6.5"/>
+	<uml:Model xmi:type="uml:Model" name="EA_Model" visibility="public">
+		<packagedElement xmi:type="uml:Package" xmi:id="EAPK_Model" name="Model" visibility="public">
+			<packagedElement xmi:type="uml:Class" xmi:id="EAID_Car" name="Car" visibility="public">
+				<nestedClassifier xmi:type="uml:Enumeration" xmi:id="EAID_Gear" name="Gear" visibility="public">
+					<ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="EAID_Gear_First" name="First" visibility="public"/>
+				</nestedClassifier>
+			</packagedElement>
+		</packagedElement>
+	</uml:Model>
+</xmi:XMI>

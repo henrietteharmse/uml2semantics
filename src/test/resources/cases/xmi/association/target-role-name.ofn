@@ -1,0 +1,20 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # A role name on the target end takes precedence over the association name. It names the same
+  # attribute, which takes the definition of the role. The association name is not used.
+  Declaration(Class(:Employer))
+  AnnotationAssertion(rdfs:label :Employer "Employer")
+  Declaration(Class(:Employee))
+  AnnotationAssertion(rdfs:label :Employee "Employee")
+  Declaration(ObjectProperty(<https://uml2semantics.com/test/ontology/Employer#staff>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Employer#staff> "staff")
+  AnnotationAssertion(rdfs:comment <https://uml2semantics.com/test/ontology/Employer#staff> "The people an employer employs.")
+  ObjectPropertyDomain(<https://uml2semantics.com/test/ontology/Employer#staff> :Employer)
+  ObjectPropertyRange(<https://uml2semantics.com/test/ontology/Employer#staff> :Employee)
+  SubClassOf(:Employer ObjectMinCardinality(1 <https://uml2semantics.com/test/ontology/Employer#staff> owl:Thing))
+  DisjointClasses(:Employer :Employee)
+)

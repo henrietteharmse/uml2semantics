@@ -1,0 +1,20 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # An association belongs to its source. Its name becomes an attribute of the source class, typed by
+  # the target class, with the multiplicity of the target end: the attribute a row of the TSV
+  # attributes file would give, and so an object property with a domain, a range and a restriction.
+  Declaration(Class(:Employer))
+  AnnotationAssertion(rdfs:label :Employer "Employer")
+  Declaration(Class(:Employee))
+  AnnotationAssertion(rdfs:label :Employee "Employee")
+  Declaration(ObjectProperty(<https://uml2semantics.com/test/ontology/Employer#employs>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Employer#employs> "employs")
+  ObjectPropertyDomain(<https://uml2semantics.com/test/ontology/Employer#employs> :Employer)
+  ObjectPropertyRange(<https://uml2semantics.com/test/ontology/Employer#employs> :Employee)
+  SubClassOf(:Employer ObjectMinCardinality(1 <https://uml2semantics.com/test/ontology/Employer#employs> owl:Thing))
+  DisjointClasses(:Employer :Employee)
+)

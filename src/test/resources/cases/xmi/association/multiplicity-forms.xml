@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Rule 14. Four associations from Order to Item, with 2, 0..3, * and 1..5 at the Item end.
+-->
+<xmi:XMI xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmi:version="2.1" xmlns:uml="http://schema.omg.org/spec/UML/2.1">
+	<xmi:Documentation exporter="Enterprise Architect" exporterVersion="6.5"/>
+	<uml:Model xmi:type="uml:Model" name="EA_Model" visibility="public">
+		<packagedElement xmi:type="uml:Package" xmi:id="EAPK_Model" name="Model" visibility="public">
+			<packagedElement xmi:type="uml:Class" xmi:id="EAID_Order" name="Order" visibility="public"/>
+			<packagedElement xmi:type="uml:Class" xmi:id="EAID_Item" name="Item" visibility="public"/>
+		</packagedElement>
+	</uml:Model>
+	<xmi:Extension extender="Enterprise Architect" extenderID="6.5">
+		<connectors>
+			<connector xmi:idref="EAID_exactlyTwo" name="exactlyTwo">
+				<source xmi:idref="EAID_Order">
+					<model type="Class" name="Order"/>
+					<role visibility="Public" targetScope="instance"/>
+					<type aggregation="none" containment="Unspecified"/>
+					<documentation/>
+				</source>
+				<target xmi:idref="EAID_Item">
+					<model type="Class" name="Item"/>
+					<role visibility="Public" targetScope="instance"/>
+					<type multiplicity="2" aggregation="none" containment="Unspecified"/>
+					<documentation/>
+				</target>
+				<properties ea_type="Association" direction="Unspecified"/>
+				<documentation/>
+			</connector>
+			<connector xmi:idref="EAID_upToThree" name="upToThree">
+				<source xmi:idref="EAID_Order">
+					<model type="Class" name="Order"/>
+					<role visibility="Public" targetScope="instance"/>
+					<type aggregation="none" containment="Unspecified"/>
+					<documentation/>
+				</source>
+				<target xmi:idref="EAID_Item">
+					<model type="Class" name="Item"/>
+					<role visibility="Public" targetScope="instance"/>
+					<type multiplicity="0..3" aggregation="none" containment="Unspecified"/>
+					<documentation/>
+				</target>
+				<properties ea_type="Association" direction="Unspecified"/>
+				<documentation/>
+			</connector>
+			<connector xmi:idref="EAID_anyNumber" name="anyNumber">
+				<source xmi:idref="EAID_Order">
+					<model type="Class" name="Order"/>
+					<role visibility="Public" targetScope="instance"/>
+					<type aggregation="none" containment="Unspecified"/>
+					<documentation/>
+				</source>
+				<target xmi:idref="EAID_Item">
+					<model type="Class" name="Item"/>
+					<role visibility="Public" targetScope="instance"/>
+					<type multiplicity="*" aggregation="none" containment="Unspecified"/>
+					<documentation/>
+				</target>
+				<properties ea_type="Association" direction="Unspecified"/>
+				<documentation/>
+			</connector>
+			<connector xmi:idref="EAID_oneToFive" name="oneToFive">
+				<source xmi:idref="EAID_Order">
+					<model type="Class" name="Order"/>
+					<role visibility="Public" targetScope="instance"/>
+					<type aggregation="none" containment="Unspecified"/>
+					<documentation/>
+				</source>
+				<target xmi:idref="EAID_Item">
+					<model type="Class" name="Item"/>
+					<role visibility="Public" targetScope="instance"/>
+					<type multiplicity="1..5" aggregation="none" containment="Unspecified"/>
+					<documentation/>
+				</target>
+				<properties ea_type="Association" direction="Unspecified"/>
+				<documentation/>
+			</connector>
+		</connectors>
+	</xmi:Extension>
+</xmi:XMI>

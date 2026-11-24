@@ -111,7 +111,9 @@ The enumeration and its values in these examples are those of `SimpleEmployerWit
    built after the value row succeeds, so a rejected row leaves no enumeration behind.
 7. **Enumeration without values.** An enumeration with no value rows is accepted and reported as a
    warning. The tool cannot tell an omission from a model that is still being drafted, which is the
-   same reasoning as for a blank attribute type. This also covers supplying `-e` without `-n`.
+   same reasoning as for a blank attribute type. This also covers supplying `-e` without `-n`. It
+   is judged once every input has been read, so an enumeration that gets its values from an XMI
+   file read in the same run is not reported.
 8. **An enumeration must be declared to be an enumeration.** A `ClassEnumOrPrimitiveType` cell that
    names something found in neither enumeration file is treated as a class, as it is today. The
    tool has no way to guess that an undeclared type was meant as an enumeration.
@@ -146,11 +148,12 @@ codes marked *new* were added for enumerations.
 | A curie uses a prefix not configured with `-p` or `-x` | Error | `UnresolvableCurie` |
 | A name or curie is used for both a class and an enumeration (rule 5) | Error | `ClassifierKindConflict` (*new*) |
 | An enumeration has no values (rule 7) | Warning | `EnumerationWithoutValues` (*new*) |
+| Two values of one enumeration would get the same IRI | Error | `EnumerationValueIRIConflict` |
 | A required column is missing from the header | Error on every row | `RowRejected` |
 
 A name with a colon or a curie with an unconfigured prefix is an error even when the other half of
-the identity is fine. This is stricter than the classes file, which drops an unresolvable curie
-without comment when the row also has a name.
+the identity is fine. For a curie the classes file and the attributes file do the same: a curie with
+an unconfigured prefix rejects the row even when the row also has a name.
 
 `EnumerationInputIgnored` is retired: the files are read and translated.
 
@@ -182,6 +185,12 @@ ObjectProperty: paymentSchedule
   prefix and qualified by the label of its enumeration, as an attribute is by its class:
   `PaymentSchedule#Daily`. This is what makes rule 3 hold in the ontology. For an enumeration known
   only by a curie the label is the curie text, so that text appears in the IRI.
+- **Value names that are not safe in an IRI.** A character of a value name is kept in the IRI when
+  it is a letter or a digit, in any script, or one of `-`, `.`, `_` and `~`. Every other character
+  becomes `_`, so the value `Hp 0` of `Signal` gets `Signal#Hp_0`. The label is the name as given.
+  Two values of one enumeration may not end up with the same IRI, as `Hp 0` and `Hp_0` would; the
+  row read second is rejected. These are rules 16 to 20 of
+  [`xmi-enumerations.md`](xmi-enumerations.md), where the reason for them is given.
 - **Attribute typed by an enumeration.** An object property ranging over the enumeration's class,
   with its multiplicity translated as for any object property.
 - **Enumeration without values.** A class and nothing more. It is not made equivalent to an empty
@@ -193,6 +202,7 @@ ObjectProperty: paymentSchedule
   for a value share that individual, and declaring them disjoint would make the ontology
   inconsistent. Both are left out of the axiom, reported as `GlobalDisjointnessRelaxed`.
 
-## Not yet supported
+## Reading enumerations from XMI
 
-- Reading enumerations from XMI, and how `--overrides` applies to them.
+Enumerations are also read from XMI, and `--overrides` applies to them as it does to classes. Both
+are specified in [`xmi-enumerations.md`](xmi-enumerations.md).

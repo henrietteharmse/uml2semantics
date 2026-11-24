@@ -1,0 +1,19 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(ex:=<https://example.org/vocabulary/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # The same in a complete and disjoint generalization set: the disjoint union that Person is declared
+  # to be names the child by the IRI its curie gives, not by the IRI it had when the diagram was read.
+  Declaration(Class(:Person))
+  AnnotationAssertion(rdfs:label :Person "Person")
+  AnnotationAssertion(rdfs:comment :Person "A person is a human being.")
+  Declaration(Class(ex:Employee))
+  AnnotationAssertion(rdfs:label ex:Employee "Employee")
+  Declaration(Class(:Employer))
+  AnnotationAssertion(rdfs:label :Employer "Employer")
+  SubClassOf(ex:Employee :Person)
+  SubClassOf(:Employer :Person)
+  DisjointUnion(:Person ex:Employee :Employer)
+)

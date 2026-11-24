@@ -1,0 +1,17 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # A maximum below its minimum is reported. The attribute is kept without a restriction.
+  Declaration(Class(:Order))
+  AnnotationAssertion(rdfs:label :Order "Order")
+  Declaration(Class(:Item))
+  AnnotationAssertion(rdfs:label :Item "Item")
+  Declaration(ObjectProperty(<https://uml2semantics.com/test/ontology/Order#holds>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Order#holds> "holds")
+  ObjectPropertyDomain(<https://uml2semantics.com/test/ontology/Order#holds> :Order)
+  ObjectPropertyRange(<https://uml2semantics.com/test/ontology/Order#holds> :Item)
+  DisjointClasses(:Order :Item)
+)

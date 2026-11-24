@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Rule 6. An enumeration with no literals.
+-->
+<xmi:XMI xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmi:version="2.1" xmlns:uml="http://schema.omg.org/spec/UML/2.1">
+	<xmi:Documentation exporter="Enterprise Architect" exporterVersion="6.5"/>
+	<uml:Model xmi:type="uml:Model" name="EA_Model" visibility="public">
+		<packagedElement xmi:type="uml:Package" xmi:id="EAPK_Model" name="Model" visibility="public">
+			<packagedElement xmi:type="uml:Enumeration" xmi:id="EAID_PaymentSchedule" name="PaymentSchedule" visibility="public"/>
+		</packagedElement>
+	</uml:Model>
+	<xmi:Extension extender="Enterprise Architect" extenderID="6.5">
+		<elements>
+			<element xmi:idref="EAID_PaymentSchedule" xmi:type="uml:Enumeration" name="PaymentSchedule" scope="public">
+				<properties documentation="The frequency at which an employee is paid." isSpecification="false" sType="Enumeration" nType="0" scope="public"/>
+			</element>
+		</elements>
+	</xmi:Extension>
+</xmi:XMI>

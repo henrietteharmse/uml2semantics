@@ -1,17 +1,17 @@
 # XMI specification: associations
 
-**Status: proposed.** Nothing in this document is implemented.
+**Status: implemented.** The XMI reader reads associations into the model as specified here.
 
 An attribute and an association translate to the same OWL axioms: a property with a domain, a
 range and a cardinality restriction. That is why an association adds nothing new to the model. It
 becomes an *attribute*, exactly the one a modeller would write as a row of the TSV attributes
 file, and the translation of an attribute to OWL is unchanged.
 
-Today the XMI reader does not look at the association lines of a diagram. An association reaches
-the ontology only when a *supporting attribute* states it. One that has no supporting attribute
-is lost, and nothing is reported; see [What the examples do today](#what-the-examples-do-today).
-This document specifies reading the association itself, so that it no longer depends on a
-supporting attribute.
+The XMI reader used not to look at the association lines of a diagram. An association reached
+the ontology only when a *supporting attribute* stated it. One that had no supporting attribute
+was lost, and nothing was reported; see
+[Before this was implemented](#before-this-was-implemented). This document specifies reading the
+association itself, so that it no longer depends on a supporting attribute.
 
 It is the companion of [`xmi-enumerations.md`](xmi-enumerations.md).
 
@@ -62,9 +62,13 @@ Other files in the repository, used below because they are drawn differently:
   has `1` at `Employer` in four of them and no multiplicity in
   `WithGeneralizationSet-CompleteOverlapping.xml`. None has an enumeration or an unnamed
   association.
-- **The older employer exports**: three files under `examples/xmi/sparx` (`Employer.xml`,
-  `Employer-WithoutGeneralizationSet.xml`, `Employer-WithGeneralizationSet-CompleteOverlapping.xml`)
-  and `scenarios/employer-generalization/source-models/Employer.xml`. They have `renumeration`
+- **The five employer examples**: `Employer-<variant>.xml` under `examples/xmi/sparx`, for the
+  five variants of the employer generalization scenario. Since 2026-11-24 each is a copy of the
+  scenario file `<variant>.xml`, so what is said of the scenario holds for them.
+- **The older employer exports**: `examples/xmi/sparx/Employer.xml` and its copy
+  `scenarios/employer-generalization/source-models/Employer.xml`. Until 2026-11-24
+  `Employer-WithoutGeneralizationSet.xml` and `Employer-WithGeneralizationSet-CompleteOverlapping.xml`
+  under `examples/xmi/sparx` were drawn the same way. They have `renumeration`
   from `Employee` to `Renumeration` with `1` at both ends, `employes` from `Employee` to
   `Employer` with `1..*` at `Employee`, `employedBy` from `Employer` to `Employee` with `1` at
   `Employer`, and an unnamed line from `Renumeration` to `PaymentSchedule` with its supporting
@@ -108,7 +112,7 @@ In the initial example:
 ```
 
 A file exported without the extension part yields no associations, as it yields no attributes
-today. Four of the employer files under `examples/xmi/sparx` are such exports.
+today. `examples/xmi/sparx/Employer-WithGeneralization.xml` is such an export.
 
 ## Rules
 
@@ -199,8 +203,8 @@ today. Four of the employer files under `examples/xmi/sparx` are such exports.
 
 ## Diagnostics
 
-An XMI diagnostic carries the file name and no row, so the message names the association, or its
-two ends when it has no name. One code is new.
+An XMI diagnostic carries the file name and no row, so the message names the association and its
+two ends. One code is new.
 
 | Situation | Severity | Code |
 |-----------|----------|------|
@@ -213,7 +217,8 @@ two ends when it has no name. One code is new.
 | The minimum of a multiplicity is `*` | Error | `UnboundedMinMultiplicity` |
 
 The last three are the existing codes for an attribute's multiplicity, with their existing
-severity and effect.
+severity and effect. A multiplicity written as one unparsable word, such as `many`, is both the
+minimum and the maximum and is reported once.
 
 ## Combining XMI with TSV
 
@@ -264,7 +269,8 @@ Class: Renumeration
 `isEmployedBy` and `employs` are not declared inverses of each other. They are two associations,
 and nothing in the diagram relates them.
 
-For the real-world example the result is no attributes and 55 `UnnamedAssociation` errors.
+For the real-world example the result is no attributes and 55 `UnnamedAssociation` errors. For
+`resource-metadata-schema.xml` it is 3. Runs of the implementation gave these numbers.
 
 ## What the employer generalization scenario becomes
 
@@ -279,13 +285,13 @@ In four files the `[1,1]` of `isEmployedBy` is the `1` drawn at the `Employer` e
 `WithGeneralizationSet-CompleteOverlapping.xml` that end has no multiplicity and the `[1,1]` is
 the default of rule 14.
 
-## What the examples do today
+## Before this was implemented
 
-Recorded by running the current tool.
+Recorded by running the tool as it was before associations were read.
 
 - **An association with a supporting attribute reaches the ontology through the attribute.**
-  `examples/xmi/sparx/Employer-WithoutGeneralizationSet.xml` gives the object property
-  `paymentSchedule` of `Renumeration`.
+  `examples/xmi/sparx/Employer-WithoutGeneralizationSet.xml`, as it was before it was replaced
+  by the scenario export, gave the object property `paymentSchedule` of `Renumeration`.
 - **A named association without a supporting attribute is lost.** The same run has none of
   `renumeration`, `employes` and `employedBy`. The initial example gives its four classes and the
   three datatype properties of `Person`, and none of its four associations. No diagnostic says
@@ -333,12 +339,21 @@ Taken on 2026-11-24.
 
 ## Still open
 
+The first two are implemented as written here, and are still to be confirmed.
+
 1. **What counts as a supporting attribute.** The definition used here is an attribute of the
    class at either end, typed by the classifier at the other end, whatever its name and
-   multiplicity.
+   multiplicity. The attributes looked at are the ones in the model when the associations are
+   read. With `--overrides XMI` that includes attributes read from TSV. With the default it does
+   not, because TSV is then read after XMI.
 2. **Whether an unnamed association without a supporting attribute is an error.** Rule 10 reports
    it as an error, because something in the diagram does not reach the ontology. The real-world
-   example would report 55. A warning is the alternative.
-3. **Expected files.** `scenarios/employer-generalization/expected` is empty. The expected
-   ontologies for its five files are still to be written, and include the two attributes in
-   [What the employer generalization scenario becomes](#what-the-employer-generalization-scenario-becomes).
+   example reports 55. A warning is the alternative.
+3. **Expected files.** The ontologies under `scenarios/simple-employer/expected` and
+   `scenarios/employer-generalization/expected` have been written again by the tool, from the
+   exports beside them and with the ontology IRI `https://uml2semantics.com/examples/employer`
+   that `runTest.sh` uses. They now have the attributes in
+   [What the initial example becomes](#what-the-initial-example-becomes) and
+   [What the employer generalization scenario becomes](#what-the-employer-generalization-scenario-becomes),
+   and for the initial example the enumeration. `ScenarioSuite` checks each of the seven against
+   what the tool writes, so a test fails when one falls behind the tool.

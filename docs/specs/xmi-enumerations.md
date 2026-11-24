@@ -1,8 +1,8 @@
 # XMI specification: enumerations
 
-**Status: proposed.** Nothing in this document is implemented. Today the XMI reader skips every
-enumeration, and stops altogether on a class that specialises one; see
-[What the examples do today](#what-the-examples-do-today).
+**Status: implemented.** The XMI reader reads enumerations and their values into the model as
+specified here. What it did before is kept under
+[Before this was implemented](#before-this-was-implemented).
 
 This document covers *what is read from an XMI file* and what it becomes in the model. The
 translation of the model to OWL is unchanged and is the one described in
@@ -71,8 +71,8 @@ enumerations and values too, only without definitions. That is untested.
 Nothing new is read. The XMI reader already takes the type of an attribute as a name, from
 `properties/@type` of the attribute in the extension part, and resolves it through the model's
 attribute-type resolution: supported datatype curie, known class, known enumeration, curie,
-placeholder class. Once enumerations are read before attributes (rule 9), a type name that is the
-name of an enumeration resolves to that enumeration.
+placeholder class. Because enumerations are read before attributes (rule 9), a type name that is
+the name of an enumeration resolves to that enumeration.
 
 The initial example has no such attribute; its enumeration is used through an association
 (rule 14). In the real-world example:
@@ -115,17 +115,15 @@ points at, so resolving by name loses nothing there.
 6. **Enumeration without values.** Accepted and reported as a warning, as in TSV rule 7.
    `Enumeration1` in the real-world example is the one instance.
 7. **An enumeration nothing refers to is still read.** It is translated whether or not an attribute
-   is typed by it. This covers 8 enumerations in the real-world example. It also covers
-   `PaymentSchedule` in the initial example for as long as associations are not read, since no
-   attribute is typed by it.
+   is typed by it. This covers 8 enumerations in the real-world example.
 8. **A type name that matches no enumeration is treated as a class**, as it is today and as in TSV
    rule 8.
 
 ### Reading order
 
 9. **Classes, then enumerations with their values, then attributes.** This is the order of TSV
-   rule 9. Today the XMI reader reads each class together with its attributes, so this splits that
-   into two passes with the enumerations between them. Document order carries no meaning.
+   rule 9. The XMI reader used to read each class together with its attributes; that is now two
+   passes with the enumerations between them. Document order carries no meaning.
 10. **The order of literals is not kept.** Same as TSV rule 10. Enterprise Architect records a
     position for each literal; it is not read.
 
@@ -172,9 +170,9 @@ identifiers, so values are the one place it happens.
     same enumeration would. The one read second is rejected. Values of different enumerations
     cannot clash, because the enumeration qualifies the IRI.
 20. **The rule belongs to the model, not to the XMI reader.** A value name read from the values
-    file of the TSV input is minted the same way, so the paragraph on the IRI of a value in
-    [`tsv-enumerations.md`](tsv-enumerations.md) gains this rule when it is implemented. Names of
-    classes, attributes and enumerations are minted as written, as they are today.
+    file of the TSV input is minted the same way, and the paragraph on the IRI of a value in
+    [`tsv-enumerations.md`](tsv-enumerations.md) says so. Names of classes, attributes and
+    enumerations are minted as written.
 
 With an ontology prefix that ends in `#`:
 
@@ -213,7 +211,12 @@ enumeration and its other values in place.
 
 `EnumerationWithoutValues` is reported once per enumeration, after every input has been read. When
 XMI and TSV are combined, an enumeration declared in the XMI file and given its values in the
-values file has values, and is not reported.
+values file has values, and is not reported. For that reason the check is no longer made by a
+reader but by the translation, once every reader has run.
+
+A class that cannot be read is now reported and skipped as well, where it used to stop the reader.
+That is what lets an XMI class with the name of an enumeration read earlier from TSV be turned
+away, as described under [Combining XMI with TSV](#combining-xmi-with-tsv).
 
 ## Combining XMI with TSV
 
@@ -234,7 +237,8 @@ TSV overrides XMI by default.
   attribute row that names an enumeration read from XMI is rejected. With XMI overriding, an
   enumeration in the XMI file is rejected when TSV already made a class of that name. That includes
   a placeholder class, so an attributes file that uses `PaymentSchedule` as a type without an
-  enumerations file turns the XMI enumeration away.
+  enumerations file turns the XMI enumeration away. In the same way a class in the XMI file is
+  rejected when TSV already made an enumeration of that name.
 - **An attributes file can use an XMI enumeration.** With TSV overriding, a
   `ClassEnumOrPrimitiveType` cell naming an enumeration read from XMI resolves to it, with no
   enumerations file needed.
@@ -276,28 +280,30 @@ For the real-world example the result is 203 enumeration classes and 1619 indivi
 classes with a comment, and 200 object properties named `Wert`, each ranging over an enumeration
 class with exact cardinality 1. 130 of the individuals have an IRI that differs from their label
 under rule 16. The diagnostics that concern enumerations are one
-`EnumerationWithoutValues` warning and 7 `ClassifierKindConflict` errors.
+`EnumerationWithoutValues` warning and 7 `ClassifierKindConflict` errors. A run of the
+implementation gave exactly these numbers, in about six seconds.
 
-## What the examples do today
+## Before this was implemented
 
-Recorded by running the current tool, before any of this is implemented.
+Recorded by running the tool as it was before any of this was implemented.
 
 - **Initial example.** The ontology has the classes `Employee`, `Employer`, `Person` and
   `Renumeration`, the three datatype properties of `Person`, and nothing else. `PaymentSchedule`
   and its values are absent, and so is every association. No diagnostics.
-- **Real-world example.** It cannot be translated, for two reasons.
+- **Real-world example.** It could not be translated, for two reasons.
   - *A class that specialises an enumeration stops the reader.* A generalization looks its parent
     up among classes only, so a parent that is an enumeration comes back with a blank name, and
     the reader stops with an uncaught `BlankIdentity` exception before any ontology is written. A
     copy of an earlier version of the initial example, given one such generalization, reproduced
     this. The real-world
     example has 7, so rule 13 is needed before it can be read at all.
-  - *Reading does not finish.* A run of the current tool on the file was stopped after 25 minutes,
-    still reading classes and before it reached the first failure above. The reader searches the
-    whole document once or more for every class, generalization and attribute, and this file has
-    2000 classes and 3384 attributes. That is not about enumerations, but it bounds how they may
-    be read: a search of the whole document for each of the 1619 literals, to find its
-    definition, would add to the same cost.
+  - *Reading does not finish.* A run of the tool on the file was stopped after 25 minutes, still
+    reading classes and before it reached the first failure above. The reader searched the whole
+    document once or more for every class, generalization and attribute, and this file has 2000
+    classes and 3384 attributes. That is not about enumerations, but it bounded how they could be
+    read: a search of the whole document for each of the 1619 literals, to find its definition,
+    would have added to the same cost. The reader now walks the document once and looks
+    everything up in what it found, for classes, generalizations and attributes as well.
 - **Other fixtures.** The five XMI variants under `scenarios/employer-generalization` have the
   classes `Person`, `Employee` and `Employer` and no enumeration, so reading enumerations from
   XMI does not change what they give.
@@ -323,6 +329,8 @@ Taken on 2026-11-24, on questions the first draft of this specification left ope
    enumeration names.
 
 ## Still open
+
+Both are implemented as proposed, and are still to be confirmed.
 
 1. **Which characters count as unsafe.** Rule 16 keeps letters of any script, so umlauts and `ß`
    stay in the IRI, which an IRI allows. Restricting the IRI to ASCII letters would change 166

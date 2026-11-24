@@ -1,7 +1,7 @@
 package org.uml2semantics.model
 
 import org.uml2semantics.diagnostics.{DiagnosticCode, UMLModelException}
-import org.uml2semantics.model.cache.{ClassBuilderCache, ClassIdentityBuilderCache}
+import org.uml2semantics.model.cache.{ClassBuilderCache, ClassIdentityBuilderCache, EnumerationCache}
 
 import scala.collection.mutable
 
@@ -104,21 +104,30 @@ object UMLClassIdentity:
     def build: UMLClassIdentity =
       if name.isEmpty && curie.isEmpty then
         throw new UMLModelException(DiagnosticCode.BlankIdentity, "Name and curie must not be empty.")
+      // Classes and enumerations share one namespace, and whichever use is read second is refused.
+      // An enumeration checks this against the classes when it is built; this is the other
+      // direction, which arises once a source read earlier has supplied enumerations.
+      (name ++ curie).filterNot(_.isBlank).find(EnumerationCache.getUMLEnumeration(_).isDefined)
+        .foreach(half => throw new UMLModelException(DiagnosticCode.ClassifierKindConflict,
+          s"'$half' already identifies an enumeration, so it cannot also identify a class."))
       val classNameOption = name.flatMap(UMLClassName(_))
       val classCurieOption = curie.flatMap(UMLClassCurie(_))
+      // A curie that cannot be expanded rejects the identity even when the name is usable. Keeping
+      // the class under its name alone would give it another IRI than the one that was asked for,
+      // without saying so.
+      curie.filterNot(_.isBlank).filter(_ => classCurieOption.isEmpty).foreach(unresolvableCurie =>
+        throw new UMLModelException(DiagnosticCode.UnresolvableCurie,
+          s"Could not interpret '$unresolvableCurie' as a curie. Its prefix must be configured via the -p or " +
+            s"-x command line options."))
       if classNameOption.isEmpty && classCurieOption.isEmpty then
-        (name.filterNot(_.isBlank), curie.filterNot(_.isBlank)) match
-          case (None, None) =>
-            throw new UMLModelException(DiagnosticCode.BlankIdentity,
-              "A class needs a name or a curie; both were blank.")
-          case (Some(nameWithColon), None) =>
+        name.filterNot(_.isBlank) match
+          case Some(nameWithColon) =>
             throw new UMLModelException(DiagnosticCode.NameContainsColon,
               s"Could not interpret '$nameWithColon' as a class name, because a name may not contain a colon. " +
                 s"If it is intended to be a curie, put it in the Curie column.")
-          case (_, Some(unresolvableCurie)) =>
-            throw new UMLModelException(DiagnosticCode.UnresolvableCurie,
-              s"Could not interpret '$unresolvableCurie' as a curie. Its prefix must be configured via the -p or " +
-                s"-x command line options.")
+          case None =>
+            throw new UMLModelException(DiagnosticCode.BlankIdentity,
+              "A class needs a name or a curie; both were blank.")
 
       // Assume this class identity is the one to use if it has both a name and a curie.
       val thisClassIdentity = UMLClassIdentity(classNameOption, classCurieOption, prefixNamespace)

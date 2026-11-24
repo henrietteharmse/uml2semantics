@@ -13,6 +13,40 @@
     <!-- 
     ///////////////////////////////////////////////////////////////////////////////////////
     //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    
+
+
+    <!-- https://uml2semantics.com/ontology/Employee#isEmployedBy -->
+
+
+    <owl:ObjectProperty rdf:about="https://uml2semantics.com/ontology/Employee#isEmployedBy">
+        <rdfs:domain rdf:resource="https://uml2semantics.com/ontology/Employee"/>
+        <rdfs:range rdf:resource="https://uml2semantics.com/ontology/Employer"/>
+        <rdfs:label>isEmployedBy</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- https://uml2semantics.com/ontology/Employer#employs -->
+
+
+    <owl:ObjectProperty rdf:about="https://uml2semantics.com/ontology/Employer#employs">
+        <rdfs:domain rdf:resource="https://uml2semantics.com/ontology/Employer"/>
+        <rdfs:range rdf:resource="https://uml2semantics.com/ontology/Employee"/>
+        <rdfs:label>employs</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
     // Data properties
     //
     ///////////////////////////////////////////////////////////////////////////////////////
@@ -75,6 +109,12 @@
 
     <owl:Class rdf:about="https://uml2semantics.com/ontology/Employee">
         <rdfs:subClassOf rdf:resource="https://uml2semantics.com/ontology/Person"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://uml2semantics.com/ontology/Employee#isEmployedBy"/>
+                <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:cardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
         <owl:disjointWith rdf:resource="https://uml2semantics.com/ontology/Employer"/>
         <rdfs:comment>An employee is someone who does work for an employer for which they get compensated.</rdfs:comment>
         <rdfs:label>Employee</rdfs:label>
@@ -87,6 +127,12 @@
 
     <owl:Class rdf:about="https://uml2semantics.com/ontology/Employer">
         <rdfs:subClassOf rdf:resource="https://uml2semantics.com/ontology/Person"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="https://uml2semantics.com/ontology/Employer#employs"/>
+                <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
         <rdfs:comment>An employer is someone that employs 1 or more persons.</rdfs:comment>
         <rdfs:label>Employer</rdfs:label>
     </owl:Class>

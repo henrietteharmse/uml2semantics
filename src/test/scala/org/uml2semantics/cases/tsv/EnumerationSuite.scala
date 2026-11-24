@@ -1,10 +1,10 @@
 package org.uml2semantics.cases.tsv
 
-import org.uml2semantics.diagnostics.DiagnosticCode.{BlankIdentity, ClassifierKindConflict, EnumerationWithoutValues, GlobalDisjointnessRelaxed, NameContainsColon, RowRejected, UnresolvableCurie}
+import org.uml2semantics.diagnostics.DiagnosticCode.{BlankIdentity, ClassifierKindConflict, EnumerationValueIRIConflict, EnumerationWithoutValues, GlobalDisjointnessRelaxed, NameContainsColon, RowRejected, UnresolvableCurie}
 import org.uml2semantics.diagnostics.DiagnosticSeverity.{Error, Warning}
-import org.uml2semantics.model.cache.{AttributeCache, EnumerationCache}
-import org.uml2semantics.model.{UMLAttributeType, UMLEnumerationType}
+import org.uml2semantics.model.UMLEnumerationType
 import org.uml2semantics.Uml2SemanticsSuite
+import org.uml2semantics.cases.EnumerationAssertions
 
 /**
  * Cases for enumerations: reading them and their values from TSV, following
@@ -14,32 +14,9 @@ import org.uml2semantics.Uml2SemanticsSuite
  * the model. That is not redundant: the ontology cannot show which half of an identity a row
  * supplied, or that two rows became one value, once only the resulting IRI and label are written.
  */
-class EnumerationSuite extends Uml2SemanticsSuite:
-
-  /** What a case expects of one value. A blank half or definition means "not given". */
-  private case class Value(name: String = "", curie: String = "", definition: String = "")
-
-  /** What a case expects of one enumeration. A blank half or definition means "not given". */
-  private case class Enumeration(name: String = "", curie: String = "", definition: String = "",
-                                 values: Set[Value] = Set.empty)
+class EnumerationSuite extends Uml2SemanticsSuite with EnumerationAssertions:
 
   private val examplePrefix = Seq("-x", "ex:https://example.org/vocabulary/")
-
-  private def assertEnumerations(expected: Enumeration*): Unit =
-    val actual = EnumerationCache.getEnumerations.map(enumeration =>
-      Enumeration(
-        enumeration.identity.nameOption.map(_.name).getOrElse(""),
-        enumeration.identity.curieOption.map(_.curie).getOrElse(""),
-        enumeration.definition.map(_.definition).getOrElse(""),
-        enumeration.values.map(value =>
-          Value(
-            value.identity.nameOption.map(_.name).getOrElse(""),
-            value.identity.curieOption.map(_.curie).getOrElse(""),
-            value.definition.map(_.definition).getOrElse("")))))
-    assertEquals(actual, expected.toSet)
-
-  private def typeOfAttribute(label: String): Option[UMLAttributeType] =
-    AttributeCache.getAttributes.find(_.getLabel == label).flatMap(_.typeOfAttribute)
 
   // --- The two files -------------------------------------------------------------------------
 
@@ -237,6 +214,18 @@ class EnumerationSuite extends Uml2SemanticsSuite:
 
   test("a name-only value of a curie-only enumeration is qualified by the curie text") {
     assertNoDiagnostics(runCase("tsv/enumeration/name-only-value-of-curie-only-enumeration", examplePrefix))
+  }
+
+  test("a value name that is not safe in an IRI keeps its label and gets underscores in its IRI") {
+    val result = runCase("tsv/enumeration/unsafe-value-name")
+    assertNoDiagnostics(result)
+    assertEnumerations(Enumeration("Signal", values = Set(Value("Hp 0"), Value("PZB/LZB"))))
+  }
+
+  test("a value whose IRI another value of its enumeration already has is rejected") {
+    val result = runCase("tsv/enumeration/value-iri-conflict")
+    assertDiagnostics(result, Error -> EnumerationValueIRIConflict)
+    assertEnumerations(Enumeration("Signal", values = Set(Value("Hp 0"), Value("Hp 1"))))
   }
 
   // --- Global disjointness -------------------------------------------------------------------

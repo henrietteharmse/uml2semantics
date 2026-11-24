@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Rules 4 and 15. The association employs, with the role name employer and 0..1 on its source end.
+	Both the association and the role have a definition.
+-->
+<xmi:XMI xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmi:version="2.1" xmlns:uml="http://schema.omg.org/spec/UML/2.1">
+	<xmi:Documentation exporter="Enterprise Architect" exporterVersion="6.5"/>
+	<uml:Model xmi:type="uml:Model" name="EA_Model" visibility="public">
+		<packagedElement xmi:type="uml:Package" xmi:id="EAPK_Model" name="Model" visibility="public">
+			<packagedElement xmi:type="uml:Class" xmi:id="EAID_Employer" name="Employer" visibility="public"/>
+			<packagedElement xmi:type="uml:Class" xmi:id="EAID_Employee" name="Employee" visibility="public"/>
+		</packagedElement>
+	</uml:Model>
+	<xmi:Extension extender="Enterprise Architect" extenderID="6.5">
+		<connectors>
+			<connector xmi:idref="EAID_employs" name="employs">
+				<source xmi:idref="EAID_Employer">
+					<model type="Class" name="Employer"/>
+					<role name="employer" visibility="Public" targetScope="instance"/>
+					<type multiplicity="0..1" aggregation="none" containment="Unspecified"/>
+					<documentation value="The employer of an employee."/>
+				</source>
+				<target xmi:idref="EAID_Employee">
+					<model type="Class" name="Employee"/>
+					<role visibility="Public" targetScope="instance"/>
+					<type multiplicity="1..*" aggregation="none" containment="Unspecified"/>
+					<documentation/>
+				</target>
+				<properties ea_type="Association" direction="Unspecified"/>
+				<documentation value="An employer employs one or more employees."/>
+			</connector>
+		</connectors>
+	</xmi:Extension>
+</xmi:XMI>

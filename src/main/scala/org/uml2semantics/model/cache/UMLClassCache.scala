@@ -2,7 +2,7 @@ package org.uml2semantics.model.cache
 
 import org.uml2semantics.diagnostics.{DiagnosticCode, UMLModelException}
 import org.uml2semantics.model.UMLClassIdentity.ClassIdentityBuilder
-import org.uml2semantics.model.{PrefixNamespace, UMLClass, UMLClassCurie, UMLClassDefinition, UMLClassIdentifier, UMLClassIdentity, UMLClassName}
+import org.uml2semantics.model.{PrefixNamespace, UMLClass, UMLClassChildren, UMLClassCurie, UMLClassDefinition, UMLClassIdentifier, UMLClassIdentity, UMLClassName}
 
 import scala.collection.mutable
 
@@ -85,33 +85,57 @@ object ClassBuilderCache:
     buildersByClassIdentity.clear()
     classesByClassIdentity.clear()
 
+  /**
+   * Caches a class, merging into it what an earlier build of the same class left behind.
+   *
+   * The class may already be cached under this identity, or, when this identity has both a name
+   * and a curie, under either half alone. A definition this build states wins, and a blank one is
+   * taken from the earlier build. Children are added to: the class keeps the generalization sets of
+   * the earlier build beside its own, so that no source can take away a child another source gave,
+   * in whichever order the sources are read.
+   */
   def cacheUMLClass(umlClass: UMLClass, builder: UMLClass.ClassBuilder): Unit =
-    // When enriching a partial (name-only or curie-only) entry with the full identity,
-    // remove the partial versions to avoid duplicates
+    val classIdentity = umlClass.classIdentity
+    val partialIdentities =
+      if classIdentity.nameOption.nonEmpty && classIdentity.curieOption.nonEmpty then Seq(
+        UMLClassIdentity(classIdentity.nameOption, None, classIdentity.ontologyPrefix),
+        UMLClassIdentity(None, classIdentity.curieOption, classIdentity.ontologyPrefix))
+      else Seq.empty
+
     var classToCache = umlClass
-    if umlClass.classIdentity.nameOption.nonEmpty && umlClass.classIdentity.curieOption.nonEmpty then
-      val partialIdentities = Seq(
-        UMLClassIdentity(umlClass.classIdentity.nameOption, None, umlClass.classIdentity.ontologyPrefix),
-        UMLClassIdentity(None, umlClass.classIdentity.curieOption, umlClass.classIdentity.ontologyPrefix))
-      partialIdentities.foreach { partialIdentity =>
-        // Merge data from the old class into the new one so we don't lose definition/children
-        classesByClassIdentity.get(partialIdentity).foreach { oldClass =>
-          val mergedDefinition = classToCache.classDefinitionOption match
-            case Some(UMLClassDefinition(d)) if d.nonEmpty => classToCache.classDefinitionOption
-            case _ => oldClass.classDefinitionOption
-          val mergedChildren = if classToCache.children.setOfGeneralizationSets.nonEmpty then classToCache.children
-            else oldClass.children
-          classToCache = classToCache.copy(classDefinitionOption = mergedDefinition, children = mergedChildren)
-        }
-        // Update attributes that still reference the old partial class identity
-        AttributeCache.updateClassIdentity(partialIdentity, umlClass.classIdentity)
-        removeUMLClass(partialIdentity)
-      }
+    (classIdentity +: partialIdentities).flatMap(classesByClassIdentity.get).foreach { earlierClass =>
+      val mergedDefinition = classToCache.classDefinitionOption match
+        case Some(UMLClassDefinition(definition)) if definition.nonEmpty => classToCache.classDefinitionOption
+        case _ => earlierClass.classDefinitionOption
+      val mergedChildren = UMLClassChildren(
+        earlierClass.children.setOfGeneralizationSets ++ classToCache.children.setOfGeneralizationSets)
+      classToCache = classToCache.copy(classDefinitionOption = mergedDefinition, children = mergedChildren)
+    }
+
+    // The partial entries are now part of this one. Attributes that still point at them follow.
+    partialIdentities.foreach { partialIdentity =>
+      AttributeCache.updateClassIdentity(partialIdentity, classIdentity)
+      removeUMLClass(partialIdentity)
+    }
     buildersByClassIdentity += (classToCache.classIdentity -> builder)
     classesByClassIdentity += (classToCache.classIdentity -> classToCache)
   
+  /**
+   * A class with its children under the identities they have now.
+   *
+   * A generalization set records the identity each child had when the set was built. A child may
+   * gain the other half of its identity afterwards, as when a TSV row gives a class of the diagram
+   * a curie, and that changes its IRI. The set is not rewritten when that happens. Instead every
+   * class handed out by this cache has its children looked up again, so that a generalization
+   * follows its child to the IRI the child ends up with.
+   */
+  private def withCurrentChildren(umlClass: UMLClass): UMLClass =
+    umlClass.copy(children = UMLClassChildren(umlClass.children.setOfGeneralizationSets.map(generalizationSet =>
+      generalizationSet.copy(generalizationSet = generalizationSet.generalizationSet.map(child =>
+        ClassIdentityBuilderCache.getClassIdentity(child).getOrElse(child))))))
+
   def getUMLClass(classIdentity: UMLClassIdentity): Option[UMLClass] =
-    classesByClassIdentity.get(classIdentity)
+    classesByClassIdentity.get(classIdentity).map(withCurrentChildren)
     
   def getUMLClass(name: String): Option[UMLClass] =
     ClassIdentityBuilderCache.getUMLClassIdentity(name)
@@ -128,5 +152,5 @@ object ClassBuilderCache:
     buildersByClassIdentity -= classIdentity
     classesByClassIdentity -= classIdentity
 
-  def getClasses: Set[UMLClass] = classesByClassIdentity.values.toSet
+  def getClasses: Set[UMLClass] = classesByClassIdentity.values.map(withCurrentChildren).toSet
 

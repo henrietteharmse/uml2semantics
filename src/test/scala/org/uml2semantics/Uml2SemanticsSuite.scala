@@ -39,9 +39,10 @@ abstract class Uml2SemanticsSuite extends FunSuite:
    * Runs one case and asserts its ontology matches its golden.
    *
    * `caseName` is a path under `src/test/resources/cases`, e.g. `tsv/multiplicity/exact-one`.
-   * Whichever of `<case>.classes.tsv`, `<case>.attributes.tsv`, `<case>.enumerations.tsv` and
-   * `<case>.enumeration-values.tsv` exist are passed as input; the golden is `<case>.ofn`. The
-   * translation goes through argument parsing, so cases exercise the CLI surface rather than
+   * Whichever of `<case>.classes.tsv`, `<case>.attributes.tsv`, `<case>.enumerations.tsv`,
+   * `<case>.enumeration-values.tsv` and `<case>.xml`, an XMI file, exist are passed as input; the
+   * golden is `<case>.ofn`. A case with both an XMI file and TSV files combines the two sources.
+   * The translation goes through argument parsing, so cases exercise the CLI surface rather than
    * assuming it.
    *
    * Returns the result so a case can go on to assert the diagnostics it expects.
@@ -57,13 +58,14 @@ abstract class Uml2SemanticsSuite extends FunSuite:
     val attributesTsv = new File(caseDirectory, s"$filePrefix.attributes.tsv")
     val enumerationsTsv = new File(caseDirectory, s"$filePrefix.enumerations.tsv")
     val enumerationValuesTsv = new File(caseDirectory, s"$filePrefix.enumeration-values.tsv")
+    val xmi = new File(caseDirectory, s"$filePrefix.xml")
     val golden = new File(caseDirectory, s"$filePrefix.ofn")
 
     val inputFiles = Seq("-c" -> classesTsv, "-a" -> attributesTsv,
-      "-e" -> enumerationsTsv, "-n" -> enumerationValuesTsv).filter((_, file) => file.exists())
+      "-e" -> enumerationsTsv, "-n" -> enumerationValuesTsv, "-m" -> xmi).filter((_, file) => file.exists())
 
     assert(inputFiles.nonEmpty, s"Case '$caseName' has no input file; expected at least one of " +
-      s"$classesTsv, $attributesTsv, $enumerationsTsv or $enumerationValuesTsv")
+      s"$classesTsv, $attributesTsv, $enumerationsTsv, $enumerationValuesTsv or $xmi")
     assert(golden.exists(), s"Case '$caseName' has no golden; expected $golden")
 
     val outputFile = new File(outputRoot, s"$caseName.rdf")

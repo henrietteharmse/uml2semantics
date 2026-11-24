@@ -1,0 +1,10 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # An end that is neither a class nor an enumeration makes the association unreadable. It is reported
+  # and skipped, and no class is built for the interface.
+  Declaration(Class(:Car))
+  AnnotationAssertion(rdfs:label :Car "Car")
+)

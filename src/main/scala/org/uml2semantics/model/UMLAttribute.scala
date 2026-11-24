@@ -112,19 +112,21 @@ object UMLAttributeIdentity:
         classIdentity.getClassIdentifier, _))
       val attributeCurieOption: Option[UMLAttributeCurie] = curieOption.flatMap(UMLAttributeCurie(
         classIdentity.getClassIdentifier, _))
+      // As for a class: a curie that cannot be expanded rejects the identity even when the name is
+      // usable, instead of leaving the attribute under its name alone without saying so.
+      curieOption.filterNot(_.isBlank).filter(_ => attributeCurieOption.isEmpty).foreach(unresolvableCurie =>
+        throw new UMLModelException(DiagnosticCode.UnresolvableCurie,
+          s"Could not interpret '$unresolvableCurie' as a curie. Its prefix must be configured via the -p or " +
+            s"-x command line options."))
       if attributeNameOption.isEmpty && attributeCurieOption.isEmpty then
-        (nameOption.filterNot(_.isBlank), curieOption.filterNot(_.isBlank)) match
-          case (None, None) =>
-            throw new UMLModelException(DiagnosticCode.BlankIdentity,
-              "An attribute needs a name or a curie; both were blank.")
-          case (Some(nameWithColon), None) =>
+        nameOption.filterNot(_.isBlank) match
+          case Some(nameWithColon) =>
             throw new UMLModelException(DiagnosticCode.NameContainsColon,
               s"Could not interpret '$nameWithColon' as an attribute name, because a name may not contain a colon. " +
                 s"If it is intended to be a curie, put it in the Curie column.")
-          case (_, Some(unresolvableCurie)) =>
-            throw new UMLModelException(DiagnosticCode.UnresolvableCurie,
-              s"Could not interpret '$unresolvableCurie' as a curie. Its prefix must be configured via the -p or " +
-                s"-x command line options.")
+          case None =>
+            throw new UMLModelException(DiagnosticCode.BlankIdentity,
+              "An attribute needs a name or a curie; both were blank.")
       val thisAttributeIdentity: UMLAttributeIdentity = UMLAttributeIdentity(classIdentity, attributeNameOption, attributeCurieOption)
       if attributeNameOption.isDefined && attributeCurieOption.isDefined then
         AttributeIdentityCache.cacheUMLAttributeIdentity(thisAttributeIdentity)
