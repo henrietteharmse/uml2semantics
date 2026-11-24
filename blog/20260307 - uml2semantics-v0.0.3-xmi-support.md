@@ -35,7 +35,7 @@ See the [README](https://github.com/henrietteharmse/uml2semantics?tab=readme-ov-
 
 Consider the following UML class diagram, which includes a generalization set with Complete and Overlapping constraints:
 
-![Employer with Generalization Set](../examples/xmi/sparx/Employer-WithGeneralizationSet-CompleteOverlapping.png)
+![Employer with Generalization Set](../src/test/resources/scenarios/employer-generalization/source-models/Employer-WithGeneralizationSet-CompleteOverlapping.png)
 
 In this diagram, `Person` is the superclass of `Employee` and `Employer`, with a generalization set marked as `{complete, overlapping}`. This means every `Person` is at least either an `Employee` or an `Employer` (complete), but it is also possible that `Person` are both (overlapping).
 
@@ -43,8 +43,8 @@ To convert this XMI file to an OWL ontology, run:
 
 ```
 java -jar uml2semantics.jar \
--m "./examples/xmi/sparx/Employer-WithGeneralizationSet-CompleteOverlapping.xml" \
--o "./uml2semantics/examples/xmi/sparx/Employer-WithGeneralizationSet-CompleteOverlapping.rdf" \
+-m "./src/test/resources/scenarios/employer-generalization/input/xmi/sparx/WithGeneralizationSet-CompleteOverlapping.xml" \
+-o "./Employer-WithGeneralizationSet-CompleteOverlapping.rdf" \
 -p "emp:http://uml2semantics.org/examples/employer#" \
 -i "http://uml2semantics.org/examples/employer/v.0.1"
 ```
@@ -64,8 +64,8 @@ file for classes:
 
 **Employer - Classes.tsv:**
 
-| Curie | Name | Definition | ParentNames |
-|-------|------|------------|-------------|
+| Curie | Name | Definition | Parents |
+|-------|------|------------|---------|
 | schema:Person | Person | | |
 
 Similarly, you can map attributes to Schema.org properties. The following TSV override maps the `name` attribute to 
@@ -82,14 +82,17 @@ Now run uml2semantics with both the XMI file and the TSV overrides:
 
 ```
 java -jar uml2semantics.jar \
--m "./examples/xmi/sparx/Employer-WithGeneralizationSet-CompleteOverlapping.xml" \
+-m "./src/test/resources/scenarios/employer-generalization/input/xmi/sparx/WithGeneralizationSet-CompleteOverlapping.xml" \
 -c "./examples/xmi/sparx/Employer - Classes.tsv" \
 -a "./examples/xmi/sparx/Employer - Attributes.tsv" \
 --overrides TSV \
--o "./uml2semantics/examples/xmi/sparx/Employer-WithGeneralizationSet-CompleteOverlapping-TSVOverride.rdf" \
+-o "./Employer-WithGeneralizationSet-CompleteOverlapping-TSVOverride.rdf" \
 -p "emp:http://uml2semantics.org/examples/employer#" \
+-x "schema:http://schema.org/" \
 -i "http://uml2semantics.org/examples/employer/v.0.1"
 ```
+
+The TSV files use the `schema` prefix in curies, which is why it is configured with `-x`.
 
 The result: the `Person` class now has the IRI `http://schema.org/Person`, and its `name` and `surname` attributes use 
 `schema:givenName` and `schema:familyName` respectively. The rest of the model -- the generalization set, associations, 

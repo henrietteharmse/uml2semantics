@@ -62,13 +62,11 @@ Other files in the repository, used below because they are drawn differently:
   has `1` at `Employer` in four of them and no multiplicity in
   `WithGeneralizationSet-CompleteOverlapping.xml`. None has an enumeration or an unnamed
   association.
-- **The five employer examples**: `Employer-<variant>.xml` under `examples/xmi/sparx`, for the
-  five variants of the employer generalization scenario. Since 2026-11-24 each is a copy of the
-  scenario file `<variant>.xml`, so what is said of the scenario holds for them.
-- **The older employer exports**: `examples/xmi/sparx/Employer.xml` and its copy
-  `scenarios/employer-generalization/source-models/Employer.xml`. Until 2026-11-24
+- **The older employer export**: `scenarios/employer-generalization/source-models/Employer.xml`.
+  Until 2026-11-24 `examples/xmi/sparx` held a copy of it, and employer exports named
   `Employer-WithoutGeneralizationSet.xml` and `Employer-WithGeneralizationSet-CompleteOverlapping.xml`
-  under `examples/xmi/sparx` were drawn the same way. They have `renumeration`
+  that were drawn the same way. Those examples have been removed, because the scenario holds the
+  same models. The older export has `renumeration`
   from `Employee` to `Renumeration` with `1` at both ends, `employes` from `Employee` to
   `Employer` with `1..*` at `Employee`, `employedBy` from `Employer` to `Employee` with `1` at
   `Employer`, and an unnamed line from `Renumeration` to `PaymentSchedule` with its supporting
@@ -290,8 +288,9 @@ the default of rule 14.
 Recorded by running the tool as it was before associations were read.
 
 - **An association with a supporting attribute reaches the ontology through the attribute.**
-  `examples/xmi/sparx/Employer-WithoutGeneralizationSet.xml`, as it was before it was replaced
-  by the scenario export, gave the object property `paymentSchedule` of `Renumeration`.
+  The example `examples/xmi/sparx/Employer-WithoutGeneralizationSet.xml`, which was drawn as the
+  older employer export is and has since been removed, gave the object property `paymentSchedule`
+  of `Renumeration`.
 - **A named association without a supporting attribute is lost.** The same run has none of
   `renumeration`, `employes` and `employedBy`. The initial example gives its four classes and the
   three datatype properties of `Person`, and none of its four associations. No diagnostic says
