@@ -43,7 +43,8 @@ At minimum, you must provide either TSV files (`-c`, `-a`, `-e`, `-n`) or an XMI
 As a quick start here is a small UML class diagram that we will convert to OWL. We define a `Person` class 
 that has attributes `name`, `surname` and  `dateOfBirth`. The types we use are `name` and `surname` is `xsd:string` 
 and for `dateOfBirth` we use `xsd:dateTime`. `Employee` and `Employer` extends `Person`. An employee has exactly 1 
-employer and an employer has 1 or more employees.
+employer and an employer has 1 or more employees. An employee also has exactly 1 `Renumeration`, which has a `rate` of
+type `xsd:decimal` and a `paymentSchedule`. The type of `paymentSchedule` is the enumeration `PaymentSchedule`.
 
 ![Employer Example](./docs/SimpleEmployerExample.png)
 
@@ -52,11 +53,12 @@ UML class diagram information can be specified using TSV files. First create
 the TSV file for your classes. It has the following format:
 
 
-| Curie | Name     | Definition | Parents     | 
-|-------|----------|------------|-------------|
-|       | Person   |            |             |
-|       | Employee |            | Person      |
-|       | Employer |            | Person      |
+| Curie | Name         | Definition | Parents |
+|-------|--------------|------------|---------|
+|       | Person       |            |         |
+|       | Employee     |            | Person  |
+|       | Employer     |            | Person  |
+|       | Renumeration |            |         |
 
 Here we only specify the name for each class, hence the reason we used the **Name** column to define our classes. Since
 `Employee` and `Employer` both extend the `Person` class, we add `Person` to **Parents** column. Multiple parents are
@@ -64,41 +66,50 @@ separated by `|`. Curie refer to compact URI based on the [W3C CURIE syntax](htt
 
 To specify attributes we use the following format. 
 
-| Class    | Curie | Name        | ClassEnumOrPrimitiveType | MinMultiplicity | MaxMultiplicity | Definition | 
-|----------|-------|-------------|--------------------------|-----------------|-----------------|------------|
-| Person   |       | name        | xsd:string               |                 |                 |            |
-| Person   |       | surname     | xsd:string               |                 |                 |            |
-| Person   |       | dateOfBirth | xsd:dateTime             |                 |                 |            |
-| Employee |       | employedBy  | Employer                 | 1               | 1               |            |
-| Employer |       | employes    | Employee                 | 1               | *               |            |
+| Class        | Curie | Name            | ClassEnumOrPrimitiveType | MinMultiplicity | MaxMultiplicity | Definition | 
+|--------------|-------|-----------------|--------------------------|-----------------|-----------------|------------|
+| Person       |       | name            | xsd:string               |                 |                 |            |
+| Person       |       | surname         | xsd:string               |                 |                 |            |
+| Person       |       | dateOfBirth     | xsd:dateTime             |                 |                 |            |
+| Employee     |       | employedBy      | Employer                 | 1               | 1               |            |
+| Employee     |       | renumeration    | Renumeration             | 1               | 1               |            |
+| Employer     |       | employes        | Employee                 | 1               | *               |            |
+| Renumeration |       | rate            | xsd:decimal              | 1               | 1               |            |
+| Renumeration |       | paymentSchedule | PaymentSchedule          | 1               | 1               |            |
 
 **Class** refers to the class for which we are defining the attributes. Attributes can also be defined using curies, 
-but we again only used names for now. The type of an attribute can be a primitive or a class. Currenlty XML primitive data
+but we again only used names for now. The type of an attribute can be a primitive, a class or an enumeration. Currenlty XML primitive data
 types as used in [Protege Desktop](https://protege.stanford.edu/) data types are supported. When no multiplicity is given,
 [1..1] is assumed. `*` is to refer to infinite as per usual.
 
 #### Enumerations
 An enumeration is specified using two more TSV files. The first lists the enumerations:
 
-| Name            | Curie | Definition                                  |
-|-----------------|-------|---------------------------------------------|
-| PaymentSchedule |       | The frequency at which an employee is paid. |
+| Curie              | Name            | Definition                        |
+|--------------------|-----------------|-----------------------------------|
+| emp:SalarySchedule | PaymentSchedule | Defines the frequency of payments |
+
+Here the enumeration is given both a name and a curie, which means it can be referred to by either.
 
 The second lists the values of each enumeration, where **Enumeration** refers to the enumeration a value belongs to:
 
-| Enumeration     | Name    | Curie | Definition |
-|-----------------|---------|-------|------------|
-| PaymentSchedule | Daily   |       |            |
-| PaymentSchedule | Weekly  |       |            |
-| PaymentSchedule | Monthly |       |            |
+| Enumeration        | Curie       | Name   | Definition                                             |
+|--------------------|-------------|--------|--------------------------------------------------------|
+| emp:SalarySchedule | emp:Daily   |        | Employee gets paid at the end of each day              |
+| PaymentSchedule    |             | Weekly | Employee gets paid at the end of each week on a Friday |
+| emp:SalarySchedule | emp:Monthly |        | Employee gets paid at the last day of the month        |
+
+All three rows add a value to the same enumeration, since `PaymentSchedule` and `emp:SalarySchedule` are its name and
+its curie. A value, like a class, is specified using a name, a curie or both.
 
 To use an enumeration as the type of an attribute, give its name or curie in the **ClassEnumOrPrimitiveType** column of
-the attributes file. An enumeration is translated to an OWL class that is equivalent to the set of its values, each
-value being an individual. The full rules are in the [TSV enumerations specification](./docs/specs/tsv-enumerations.md).
-Enumerations are passed using the `-e` and `-n` options.
+the attributes file, as the `paymentSchedule` attribute of `Renumeration` does above. An enumeration is translated to an
+OWL class that is equivalent to the set of its values, each value being an individual. The full rules are in the
+[TSV enumerations specification](./docs/specs/tsv-enumerations.md). Enumerations are passed using the `-e` and `-n`
+options.
 
 A Google spreadsheet for this UML class diagram can be found [here](https://docs.google.com/spreadsheets/d/1FXpbc52Ag24Htj3Qq36Z743QB5SzlShzjeg98uxd2Xo/edit?usp=sharing).
-Save the classes and attributes tabs as TSV files.
+Save the Classes, Attributes, Enumerations and EnumerationNamedValues tabs as TSV files.
 
 ### Run uml2semantics using TSV files
 Assuming you have downloaded uml2semantics to a `$uml2semantics` directory (you need to replace `$uml2semantics` with your 
@@ -109,6 +120,8 @@ as `$uml2semantics/examples/employer/employer.rdf`:
 java -jar uml2semantics.jar \
 -c "$uml2semantics/examples/employer/Employer - Classes.tsv" \
 -a "$uml2semantics/examples/employer/Employer - Attributes.tsv" \
+-e "$uml2semantics/examples/employer/Employer - Enumerations.tsv" \
+-n "$uml2semantics/examples/employer/Employer - EnumerationNamedValues.tsv" \
 -o "$uml2semantics/examples/employer/employer.rdf" \
 -p "emp:http://uml2semantics.org/examples/employer#" \
 -i "http://uml2semantics.org/examples/employer/v.0.1" 
