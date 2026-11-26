@@ -5,9 +5,10 @@ import org.uml2semantics.diagnostics.DiagnosticCode.{BlankIdentity, NameContains
 import org.uml2semantics.diagnostics.DiagnosticSeverity.Error
 
 /**
- * Cases for how a class is identified, how its IRI is minted, and what happens to a row whose
- * identity cannot be read. Every case here has a single surviving class, which also pins the rule
- * that global disjointness is skipped below two eligible classes.
+ * Cases for how a class is identified, how its IRI is minted, what happens to a row whose identity
+ * cannot be read, and what a second row for a known class does. Every case here has a single
+ * surviving class, which also pins the rule that global disjointness is skipped below two eligible
+ * classes.
  */
 class IdentitySuite extends Uml2SemanticsSuite:
 
@@ -40,4 +41,22 @@ class IdentitySuite extends Uml2SemanticsSuite:
   test("a curie with an unconfigured prefix is rejected and parsing continues") {
     val result = runCase("tsv/identity/unresolvable-curie")
     assertDiagnostics(result, Error -> UnresolvableCurie)
+  }
+
+  test("a curie with an unconfigured prefix rejects its row even when the row has a name") {
+    val result = runCase("tsv/identity/unresolvable-curie-beside-name")
+    assertDiagnostics(result, Error -> UnresolvableCurie)
+  }
+
+  test("an attribute curie with an unconfigured prefix rejects its row even when the row has a name") {
+    val result = runCase("tsv/identity/attribute-unresolvable-curie-beside-name")
+    assertDiagnostics(result, Error -> UnresolvableCurie)
+  }
+
+  test("a second row for a class keeps the definition the first row gave when its own is blank") {
+    assertNoDiagnostics(runCase("tsv/identity/repeated-row-keeps-definition"))
+  }
+
+  test("a second row for a class replaces the definition when it gives one") {
+    assertNoDiagnostics(runCase("tsv/identity/repeated-row-later-definition-wins"))
   }

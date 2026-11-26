@@ -1,0 +1,22 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # An attribute row owned by an enumeration read from XMI is rejected. The next row is read.
+  Declaration(Class(:Colour))
+  AnnotationAssertion(rdfs:label :Colour "Colour")
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/Colour#Red>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Colour#Red> "Red")
+  ClassAssertion(:Colour <https://uml2semantics.com/test/ontology/Colour#Red>)
+  EquivalentClasses(:Colour ObjectOneOf(<https://uml2semantics.com/test/ontology/Colour#Red>))
+  Declaration(Class(:Person))
+  AnnotationAssertion(rdfs:label :Person "Person")
+  Declaration(DataProperty(<https://uml2semantics.com/test/ontology/Person#name>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Person#name> "name")
+  DataPropertyDomain(<https://uml2semantics.com/test/ontology/Person#name> :Person)
+  DataPropertyRange(<https://uml2semantics.com/test/ontology/Person#name> xsd:string)
+  SubClassOf(:Person DataExactCardinality(1 <https://uml2semantics.com/test/ontology/Person#name> xsd:string))
+  DisjointClasses(:Person :Colour)
+)

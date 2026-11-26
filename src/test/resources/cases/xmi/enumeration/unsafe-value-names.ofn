@@ -1,0 +1,34 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # A space, a slash, brackets and a plus become an underscore in the IRI, one for one. Letters of any
+  # script, digits, the hyphen, the full stop, the underscore and the tilde are kept. The label is the
+  # name as it was given.
+  Declaration(Class(:Signal))
+  AnnotationAssertion(rdfs:label :Signal "Signal")
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/Signal#Hp_0>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Signal#Hp_0> "Hp 0")
+  ClassAssertion(:Signal <https://uml2semantics.com/test/ontology/Signal#Hp_0>)
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/Signal#Sh_2_Sh_0>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Signal#Sh_2_Sh_0> "Sh 2/Sh 0")
+  ClassAssertion(:Signal <https://uml2semantics.com/test/ontology/Signal#Sh_2_Sh_0>)
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/Signal#Präzisionshalt_hochpräzise>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Signal#Präzisionshalt_hochpräzise> "Präzisionshalt hochpräzise")
+  ClassAssertion(:Signal <https://uml2semantics.com/test/ontology/Signal#Präzisionshalt_hochpräzise>)
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/Signal#AE-E>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Signal#AE-E> "AE-E")
+  ClassAssertion(:Signal <https://uml2semantics.com/test/ontology/Signal#AE-E>)
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/Signal#12>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Signal#12> "12")
+  ClassAssertion(:Signal <https://uml2semantics.com/test/ontology/Signal#12>)
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/Signal#v1.2_a~b>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Signal#v1.2_a~b> "v1.2_a~b")
+  ClassAssertion(:Signal <https://uml2semantics.com/test/ontology/Signal#v1.2_a~b>)
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/Signal#___>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Signal#___> "(+)")
+  ClassAssertion(:Signal <https://uml2semantics.com/test/ontology/Signal#___>)
+  EquivalentClasses(:Signal ObjectOneOf(<https://uml2semantics.com/test/ontology/Signal#Hp_0> <https://uml2semantics.com/test/ontology/Signal#Sh_2_Sh_0> <https://uml2semantics.com/test/ontology/Signal#Präzisionshalt_hochpräzise> <https://uml2semantics.com/test/ontology/Signal#AE-E> <https://uml2semantics.com/test/ontology/Signal#12> <https://uml2semantics.com/test/ontology/Signal#v1.2_a~b> <https://uml2semantics.com/test/ontology/Signal#___>))
+  DifferentIndividuals(<https://uml2semantics.com/test/ontology/Signal#Hp_0> <https://uml2semantics.com/test/ontology/Signal#Sh_2_Sh_0> <https://uml2semantics.com/test/ontology/Signal#Präzisionshalt_hochpräzise> <https://uml2semantics.com/test/ontology/Signal#AE-E> <https://uml2semantics.com/test/ontology/Signal#12> <https://uml2semantics.com/test/ontology/Signal#v1.2_a~b> <https://uml2semantics.com/test/ontology/Signal#___>)
+)

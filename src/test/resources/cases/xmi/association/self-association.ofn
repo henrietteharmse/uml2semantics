@@ -1,0 +1,14 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # An association from a class to itself gives an attribute of the class typed by the class. 0..*
+  # asserts nothing, so there is no restriction.
+  Declaration(Class(:Person))
+  AnnotationAssertion(rdfs:label :Person "Person")
+  Declaration(ObjectProperty(<https://uml2semantics.com/test/ontology/Person#manages>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Person#manages> "manages")
+  ObjectPropertyDomain(<https://uml2semantics.com/test/ontology/Person#manages> :Person)
+  ObjectPropertyRange(<https://uml2semantics.com/test/ontology/Person#manages> :Person)
+)

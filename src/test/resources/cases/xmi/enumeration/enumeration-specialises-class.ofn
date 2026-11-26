@@ -1,0 +1,16 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # The generalization is rejected whichever end the enumeration is at. Both ends are kept.
+  Declaration(Class(:Paint))
+  AnnotationAssertion(rdfs:label :Paint "Paint")
+  Declaration(Class(:Colour))
+  AnnotationAssertion(rdfs:label :Colour "Colour")
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/Colour#Red>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Colour#Red> "Red")
+  ClassAssertion(:Colour <https://uml2semantics.com/test/ontology/Colour#Red>)
+  EquivalentClasses(:Colour ObjectOneOf(<https://uml2semantics.com/test/ontology/Colour#Red>))
+  DisjointClasses(:Paint :Colour)
+)

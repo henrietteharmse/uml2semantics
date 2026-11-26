@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Rule 9. An attribute whose type is the name of an enumeration that comes later in the file.
+-->
+<xmi:XMI xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmi:version="2.1" xmlns:uml="http://schema.omg.org/spec/UML/2.1">
+	<xmi:Documentation exporter="Enterprise Architect" exporterVersion="6.5"/>
+	<uml:Model xmi:type="uml:Model" name="EA_Model" visibility="public">
+		<packagedElement xmi:type="uml:Package" xmi:id="EAPK_Model" name="Model" visibility="public">
+			<packagedElement xmi:type="uml:Class" xmi:id="EAID_Renumeration" name="Renumeration" visibility="public"/>
+			<packagedElement xmi:type="uml:Enumeration" xmi:id="EAID_PaymentSchedule" name="PaymentSchedule" visibility="public">
+				<ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="EAID_PaymentSchedule_Daily" name="Daily" visibility="public"/>
+			</packagedElement>
+		</packagedElement>
+	</uml:Model>
+	<xmi:Extension extender="Enterprise Architect" extenderID="6.5">
+		<elements>
+			<element xmi:idref="EAID_Renumeration" xmi:type="uml:Class" name="Renumeration" scope="public">
+				<properties isSpecification="false" sType="Class" nType="0" scope="public"/>
+				<attributes>
+					<attribute xmi:idref="EAID_Renumeration_paymentSchedule" name="paymentSchedule" scope="Public">
+						<documentation/>
+						<properties type="PaymentSchedule" collection="false" static="0" duplicates="0" changeability="changeable"/>
+						<bounds lower="1" upper="1"/>
+					</attribute>
+				</attributes>
+			</element>
+			<element xmi:idref="EAID_PaymentSchedule" xmi:type="uml:Enumeration" name="PaymentSchedule" scope="public">
+				<properties isSpecification="false" sType="Enumeration" nType="0" scope="public"/>
+			</element>
+		</elements>
+	</xmi:Extension>
+</xmi:XMI>

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-uml2semantics converts UML class diagrams into OWL 2 ontologies. It accepts input as TSV files (for classes, attributes, enumerations) or XMI files (from tools like Enterprise Architect), and outputs OWL ontologies in RDF/XML format. The project assumes conceptual UML models (no interfaces, access modifiers, or operations).
+uml2semantics translates UML class diagrams into OWL 2 ontologies. It accepts input as TSV files (for classes, attributes, enumerations) or XMI files (from tools like Enterprise Architect), and outputs OWL ontologies in RDF/XML format. The project assumes conceptual UML models (no interfaces, access modifiers, or operations).
 
 ## Build & Run Commands
 
@@ -12,7 +12,7 @@ uml2semantics converts UML class diagrams into OWL 2 ontologies. It accepts inpu
 - **Test**: `sbt test` (munit). Two kinds of test, both driving the real CLI entry point: *cases* in `src/test/resources/cases/<format>/<group>/` isolate one behaviour each against a hand-authored golden in OWL Functional Syntax, and *scenarios* in `src/test/resources/scenarios/` check that a realistic model composes. Suites run sequentially because the model caches are global mutable singletons — see `src/test/CONTEXT.md`.
 - **Build assembly JAR**: `sbt assembly` (outputs `target/scala-3.6.3/uml2semantics.jar`)
 - **Run**: `java -jar target/scala-3.6.3/uml2semantics.jar [options]`
-- **Manual test**: `./runTest.sh` (runs a sample XMI-to-OWL conversion)
+- **Manual test**: `./runTest.sh` (runs a sample XMI-to-OWL translation)
 
 Additional scenarios can also be tested manually via `runTest.sh` by comparing output OWL files against expected outputs in `src/test/resources/`.
 
@@ -34,19 +34,20 @@ The pipeline follows a **Read → Cache → Write** pattern:
 
 ### Readers (`reader/`)
 - **TSVReader** — reads tab-separated files for classes, attributes, enumerations
-- **XMIReader** — parses XMI/XML using DOM + XPath (handles Enterprise Architect exports)
+- **XMIReader** — parses XMI/XML using the DOM (handles Enterprise Architect exports): classes, generalizations, enumerations, attributes, and associations, each of which becomes an attribute of its source class. Specified in `docs/specs/xmi-enumerations.md` and `docs/specs/xmi-associations.md`.
 - **ReaderHelper** — shared logic for populating parent-child (generalization) relationships
 - When both TSV and XMI are provided, the `--overrides` flag controls processing order (which source takes precedence)
 
 ### Model & Caches (`model/`, `model/cache/`)
 Readers populate global mutable caches rather than returning data:
-- **ClassBuilderCache / ClassIdentityBuilderCache** — stores UML classes
-- **AttributeBuilderCache / AttributeIdentityBuilderCache** — stores UML attributes
-- Key model types: `UMLClass`, `UMLAttribute`, `LabeledIRI`, `PrefixNamespace`, `SupportedDataType`
+- **ClassCache / ClassIdentityCache** — stores UML classes
+- **AttributeCache / AttributeIdentityCache** — stores UML attributes
+- **EnumerationCache** — stores UML enumerations, each holding its values
+- Key model types: `UMLClass`, `UMLAttribute`, `UMLEnumeration`, `LabeledIRI`, `PrefixNamespace`, `SupportedDataType`
 - `UMLClass` supports generalization sets with covering (complete/incomplete) and disjointness constraints
 
 ### Writer (`writer/`)
-- **UML2OWLWriter** — reads from caches, generates OWL 2 ontology using OWL API. Handles all four generalization set constraint combinations (complete/incomplete × disjoint/overlapping).
+- **UML2OWLWriter** — reads from caches, generates OWL 2 ontology using OWL API. Handles all four generalization set constraint combinations (complete/incomplete × disjoint/overlapping), and translates an enumeration to a class equivalent to the one-of of its values.
 - **UML2SHACLWriter** — SHACL output (in development)
 
 ### Utilities

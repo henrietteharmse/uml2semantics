@@ -1,0 +1,13 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # A value with a blank name is rejected. Its enumeration and the other value are kept.
+  Declaration(Class(:Size))
+  AnnotationAssertion(rdfs:label :Size "Size")
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/Size#Small>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Size#Small> "Small")
+  ClassAssertion(:Size <https://uml2semantics.com/test/ontology/Size#Small>)
+  EquivalentClasses(:Size ObjectOneOf(<https://uml2semantics.com/test/ontology/Size#Small>))
+)

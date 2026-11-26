@@ -1,5 +1,7 @@
 *.class
 *.log
+*.txt
+*-bak.*
 .bsp/
 .idea/
 target/

@@ -1,0 +1,20 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # The association name is never used in the opposite direction, and here there is none to use in the
+  # forward one. The role name gives the one attribute. An association with a role name is not unnamed,
+  # so nothing is reported.
+  Declaration(Class(:Employer))
+  AnnotationAssertion(rdfs:label :Employer "Employer")
+  Declaration(Class(:Employee))
+  AnnotationAssertion(rdfs:label :Employee "Employee")
+  Declaration(ObjectProperty(<https://uml2semantics.com/test/ontology/Employee#employer>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Employee#employer> "employer")
+  ObjectPropertyDomain(<https://uml2semantics.com/test/ontology/Employee#employer> :Employee)
+  ObjectPropertyRange(<https://uml2semantics.com/test/ontology/Employee#employer> :Employer)
+  SubClassOf(:Employee ObjectExactCardinality(1 <https://uml2semantics.com/test/ontology/Employee#employer> owl:Thing))
+  DisjointClasses(:Employer :Employee)
+)

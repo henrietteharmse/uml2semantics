@@ -1,0 +1,17 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # A row of the classes file for a class the diagram already has adds to that class. This row states
+  # nothing but the name, so the definition and the children read from the diagram are kept.
+  Declaration(Class(:Person))
+  AnnotationAssertion(rdfs:label :Person "Person")
+  AnnotationAssertion(rdfs:comment :Person "A person is a human being.")
+  Declaration(Class(:Employee))
+  AnnotationAssertion(rdfs:label :Employee "Employee")
+  Declaration(Class(:Employer))
+  AnnotationAssertion(rdfs:label :Employer "Employer")
+  SubClassOf(:Employee :Person)
+  SubClassOf(:Employer :Person)
+)

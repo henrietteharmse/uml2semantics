@@ -1,0 +1,12 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # The association cannot be named, so it gives no attribute. The classes at its ends are read.
+  Declaration(Class(:Employer))
+  AnnotationAssertion(rdfs:label :Employer "Employer")
+  Declaration(Class(:Employee))
+  AnnotationAssertion(rdfs:label :Employee "Employee")
+  DisjointClasses(:Employer :Employee)
+)

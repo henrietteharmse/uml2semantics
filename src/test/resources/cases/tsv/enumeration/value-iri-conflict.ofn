@@ -1,0 +1,18 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # Two values of one enumeration may not end up with the same IRI. The row read second is rejected,
+  # so the individual keeps the label 'Hp 0'.
+  Declaration(Class(:Signal))
+  AnnotationAssertion(rdfs:label :Signal "Signal")
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/Signal#Hp_0>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Signal#Hp_0> "Hp 0")
+  ClassAssertion(:Signal <https://uml2semantics.com/test/ontology/Signal#Hp_0>)
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/Signal#Hp_1>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Signal#Hp_1> "Hp 1")
+  ClassAssertion(:Signal <https://uml2semantics.com/test/ontology/Signal#Hp_1>)
+  EquivalentClasses(:Signal ObjectOneOf(<https://uml2semantics.com/test/ontology/Signal#Hp_0> <https://uml2semantics.com/test/ontology/Signal#Hp_1>))
+  DifferentIndividuals(<https://uml2semantics.com/test/ontology/Signal#Hp_0> <https://uml2semantics.com/test/ontology/Signal#Hp_1>)
+)

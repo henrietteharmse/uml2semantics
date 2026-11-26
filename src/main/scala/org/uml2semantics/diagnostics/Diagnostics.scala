@@ -37,10 +37,20 @@ enum DiagnosticCode:
   case UnresolvableCurie
   /** A multiplicity of the form [*, n] — an unbounded minimum is meaningless. */
   case UnboundedMinMultiplicity
-  /** Ancestors of a multiply-inherited class were dropped from the global disjointness axiom. */
+  /**
+   * Classifiers were dropped from the global disjointness axiom because declaring them disjoint
+   * would contradict the model: ancestors of a multiply-inherited class, or enumerations that
+   * share a value.
+   */
   case GlobalDisjointnessRelaxed
-  /** Enumeration TSV input was supplied, but enumeration parsing is not implemented. */
-  case EnumerationInputIgnored
+  /** A name or curie was used for both a class and an enumeration; the second use was dropped. */
+  case ClassifierKindConflict
+  /** An enumeration was given no values. */
+  case EnumerationWithoutValues
+  /** Two values of one enumeration would be given the same IRI; the second was dropped. */
+  case EnumerationValueIRIConflict
+  /** An association has no name, no role name and no supporting attribute, so nothing was written for it. */
+  case UnnamedAssociation
   /** No input file was supplied at all. */
   case NoInputSupplied
   /** An axiom could not be added to the ontology. */

@@ -1,0 +1,23 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # The association name gives an attribute of Paint typed by the enumeration. The role name on the
+  # source end would give an attribute of the enumeration, which is rejected.
+  Declaration(Class(:Paint))
+  AnnotationAssertion(rdfs:label :Paint "Paint")
+  Declaration(Class(:Colour))
+  AnnotationAssertion(rdfs:label :Colour "Colour")
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/Colour#Red>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Colour#Red> "Red")
+  ClassAssertion(:Colour <https://uml2semantics.com/test/ontology/Colour#Red>)
+  EquivalentClasses(:Colour ObjectOneOf(<https://uml2semantics.com/test/ontology/Colour#Red>))
+  Declaration(ObjectProperty(<https://uml2semantics.com/test/ontology/Paint#colour>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Paint#colour> "colour")
+  ObjectPropertyDomain(<https://uml2semantics.com/test/ontology/Paint#colour> :Paint)
+  ObjectPropertyRange(<https://uml2semantics.com/test/ontology/Paint#colour> :Colour)
+  SubClassOf(:Paint ObjectExactCardinality(1 <https://uml2semantics.com/test/ontology/Paint#colour> owl:Thing))
+  DisjointClasses(:Paint :Colour)
+)

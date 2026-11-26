@@ -1,0 +1,19 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(ex:=<https://example.org/vocabulary/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # A name containing a colon is a curie. It gives the IRI directly and, with no name to prefer, is also
+  # the label. The name-only value is qualified by the label of its enumeration, which is the curie.
+  Declaration(Class(ex:PaymentSchedule))
+  AnnotationAssertion(rdfs:label ex:PaymentSchedule "ex:PaymentSchedule")
+  Declaration(NamedIndividual(ex:Daily))
+  AnnotationAssertion(rdfs:label ex:Daily "ex:Daily")
+  ClassAssertion(ex:PaymentSchedule ex:Daily)
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/ex:PaymentSchedule#Weekly>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/ex:PaymentSchedule#Weekly> "Weekly")
+  ClassAssertion(ex:PaymentSchedule <https://uml2semantics.com/test/ontology/ex:PaymentSchedule#Weekly>)
+  EquivalentClasses(ex:PaymentSchedule ObjectOneOf(ex:Daily <https://uml2semantics.com/test/ontology/ex:PaymentSchedule#Weekly>))
+  DifferentIndividuals(ex:Daily <https://uml2semantics.com/test/ontology/ex:PaymentSchedule#Weekly>)
+)

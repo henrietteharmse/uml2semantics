@@ -1,0 +1,20 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # The same with a row for the parent itself in the classes file: that row does not turn the children
+  # of the classes file into a replacement for the children of the diagram.
+  Declaration(Class(:Person))
+  AnnotationAssertion(rdfs:label :Person "Person")
+  AnnotationAssertion(rdfs:comment :Person "A person is a human being.")
+  Declaration(Class(:Employee))
+  AnnotationAssertion(rdfs:label :Employee "Employee")
+  Declaration(Class(:Employer))
+  AnnotationAssertion(rdfs:label :Employer "Employer")
+  Declaration(Class(:Contractor))
+  AnnotationAssertion(rdfs:label :Contractor "Contractor")
+  SubClassOf(:Employee :Person)
+  SubClassOf(:Employer :Person)
+  SubClassOf(:Contractor :Person)
+)

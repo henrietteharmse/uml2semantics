@@ -1,0 +1,22 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(ex:=<https://example.org/vocabulary/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # Repeated rows describe one enumeration with two values, so each is written once, carrying what
+  # the rows said between them.
+  Declaration(Class(ex:SalarySchedule))
+  AnnotationAssertion(rdfs:label ex:SalarySchedule "PaymentSchedule")
+  AnnotationAssertion(rdfs:comment ex:SalarySchedule "The frequency of payments.")
+  Declaration(NamedIndividual(ex:Daily))
+  AnnotationAssertion(rdfs:label ex:Daily "Daily")
+  AnnotationAssertion(rdfs:comment ex:Daily "Paid daily.")
+  ClassAssertion(ex:SalarySchedule ex:Daily)
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly> "Weekly")
+  AnnotationAssertion(rdfs:comment <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly> "Paid weekly.")
+  ClassAssertion(ex:SalarySchedule <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly>)
+  EquivalentClasses(ex:SalarySchedule ObjectOneOf(ex:Daily <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly>))
+  DifferentIndividuals(ex:Daily <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly>)
+)

@@ -1,17 +1,10 @@
 package org.uml2semantics.model.cache
 
-import org.uml2semantics.diagnostics.{DiagnosticCode, UMLModelException}
-import org.uml2semantics.model.{UMLAttribute, UMLAttributeCurie, UMLAttributeDefinition, UMLAttributeIdentifier, UMLAttributeIdentity, UMLAttributeName, UMLClassCurie, UMLClassIdentifier, UMLClassIdentity, UMLClassName, UMLMultiplicity}
-import org.uml2semantics.model.UMLAttributeIdentity.AttributeIdentityBuilder
-import org.uml2semantics.model.cache.ClassIdentityBuilderCache
+import org.uml2semantics.model.{UMLAttribute, UMLAttributeCurie, UMLAttributeDefinition, UMLAttributeIdentity, UMLAttributeName, UMLClassCurie, UMLClassIdentifier, UMLClassIdentity, UMLClassName, UMLClassType, UMLEnumerationType, UMLMultiplicity}
 
 import scala.collection.mutable
 
-object AttributeIdentityBuilderCache:
-  private val buildersByClassNameAttributeName =  mutable.Map[UMLClassName, mutable.Map[UMLAttributeName, AttributeIdentityBuilder]]()
-  private val buildersByClassNameAttributeCurie = mutable.Map[UMLClassName, mutable.Map[UMLAttributeCurie, AttributeIdentityBuilder]]()
-  private val buildersByClassCurieAttributeName = mutable.Map[UMLClassCurie, mutable.Map[UMLAttributeName, AttributeIdentityBuilder]]()
-  private val buildersByClassCurieAttributeCurie = mutable.Map[UMLClassCurie, mutable.Map[UMLAttributeCurie, AttributeIdentityBuilder]]()
+object AttributeIdentityCache:
   private val attributeIdentityByClassNameAttributeName = mutable.Map[UMLClassName, mutable.Map[UMLAttributeName, UMLAttributeIdentity]]()
   private val attributeIdentityByClassNameAttributeCurie = mutable.Map[UMLClassName, mutable.Map[UMLAttributeCurie, UMLAttributeIdentity]]()
   private val attributeIdentityByClassCurieAttributeName = mutable.Map[UMLClassCurie, mutable.Map[UMLAttributeName, UMLAttributeIdentity]]()
@@ -19,62 +12,35 @@ object AttributeIdentityBuilderCache:
 
 
   def clear(): Unit =
-    buildersByClassNameAttributeName.clear()
-    buildersByClassNameAttributeCurie.clear()
-    buildersByClassCurieAttributeName.clear()
-    buildersByClassCurieAttributeCurie.clear()
     attributeIdentityByClassNameAttributeName.clear()
     attributeIdentityByClassNameAttributeCurie.clear()
     attributeIdentityByClassCurieAttributeName.clear()
     attributeIdentityByClassCurieAttributeCurie.clear()
 
-  def cacheUMLAttributeIdentity(attributeIdentity: UMLAttributeIdentity, builder: AttributeIdentityBuilder): UMLAttributeIdentity =
+  def cacheUMLAttributeIdentity(attributeIdentity: UMLAttributeIdentity): UMLAttributeIdentity =
     def updateCache[K, V](map: mutable.Map[K, mutable.Map[V, UMLAttributeIdentity]],
                           key: K, subKey: V, value: UMLAttributeIdentity): Unit =
-      if !map.contains(key) then map += (key -> mutable.Map(subKey -> value))
-      else map(key) += (subKey -> value)
-
-    def updateBuilderCache[K, V](map: mutable.Map[K, mutable.Map[V, AttributeIdentityBuilder]],
-                                 key: K, subKey: V, value: AttributeIdentityBuilder): Unit =
       if !map.contains(key) then map += (key -> mutable.Map(subKey -> value))
       else map(key) += (subKey -> value)
 
     attributeIdentity.classIdentity.nameOption.foreach { className =>
       attributeIdentity.nameOption.foreach { attributeName =>
         updateCache(attributeIdentityByClassNameAttributeName, className, attributeName, attributeIdentity)
-        updateBuilderCache(buildersByClassNameAttributeName, className, attributeName, builder)
       }
       attributeIdentity.curieOption.foreach { attributeCurie =>
         updateCache(attributeIdentityByClassNameAttributeCurie, className, attributeCurie, attributeIdentity)
-        updateBuilderCache(buildersByClassNameAttributeCurie, className, attributeCurie, builder)
       }
     }
     attributeIdentity.classIdentity.curieOption.foreach { classCurie =>
       attributeIdentity.nameOption.foreach { attributeName =>
         updateCache(attributeIdentityByClassCurieAttributeName, classCurie, attributeName, attributeIdentity)
-        updateBuilderCache(buildersByClassCurieAttributeName, classCurie, attributeName, builder)
       }
       attributeIdentity.curieOption.foreach { attributeCurie =>
         updateCache(attributeIdentityByClassCurieAttributeCurie, classCurie, attributeCurie, attributeIdentity)
-        updateBuilderCache(buildersByClassCurieAttributeCurie, classCurie, attributeCurie, builder)
       }
     }
 
     attributeIdentity
-
-  def getUMLAttributeIdentity(classIdentifier: String, attributeIdentifier: String): Option[UMLAttributeIdentity] =
-    ClassIdentityBuilderCache.getUMLClassIdentity(classIdentifier).flatMap { cachedClassIdentity =>
-      val attributeIdentity = UMLAttributeIdentity(cachedClassIdentity, attributeIdentifier)
-      (attributeIdentity.nameOption, attributeIdentity.curieOption) match
-        case (_, Some(attributeCurie)) =>
-          cachedClassIdentity.nameOption.flatMap(attributeIdentityByClassNameAttributeCurie.get(_).flatMap(_.get(attributeCurie)))
-            .orElse(cachedClassIdentity.curieOption.flatMap(attributeIdentityByClassCurieAttributeCurie.get(_).flatMap(_.get(attributeCurie))))
-        case (Some(attributeName), _) =>
-          cachedClassIdentity.nameOption.flatMap(attributeIdentityByClassNameAttributeName.get(_).flatMap(_.get(attributeName)))
-            .orElse(cachedClassIdentity.curieOption.flatMap(attributeIdentityByClassCurieAttributeName.get(_).flatMap(_.get(attributeName))))
-        case _ => throw new UMLModelException(DiagnosticCode.BlankIdentity,
-          "An attribute identity must have a name or a curie.")
-    }
 
   def getUMLAttributeIdentity(attributeIdentity: UMLAttributeIdentity): Option[UMLAttributeIdentity] =
     attributeIdentity.classIdentity.nameOption.flatMap { className =>
@@ -96,46 +62,15 @@ object AttributeIdentityBuilderCache:
         }
       }
     }
-  
-  def getUMLAttributeIdentity(classIdentity: UMLClassIdentity, attributeIdentifier: UMLAttributeIdentifier):
-    Option[UMLAttributeIdentity] =
-
-    attributeIdentifier match
-      case name: UMLAttributeName =>
-        classIdentity.nameOption.flatMap(attributeIdentityByClassNameAttributeName.get(_).flatMap(_.get(name)))
-          .orElse(classIdentity.curieOption.flatMap(attributeIdentityByClassCurieAttributeName.get(_).flatMap(_.get(name))))
-      case curie: UMLAttributeCurie =>
-        classIdentity.nameOption.flatMap(attributeIdentityByClassNameAttributeCurie.get(_).flatMap(_.get(curie)))
-          .orElse(classIdentity.curieOption.flatMap(attributeIdentityByClassCurieAttributeCurie.get(_).flatMap(_.get(curie))))
-
-  def getUMLAttributeIdentityBuilder(classIdentity: UMLClassIdentity, attributeIdentity: UMLAttributeIdentity):
-    Option[AttributeIdentityBuilder] =
-
-    (attributeIdentity.curieOption, attributeIdentity.nameOption) match
-      case (Some(curie), Some(name)) =>
-        buildersByClassCurieAttributeCurie.get(classIdentity.curieOption.get)
-          .flatMap(_.get(curie))
-          .orElse(buildersByClassNameAttributeName.get(classIdentity.nameOption.get)
-            .flatMap(_.get(name)))
-      case (Some(curie), None) =>
-        buildersByClassCurieAttributeCurie.get(classIdentity.curieOption.get)
-          .flatMap(_.get(curie))
-      case (None, Some(name)) =>
-        buildersByClassNameAttributeName.get(classIdentity.nameOption.get)
-          .flatMap(_.get(name))
-      case (None, None) => throw new UMLModelException(DiagnosticCode.BlankIdentity,
-        "An attribute identity must have a name or a curie.")
 
 
-object AttributeBuilderCache:
-  private val buildersByAttributeIdentity = mutable.Map[UMLAttributeIdentity, UMLAttribute.AttributeBuilder]()
+object AttributeCache:
   private val attributesByAttributeIdentity = mutable.Map[UMLAttributeIdentity, UMLAttribute]()
 
   def clear(): Unit =
-    buildersByAttributeIdentity.clear()
     attributesByAttributeIdentity.clear()
 
-  def cacheUMLAttribute(umlAttribute: UMLAttribute, builder: UMLAttribute.AttributeBuilder): Unit =
+  def cacheUMLAttribute(umlAttribute: UMLAttribute): Unit =
     // When enriching with curie, remove any existing name-only version to avoid duplicates.
     // The old entry may exist under two possible keys:
     // 1. Original: name-only class identity + name-only attribute (before class was enriched)
@@ -164,21 +99,9 @@ object AttributeBuilderCache:
       }
       removeUMLAttribute(nameOnlyIdentity)
       removeUMLAttribute(migratedIdentity)
-    buildersByAttributeIdentity += (attributeToCache.attributeIdentity -> builder)
     attributesByAttributeIdentity += (attributeToCache.attributeIdentity -> attributeToCache)
 
-  def getUMLAttribute(attributeIdentity: UMLAttributeIdentity): Option[UMLAttribute] =
-    attributesByAttributeIdentity.get(attributeIdentity)
-
-  def getUMLAttributeBuilder(attributeIdentity: UMLAttributeIdentity): Option[UMLAttribute.AttributeBuilder] =
-    buildersByAttributeIdentity.get(attributeIdentity)
-
-  def getUMLAttributeBuilder(classIdentifier: String, attributeIdentifier: String): Option[UMLAttribute.AttributeBuilder] =
-    AttributeIdentityBuilderCache.getUMLAttributeIdentity(classIdentifier, attributeIdentifier)
-      .flatMap(getUMLAttributeBuilder)
-    
   def removeUMLAttribute(attributeIdentity: UMLAttributeIdentity): Unit =
-    buildersByAttributeIdentity -= attributeIdentity
     attributesByAttributeIdentity -= attributeIdentity
 
   /**
@@ -195,11 +118,30 @@ object AttributeBuilderCache:
       val newAttrIdentity = UMLAttributeIdentity(newClassIdentity, newAttrName, newAttrCurie)
       val newAttribute = oldAttribute.copy(attributeIdentity = newAttrIdentity)
 
-      val builder = buildersByAttributeIdentity.get(oldAttrIdentity)
-      buildersByAttributeIdentity -= oldAttrIdentity
       attributesByAttributeIdentity -= oldAttrIdentity
       attributesByAttributeIdentity += (newAttrIdentity -> newAttribute)
-      builder.foreach(b => buildersByAttributeIdentity += (newAttrIdentity -> b))
     }
 
-  def getAttributes: Set[UMLAttribute] = attributesByAttributeIdentity.values.toSet
+  /**
+   * An attribute with its type as that type is known now.
+   *
+   * An attribute typed by a class or an enumeration records the classifier as it was when the
+   * attribute was built. The classifier may gain the other half of its identity afterwards, as when
+   * a TSV row gives a class of the diagram a curie, and that changes its IRI. The attribute is not
+   * rewritten when that happens. Instead every attribute handed out by this cache has its type
+   * looked up again, so that the range of its property follows the classifier to the IRI the
+   * classifier ends up with.
+   */
+  private def withCurrentType(umlAttribute: UMLAttribute): UMLAttribute =
+    umlAttribute.typeOfAttribute match
+      case Some(UMLClassType(umlClass)) =>
+        val currentClass = ClassIdentityCache.getClassIdentity(umlClass.classIdentity)
+          .flatMap(ClassCache.getUMLClass).getOrElse(umlClass)
+        umlAttribute.copy(typeOfAttribute = Some(UMLClassType(currentClass)))
+      case Some(UMLEnumerationType(enumerationIdentity)) =>
+        val currentIdentity = EnumerationCache.getEnumerations.map(_.identity)
+          .find(_.sharesAHalfWith(enumerationIdentity)).getOrElse(enumerationIdentity)
+        umlAttribute.copy(typeOfAttribute = Some(UMLEnumerationType(currentIdentity)))
+      case _ => umlAttribute
+
+  def getAttributes: Set[UMLAttribute] = attributesByAttributeIdentity.values.map(withCurrentType).toSet

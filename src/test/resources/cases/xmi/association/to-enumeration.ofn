@@ -1,0 +1,23 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # An association ending at an enumeration gives an attribute typed by that enumeration: an object
+  # property ranging over the enumeration's class.
+  Declaration(Class(:Renumeration))
+  AnnotationAssertion(rdfs:label :Renumeration "Renumeration")
+  Declaration(ObjectProperty(<https://uml2semantics.com/test/ontology/Renumeration#paymentSchedule>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Renumeration#paymentSchedule> "paymentSchedule")
+  ObjectPropertyDomain(<https://uml2semantics.com/test/ontology/Renumeration#paymentSchedule> :Renumeration)
+  ObjectPropertyRange(<https://uml2semantics.com/test/ontology/Renumeration#paymentSchedule> :PaymentSchedule)
+  SubClassOf(:Renumeration ObjectExactCardinality(1 <https://uml2semantics.com/test/ontology/Renumeration#paymentSchedule> owl:Thing))
+  Declaration(Class(:PaymentSchedule))
+  AnnotationAssertion(rdfs:label :PaymentSchedule "PaymentSchedule")
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/PaymentSchedule#Daily>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/PaymentSchedule#Daily> "Daily")
+  ClassAssertion(:PaymentSchedule <https://uml2semantics.com/test/ontology/PaymentSchedule#Daily>)
+  EquivalentClasses(:PaymentSchedule ObjectOneOf(<https://uml2semantics.com/test/ontology/PaymentSchedule#Daily>))
+  DisjointClasses(:Renumeration :PaymentSchedule)
+)

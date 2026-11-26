@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	The class Person, with a definition, and its two children Employee and Employer. The classes file of this case has
+	a row for Contractor that names Person as its parent, and no row for Person.
+-->
+<xmi:XMI xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmi:version="2.1" xmlns:uml="http://schema.omg.org/spec/UML/2.1">
+	<xmi:Documentation exporter="Enterprise Architect" exporterVersion="6.5"/>
+	<uml:Model xmi:type="uml:Model" name="EA_Model" visibility="public">
+		<packagedElement xmi:type="uml:Package" xmi:id="EAPK_Model" name="Model" visibility="public">
+			<packagedElement xmi:type="uml:Class" xmi:id="EAID_Person" name="Person" visibility="public"/>
+			<packagedElement xmi:type="uml:Class" xmi:id="EAID_Employee" name="Employee" visibility="public">
+				<generalization xmi:type="uml:Generalization" xmi:id="EAID_Employee_is_Person" general="EAID_Person"/>
+			</packagedElement>
+			<packagedElement xmi:type="uml:Class" xmi:id="EAID_Employer" name="Employer" visibility="public">
+				<generalization xmi:type="uml:Generalization" xmi:id="EAID_Employer_is_Person" general="EAID_Person"/>
+			</packagedElement>
+		</packagedElement>
+	</uml:Model>
+	<xmi:Extension extender="Enterprise Architect" extenderID="6.5">
+		<elements>
+			<element xmi:idref="EAID_Person" xmi:type="uml:Class" name="Person" scope="public">
+				<properties documentation="A person is a human being." isSpecification="false" sType="Class" nType="0" scope="public"/>
+			</element>
+		</elements>
+	</xmi:Extension>
+</xmi:XMI>

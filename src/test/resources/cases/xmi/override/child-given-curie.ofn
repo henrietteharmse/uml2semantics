@@ -1,0 +1,18 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(ex:=<https://example.org/vocabulary/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # A row that gives a child of the diagram a curie moves the child to that IRI, and its generalization
+  # moves with it: there is one class for Employee, and it is the one that is a subclass of Person.
+  Declaration(Class(:Person))
+  AnnotationAssertion(rdfs:label :Person "Person")
+  AnnotationAssertion(rdfs:comment :Person "A person is a human being.")
+  Declaration(Class(ex:Employee))
+  AnnotationAssertion(rdfs:label ex:Employee "Employee")
+  Declaration(Class(:Employer))
+  AnnotationAssertion(rdfs:label :Employer "Employer")
+  SubClassOf(ex:Employee :Person)
+  SubClassOf(:Employer :Person)
+)

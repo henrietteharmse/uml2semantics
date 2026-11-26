@@ -1,0 +1,20 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # Where the multiplicity sits does not change the direction: this is Person owns Car. The 0..1 at the
+  # source end is about the opposite direction, which has no name, so it is not read. The target end
+  # has no multiplicity and is taken to be 1.
+  Declaration(Class(:Person))
+  AnnotationAssertion(rdfs:label :Person "Person")
+  Declaration(Class(:Car))
+  AnnotationAssertion(rdfs:label :Car "Car")
+  Declaration(ObjectProperty(<https://uml2semantics.com/test/ontology/Person#owns>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Person#owns> "owns")
+  ObjectPropertyDomain(<https://uml2semantics.com/test/ontology/Person#owns> :Person)
+  ObjectPropertyRange(<https://uml2semantics.com/test/ontology/Person#owns> :Car)
+  SubClassOf(:Person ObjectExactCardinality(1 <https://uml2semantics.com/test/ontology/Person#owns> owl:Thing))
+  DisjointClasses(:Person :Car)
+)

@@ -1,4 +1,4 @@
-Curie	Name	Definition	ParentNames
+Curie	Name	Definition	Parents
 	Resource	Resource published or curated by a single agent.	
 	Dataset	A collection of data, published or curated by a single agent, and available for access or download in one or more representations.	Resource
 	Catalog	A curated collection of metadata about resources (e.g., datasets and data services in the context of a data catalog)	Dataset

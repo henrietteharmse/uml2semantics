@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Read with XMI overriding TSV. A class named Colour, which the values file of this case has already
+	made an enumeration, and a class named Person.
+-->
+<xmi:XMI xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmi:version="2.1" xmlns:uml="http://schema.omg.org/spec/UML/2.1">
+	<xmi:Documentation exporter="Enterprise Architect" exporterVersion="6.5"/>
+	<uml:Model xmi:type="uml:Model" name="EA_Model" visibility="public">
+		<packagedElement xmi:type="uml:Package" xmi:id="EAPK_Model" name="Model" visibility="public">
+			<packagedElement xmi:type="uml:Class" xmi:id="EAID_Colour" name="Colour" visibility="public"/>
+			<packagedElement xmi:type="uml:Class" xmi:id="EAID_Person" name="Person" visibility="public"/>
+		</packagedElement>
+	</uml:Model>
+</xmi:XMI>

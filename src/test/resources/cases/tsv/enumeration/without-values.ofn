@@ -1,0 +1,12 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # An enumeration without values is only a class. It is not made equivalent to an empty one-of:
+  # that is not valid OWL 2, and it would say the class is empty, which a model still being drafted
+  # does not mean.
+  Declaration(Class(:PaymentSchedule))
+  AnnotationAssertion(rdfs:label :PaymentSchedule "PaymentSchedule")
+  AnnotationAssertion(rdfs:comment :PaymentSchedule "The frequency at which an employee is paid.")
+)

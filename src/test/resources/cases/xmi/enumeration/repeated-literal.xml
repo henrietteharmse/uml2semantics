@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Rule 4. The literal Small occurs twice in one enumeration. Only the second has a definition.
+-->
+<xmi:XMI xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmi:version="2.1" xmlns:uml="http://schema.omg.org/spec/UML/2.1">
+	<xmi:Documentation exporter="Enterprise Architect" exporterVersion="6.5"/>
+	<uml:Model xmi:type="uml:Model" name="EA_Model" visibility="public">
+		<packagedElement xmi:type="uml:Package" xmi:id="EAPK_Model" name="Model" visibility="public">
+			<packagedElement xmi:type="uml:Enumeration" xmi:id="EAID_Size" name="Size" visibility="public">
+				<ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="EAID_Size_Small_1" name="Small" visibility="public"/>
+				<ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="EAID_Size_Small_2" name="Small" visibility="public"/>
+			</packagedElement>
+		</packagedElement>
+	</uml:Model>
+	<xmi:Extension extender="Enterprise Architect" extenderID="6.5">
+		<elements>
+			<element xmi:idref="EAID_Size" xmi:type="uml:Enumeration" name="Size" scope="public">
+				<properties isSpecification="false" sType="Enumeration" nType="0" scope="public"/>
+				<attributes>
+					<attribute xmi:idref="EAID_Size_Small_1" name="Small" scope="Public">
+						<documentation/>
+						<properties collection="false" static="0" duplicates="0" changeability="changeable"/>
+						<bounds lower="1" upper="1"/>
+					</attribute>
+					<attribute xmi:idref="EAID_Size_Small_2" name="Small" scope="Public">
+						<documentation value="The smallest size."/>
+						<properties collection="false" static="0" duplicates="0" changeability="changeable"/>
+						<bounds lower="1" upper="1"/>
+					</attribute>
+				</attributes>
+			</element>
+		</elements>
+	</xmi:Extension>
+</xmi:XMI>

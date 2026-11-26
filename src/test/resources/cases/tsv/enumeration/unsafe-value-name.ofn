@@ -1,0 +1,18 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # A character of a value name that is not safe in an IRI becomes an underscore in the IRI. The label
+  # is the name as it was given.
+  Declaration(Class(:Signal))
+  AnnotationAssertion(rdfs:label :Signal "Signal")
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/Signal#Hp_0>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Signal#Hp_0> "Hp 0")
+  ClassAssertion(:Signal <https://uml2semantics.com/test/ontology/Signal#Hp_0>)
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/Signal#PZB_LZB>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Signal#PZB_LZB> "PZB/LZB")
+  ClassAssertion(:Signal <https://uml2semantics.com/test/ontology/Signal#PZB_LZB>)
+  EquivalentClasses(:Signal ObjectOneOf(<https://uml2semantics.com/test/ontology/Signal#Hp_0> <https://uml2semantics.com/test/ontology/Signal#PZB_LZB>))
+  DifferentIndividuals(<https://uml2semantics.com/test/ontology/Signal#Hp_0> <https://uml2semantics.com/test/ontology/Signal#PZB_LZB>)
+)

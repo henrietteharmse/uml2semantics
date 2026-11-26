@@ -1,0 +1,27 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # A role name on the source end gives a second attribute, in the opposite direction: of the target
+  # class, typed by the source class, with the multiplicity of the source end and the definition of the
+  # role. The association name still gives its own attribute, with the definition of the association.
+  Declaration(Class(:Employer))
+  AnnotationAssertion(rdfs:label :Employer "Employer")
+  Declaration(Class(:Employee))
+  AnnotationAssertion(rdfs:label :Employee "Employee")
+  Declaration(ObjectProperty(<https://uml2semantics.com/test/ontology/Employer#employs>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Employer#employs> "employs")
+  AnnotationAssertion(rdfs:comment <https://uml2semantics.com/test/ontology/Employer#employs> "An employer employs one or more employees.")
+  ObjectPropertyDomain(<https://uml2semantics.com/test/ontology/Employer#employs> :Employer)
+  ObjectPropertyRange(<https://uml2semantics.com/test/ontology/Employer#employs> :Employee)
+  SubClassOf(:Employer ObjectMinCardinality(1 <https://uml2semantics.com/test/ontology/Employer#employs> owl:Thing))
+  Declaration(ObjectProperty(<https://uml2semantics.com/test/ontology/Employee#employer>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Employee#employer> "employer")
+  AnnotationAssertion(rdfs:comment <https://uml2semantics.com/test/ontology/Employee#employer> "The employer of an employee.")
+  ObjectPropertyDomain(<https://uml2semantics.com/test/ontology/Employee#employer> :Employee)
+  ObjectPropertyRange(<https://uml2semantics.com/test/ontology/Employee#employer> :Employer)
+  SubClassOf(:Employee ObjectMaxCardinality(1 <https://uml2semantics.com/test/ontology/Employee#employer> owl:Thing))
+  DisjointClasses(:Employer :Employee)
+)

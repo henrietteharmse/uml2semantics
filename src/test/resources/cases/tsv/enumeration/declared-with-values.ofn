@@ -1,0 +1,26 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # An enumeration is a class equivalent to the one-of of its values. Each value is a named
+  # individual of that class, minted under the ontology prefix and qualified by its enumeration, and
+  # the values are declared pairwise different.
+  Declaration(Class(:PaymentSchedule))
+  AnnotationAssertion(rdfs:label :PaymentSchedule "PaymentSchedule")
+  AnnotationAssertion(rdfs:comment :PaymentSchedule "The frequency at which an employee is paid.")
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/PaymentSchedule#Daily>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/PaymentSchedule#Daily> "Daily")
+  AnnotationAssertion(rdfs:comment <https://uml2semantics.com/test/ontology/PaymentSchedule#Daily> "The employee is paid at the end of each day.")
+  ClassAssertion(:PaymentSchedule <https://uml2semantics.com/test/ontology/PaymentSchedule#Daily>)
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly> "Weekly")
+  AnnotationAssertion(rdfs:comment <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly> "The employee is paid at the end of each week.")
+  ClassAssertion(:PaymentSchedule <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly>)
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/PaymentSchedule#Monthly>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/PaymentSchedule#Monthly> "Monthly")
+  AnnotationAssertion(rdfs:comment <https://uml2semantics.com/test/ontology/PaymentSchedule#Monthly> "The employee is paid on the last day of the month.")
+  ClassAssertion(:PaymentSchedule <https://uml2semantics.com/test/ontology/PaymentSchedule#Monthly>)
+  EquivalentClasses(:PaymentSchedule ObjectOneOf(<https://uml2semantics.com/test/ontology/PaymentSchedule#Daily> <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly> <https://uml2semantics.com/test/ontology/PaymentSchedule#Monthly>))
+  DifferentIndividuals(<https://uml2semantics.com/test/ontology/PaymentSchedule#Daily> <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly> <https://uml2semantics.com/test/ontology/PaymentSchedule#Monthly>)
+)

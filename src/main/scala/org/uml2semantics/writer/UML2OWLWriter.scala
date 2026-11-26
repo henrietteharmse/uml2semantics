@@ -20,6 +20,7 @@ class UML2OWLWriter(ontologyIRI: String,
                     owlOntologyFile: File,
                     classes: Set[UMLClass],
                     attributes: Set[UMLAttribute],
+                    enumerations: Set[UMLEnumeration],
                     globalDisjointness: Boolean = true):
 
   private val logger = Logger("UML2OWLWriter")
@@ -42,6 +43,10 @@ class UML2OWLWriter(ontologyIRI: String,
    * a hierarchy is the generalization set's business, and because a class is never disjoint from its own
    * superclass. A class having *children* does not exclude it — that says nothing about how it relates
    * to classes outside its hierarchy.
+   *
+   * The class of every enumeration takes part too, less any that share a value with another
+   * enumeration. An enumeration has no parents, a value is never an instance of a UML class, and a
+   * value belongs to one enumeration.
    */
   private val rootClassesForGlobalDisjointness: mutable.Set[OWLClass] = mutable.Set[OWLClass]()
 
@@ -95,6 +100,9 @@ class UML2OWLWriter(ontologyIRI: String,
           createObjectProperty(umlAttribute, owlClass, attributeType, errorMessages)
         case UMLClassType(attributeType) =>
           createObjectProperty(umlAttribute, owlClass, attributeType, errorMessages)
+        // An enumeration is translated to a class, so an attribute typed by one ranges over that class.
+        case UMLEnumerationType(attributeType) =>
+          createObjectProperty(umlAttribute, owlClass, attributeType, errorMessages)
     }.getOrElse {
       createObjectProperty(umlAttribute, owlClass, errorMessages)
     }
@@ -119,20 +127,8 @@ class UML2OWLWriter(ontologyIRI: String,
     createDataExistentialRestrictions(umlAttribute, domain,  owlDataProperty, dataType, errorMessages)
     owlDataProperty
 
-  private def createObjectProperty(umlAttribute: UMLAttribute, domain: OWLClass, attributeType: Curie,
-                                   errorMessages: mutable.Buffer[String]): OWLObjectProperty =
-    val owlObjectProperty = dataFactory.getOWLObjectProperty(umlAttribute.getIRI)
-    val owlObjectPropertyDomainAxiom = dataFactory.getOWLObjectPropertyDomainAxiom(owlObjectProperty, domain)
-    if manager.addAxiom(ontology, owlObjectPropertyDomainAxiom) == UNSUCCESSFULLY then
-      errorMessages += s"Could not create domain axiom for $owlObjectProperty with domain=$domain"
-    val owlRange: OWLClass = dataFactory.getOWLClass(attributeType.getIRI)
-    val owlObjectPropertyRangeAxiom = dataFactory.getOWLObjectPropertyRangeAxiom(owlObjectProperty, owlRange)
-    if manager.addAxiom(ontology, owlObjectPropertyRangeAxiom) == UNSUCCESSFULLY then
-      errorMessages += s"Could not create range axiom for $owlObjectProperty with range=$owlRange"
-    createObjectExistentialRestrictions(umlAttribute, domain, owlObjectProperty, errorMessages)
-    owlObjectProperty
-
-  private def createObjectProperty(umlAttribute: UMLAttribute, domain: OWLClass, attributeType: UMLClass,
+  /** An object property ranging over the class at the IRI of `attributeType`. */
+  private def createObjectProperty(umlAttribute: UMLAttribute, domain: OWLClass, attributeType: LabeledIRI,
                                    errorMessages: mutable.Buffer[String]): OWLObjectProperty =
     val owlObjectProperty = dataFactory.getOWLObjectProperty(umlAttribute.getIRI)
     val owlObjectPropertyDomainAxiom = dataFactory.getOWLObjectPropertyDomainAxiom(owlObjectProperty, domain)
@@ -448,17 +444,109 @@ class UML2OWLWriter(ontologyIRI: String,
     subClassOfAxiom
 
 
+  /**
+   * Translates an enumeration to a class that is equivalent to the one-of of its values. Each value
+   * is a named individual of that class, and the values are declared pairwise different, since OWL
+   * makes no unique name assumption and two literals of an enumeration are never the same thing.
+   *
+   * An enumeration without values gets the class and nothing more. An empty one-of is not valid
+   * OWL 2, and it would assert that the class is empty, which is not what an enumeration that is
+   * still being drafted means. A single value has nothing to be different from, so that axiom needs
+   * at least two.
+   */
+  private def createAndAnnotateOWLEnumeration(umlEnumeration: UMLEnumeration,
+                                              errorMessages: mutable.Buffer[String]): OWLClass =
+    logger.trace(s"createAndAnnotateOWLEnumeration: umlEnumeration=$umlEnumeration ${Code.source}")
+    val owlClass = dataFactory.getOWLClass(umlEnumeration.getIRI)
+    if manager.addAxiom(ontology, dataFactory.getOWLDeclarationAxiom(owlClass)) == UNSUCCESSFULLY then
+      errorMessages += s"Could not declare class=${owlClass.getIRI}"
+    umlEnumeration.definition.foreach(enumerationDefinition =>
+      createDefinitionAnnotation(owlClass, enumerationDefinition.definition, errorMessages))
+    createLabelAnnotation(owlClass, umlEnumeration.getLabel, errorMessages)
+    rootClassesForGlobalDisjointness += owlClass
+
+    val owlIndividuals = umlEnumeration.values.map { umlValue =>
+      val owlIndividual = dataFactory.getOWLNamedIndividual(umlEnumeration.getValueIRI(umlValue))
+      if manager.addAxiom(ontology, dataFactory.getOWLDeclarationAxiom(owlIndividual)) == UNSUCCESSFULLY then
+        errorMessages += s"Could not declare individual=${owlIndividual.getIRI}"
+      umlValue.definition.foreach(valueDefinition =>
+        createDefinitionAnnotation(owlIndividual, valueDefinition.definition, errorMessages))
+      createLabelAnnotation(owlIndividual, umlValue.getLabel, errorMessages)
+      if manager.addAxiom(ontology, dataFactory.getOWLClassAssertionAxiom(owlClass, owlIndividual)) == UNSUCCESSFULLY then
+        errorMessages += s"Could not assert individual=${owlIndividual.getIRI} to be of class=${owlClass.getIRI}"
+      owlIndividual
+    }
+
+    if owlIndividuals.nonEmpty then
+      val equivalentToOneOfAxiom = dataFactory.getOWLEquivalentClassesAxiom(owlClass,
+        dataFactory.getOWLObjectOneOf(owlIndividuals.asJava))
+      if manager.addAxiom(ontology, equivalentToOneOfAxiom) == UNSUCCESSFULLY then
+        errorMessages += s"Could not add equivalentClasses axiom for ${owlClass.getIRI} equivalent to one of " +
+          owlIndividuals.map(_.getIRI).mkString(", ")
+    if owlIndividuals.size > 1 then
+      val differentIndividualsAxiom = dataFactory.getOWLDifferentIndividualsAxiom(owlIndividuals.asJava)
+      if manager.addAxiom(ontology, differentIndividualsAxiom) == UNSUCCESSFULLY then
+        errorMessages += s"Could not add differentIndividuals axiom for ${owlIndividuals.map(_.getIRI).mkString(", ")}"
+    owlClass
+
+  /**
+   * Two enumerations declared disjoint cannot share a value, or the ontology is inconsistent: the
+   * shared individual would belong to two classes that have nothing in common. Name-only values
+   * never collide, because each is qualified by its enumeration, but two enumerations can be given
+   * the same curie for a value. Those enumerations are what this removes, all of them rather than
+   * all but one, because which to keep would be arbitrary.
+   */
+  private def relaxGlobalDisjointnessForSharedValues(): Unit =
+    val enumerationsByValueIRI = mutable.Map[String, mutable.Set[UMLEnumeration]]()
+    enumerations.foreach(umlEnumeration => umlEnumeration.values.foreach(umlValue =>
+      enumerationsByValueIRI.getOrElseUpdate(umlEnumeration.getValueIRI(umlValue), mutable.Set()) += umlEnumeration))
+
+    val sharedValueLabelsByEnumerations = mutable.Map[Set[UMLEnumeration], mutable.Set[String]]()
+    enumerationsByValueIRI.foreach { (valueIRI, sharingEnumerations) =>
+      if sharingEnumerations.size > 1 then
+        val valueLabel = sharingEnumerations.head.values.find(sharingEnumerations.head.getValueIRI(_) == valueIRI)
+          .map(_.getLabel).getOrElse(valueIRI)
+        sharedValueLabelsByEnumerations.getOrElseUpdate(sharingEnumerations.toSet, mutable.Set()) += valueLabel
+    }
+
+    sharedValueLabelsByEnumerations.toSeq.sortBy((sharing, _) => sharing.toSeq.map(_.getLabel).sorted.mkString(" "))
+      .foreach { (sharingEnumerations, valueLabels) =>
+        sharingEnumerations.foreach(umlEnumeration =>
+          rootClassesForGlobalDisjointness -= dataFactory.getOWLClass(umlEnumeration.getIRI))
+        diagnostics.warn(DiagnosticCode.GlobalDisjointnessRelaxed,
+          s"Enumerations ${sharingEnumerations.toSeq.map(_.getLabel).sorted.mkString(" and ")} share the " +
+            s"value ${valueLabels.toSeq.sorted.mkString(", ")}, so the default disjointness assumption would " +
+            s"have made the ontology inconsistent. They were left out of the global disjointness axiom. Use " +
+            s"--no-global-disjointness to switch the assumption off entirely.")
+      }
+
   private def processUMLClasses: mutable.Buffer[String] =
     logger.info("processUMLClasses: Start")
     val errorMessages: mutable.Buffer[String] = new ArrayBuffer[String]()
     classes.foreach(umlClass =>
         val owlClass = createAndAnnotateOWLClass(umlClass, errorMessages))
-    if globalDisjointness then
-      relaxGlobalDisjointnessForSharedDescendants()
-      createOWLDisjointClassesAxiom(rootClassesForGlobalDisjointness, errorMessages)
     logger.info("processUMLClasses: Done")
     errorMessages
   end processUMLClasses
+
+  private def processUMLEnumerations: mutable.Buffer[String] =
+    logger.info("processUMLEnumerations: Start")
+    val errorMessages: mutable.Buffer[String] = new ArrayBuffer[String]()
+    enumerations.foreach(umlEnumeration => createAndAnnotateOWLEnumeration(umlEnumeration, errorMessages))
+    logger.info("processUMLEnumerations: Done")
+    errorMessages
+
+  /**
+   * Declares the roots mutually disjoint. This runs once classes and enumerations have both been
+   * translated, because the one axiom spans both.
+   */
+  private def processGlobalDisjointness: mutable.Buffer[String] =
+    val errorMessages: mutable.Buffer[String] = new ArrayBuffer[String]()
+    if globalDisjointness then
+      relaxGlobalDisjointnessForSharedDescendants()
+      relaxGlobalDisjointnessForSharedValues()
+      createOWLDisjointClassesAxiom(rootClassesForGlobalDisjointness, errorMessages)
+    errorMessages
 
   private def processUMLAttributes: mutable.Buffer[String] =
     logger.info("processUMLAttributes: Start")
@@ -479,6 +567,8 @@ class UML2OWLWriter(ontologyIRI: String,
     logger.info("generateOWL: Start")
     val errorMessages = new ListBuffer[String]()
     errorMessages.appendAll(processUMLClasses)
+    errorMessages.appendAll(processUMLEnumerations)
+    errorMessages.appendAll(processGlobalDisjointness)
     errorMessages.appendAll(processUMLAttributes)
     errorMessages.foreach(diagnostics.error(DiagnosticCode.AxiomAdditionFailed, _))
     try

@@ -92,18 +92,18 @@ val argParser =
 
 
 /**
- * Parses command line arguments and runs the conversion, returning its result. Returns None when
+ * Parses command line arguments and runs the translation, returning its result. Returns None when
  * the arguments themselves could not be parsed, in which case scopt has already reported why.
  *
  * Both the CLI and the test suite enter here, so tests exercise argument handling rather than
  * assuming it.
  */
-def convertFromArguments(arguments: Seq[String]): Option[ConversionResult] =
-  OParser.parse(argParser, arguments, InputParameters()).map(convert)
+def translateFromArguments(arguments: Seq[String]): Option[TranslationResult] =
+  OParser.parse(argParser, arguments, InputParameters()).map(translate)
 
 @main def uml2owl(arguments: String*): Unit =
   val logger = Logger[this.type]
-  convertFromArguments(arguments) match
+  translateFromArguments(arguments) match
     case Some(result) =>
       result.diagnostics.foreach(diagnostic =>
         if diagnostic.severity == DiagnosticSeverity.Error then logger.error(diagnostic.toString)

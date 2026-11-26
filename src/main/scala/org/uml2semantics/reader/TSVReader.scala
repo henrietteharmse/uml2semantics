@@ -5,7 +5,7 @@ import com.typesafe.scalalogging.Logger
 import org.uml2semantics.InputParameters
 import org.uml2semantics.diagnostics.{Diagnostic, DiagnosticCode, Diagnostics, SourceLocation, UMLModelException}
 import org.uml2semantics.model.*
-import org.uml2semantics.model.cache.ClassBuilderCache
+import org.uml2semantics.model.cache.{ClassCache, EnumerationCache}
 import org.uml2semantics.reader.ReaderHelper.populateParentsWithTheirChildren
 
 import java.io.File
@@ -34,6 +34,10 @@ object TSVReader extends UMLClassDiagramReader:
     val diagnostics = new Diagnostics
     if (input.classesTsv.isDefined)
       parseClasses(input.classesTsv, ontologyPrefix, diagnostics)
+    // Enumerations are read before attributes, whatever order the flags came in, so that an
+    // attribute type naming an enumeration finds it instead of becoming a placeholder class.
+    input.enumerationsTsv.foreach(parseEnumerations(_, ontologyPrefix, diagnostics))
+    input.enumerationValuesTsv.foreach(parseEnumerationValues(_, ontologyPrefix, diagnostics))
     if (input.attributesTsv.isDefined)
       parseClassAttributes(input.attributesTsv, ontologyPrefix, diagnostics)
     diagnostics.toSeq
@@ -79,7 +83,8 @@ object TSVReader extends UMLClassDiagramReader:
         .build
     }
 
-    populateParentsWithTheirChildren(parentToChildrenMap, ontologyPrefix)
+    populateParentsWithTheirChildren(parentToChildrenMap, ontologyPrefix, diagnostics,
+      SourceLocation(maybeTsvFile.get.getName))
 
 
   private def extractParents(parentToChildrenMap: mutable.Map[String, mutable.Set[String]],
@@ -101,6 +106,36 @@ object TSVReader extends UMLClassDiagramReader:
       )
 
 
+  /**
+   * Reads the enumerations file. Where each enumeration was declared is noted in the cache, so
+   * that a later finding about the enumeration can point at its row.
+   */
+  private def parseEnumerations(tsvFile: File, ontologyPrefix: PrefixNamespace,
+                                diagnostics: Diagnostics): Unit =
+    import EnumerationsHeader.*
+    logger.info("Start")
+
+    forEachRow(tsvFile, diagnostics) { (row, location) =>
+      val umlEnumeration = UMLEnumeration.builder(ontologyPrefix)
+        .withNameAndCurie(row(Name.toString), row(Curie.toString))
+        .withDefinition(row(Definition.toString))
+        .build
+      EnumerationCache.recordDeclaration(umlEnumeration.identity, location)
+    }
+
+  private def parseEnumerationValues(tsvFile: File, ontologyPrefix: PrefixNamespace,
+                                     diagnostics: Diagnostics): Unit =
+    import EnumerationValuesHeader.*
+    logger.info("Start")
+
+    forEachRow(tsvFile, diagnostics) { (row, _) =>
+      UMLEnumerationValue.builder(ontologyPrefix)
+        .withEnumeration(row(Enumeration.toString))
+        .withNameAndCurie(row(Name.toString), row(Curie.toString))
+        .withDefinition(row(Definition.toString))
+        .build
+    }
+
   private def parseClassAttributes(maybeTsvFile: Option[File], ontologyPrefix: PrefixNamespace,
                                    diagnostics: Diagnostics): Unit =
     import ClassAttributesHeader.*
@@ -108,6 +143,12 @@ object TSVReader extends UMLClassDiagramReader:
 
     forEachRow(maybeTsvFile.get, diagnostics) { (row, location) =>
       val classIdentifier = row(Class.toString)
+      // Checked before anything is built for the row, so that the enumeration's name is not also
+      // left behind as a class identity.
+      if EnumerationCache.getUMLEnumeration(classIdentifier).isDefined then
+        throw new UMLModelException(DiagnosticCode.ClassifierKindConflict,
+          s"'$classIdentifier' is an enumeration, and an enumeration owns no attributes. A name or curie " +
+            s"identifies either a class or an enumeration, never both.")
       val classIdentity = UMLClassIdentity.builder(ontologyPrefix)
         .withNameOrCurie(classIdentifier)
         .build
@@ -127,6 +168,6 @@ object TSVReader extends UMLClassDiagramReader:
       //
       // Deliberately after the attribute is built, not before: a row that was rejected should not
       // leave a class behind, so only a valid attribute is evidence that its owner exists.
-      if ClassBuilderCache.getUMLClass(classIdentity).isEmpty then
+      if ClassCache.getUMLClass(classIdentity).isEmpty then
         UMLClass.builder(ontologyPrefix).withNameOrCurie(classIdentifier).build
     }

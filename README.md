@@ -1,4 +1,4 @@
-`uml2semantics` is an application that allows you to convert a UML class diagram to an OWL 2 ontology. Translating a UML 
+`uml2semantics` is an application that allows you to translate a UML class diagram to an OWL 2 ontology. Translating a UML 
 class diagram to an OWL 2 ontology allows one to reason over the ontology and thereby discover possible 
 inconsistencies or unintended consequences. The UML to OWL translation we use is based on
 [UML to OWL](https://henrietteharmse.com/uml-vs-owl/uml-class-diagram-to-owl-and-sroiq-reference/), which
@@ -7,7 +7,7 @@ provides the related Manchester syntax and SROIQ semantics.
 
 # Project status
 `uml2semantics` is in the very early stages of development and thus is missing many features. Currently it has support 
-for specifying classes and attributes/associations using TSV files.
+for specifying classes, attributes/associations and enumerations using TSV files.
 
 
 # Assumption
@@ -26,6 +26,8 @@ Java 11+
 |-------|------|----------|-------------|
 | `-c` | `--classes` | No | TSV file containing UML class information |
 | `-a` | `--attributes` | No | TSV file containing UML class attribute information |
+| `-e` | `--enumerations` | No | TSV file containing UML enumerations |
+| `-n` | `--enumeration-values` | No | TSV file containing the values of UML enumerations |
 | `-m` | `--xmi` | No | An XMI file exported from a UML tool |
 | `-o` | `--ontology` | **Yes** | Output OWL ontology file |
 | `-i` | `--ontologyIRI` | **Yes** | IRI of the ontology (e.g., `https://example.com/ontology`) |
@@ -38,10 +40,11 @@ At minimum, you must provide either TSV files (`-c`, `-a`, `-e`, `-n`) or an XMI
 
 # Quick Start
 ## Employer and Employee example 
-As a quick start here is a small UML class diagram that we will convert to OWL. We define a `Person` class 
+As a quick start here is a small UML class diagram that we will translate to OWL. We define a `Person` class 
 that has attributes `name`, `surname` and  `dateOfBirth`. The types we use are `name` and `surname` is `xsd:string` 
 and for `dateOfBirth` we use `xsd:dateTime`. `Employee` and `Employer` extends `Person`. An employee has exactly 1 
-employer and an employer has 1 or more employees.
+employer and an employer has 1 or more employees. An employee also has exactly 1 `Renumeration`, which has a `rate` of
+type `xsd:decimal` and a `paymentSchedule`. The type of `paymentSchedule` is the enumeration `PaymentSchedule`.
 
 ![Employer Example](./docs/SimpleEmployerExample.png)
 
@@ -50,64 +53,114 @@ UML class diagram information can be specified using TSV files. First create
 the TSV file for your classes. It has the following format:
 
 
-| Curie | Name     | Definition | ParentNames | 
-|-------|----------|------------|-------------|
-|       | Person   |            |             |
-|       | Employee |            | Person      |
-|       | Employer |            | Person      |
+| Curie | Name         | Definition | Parents |
+|-------|--------------|------------|---------|
+|       | Person       |            |         |
+|       | Employee     |            | Person  |
+|       | Employer     |            | Person  |
+|       | Renumeration |            |         |
 
 Here we only specify the name for each class, hence the reason we used the **Name** column to define our classes. Since
-`Employee` and `Employer` both extend the `Person` class, we add `Person` to **ParentNames** column. Multiple parents are
+`Employee` and `Employer` both extend the `Person` class, we add `Person` to **Parents** column. Multiple parents are
 separated by `|`. Curie refer to compact URI based on the [W3C CURIE syntax](https://www.w3.org/TR/2010/NOTE-curie-20101216/).
 
 To specify attributes we use the following format. 
 
-| Class    | Curie | Name        | ClassEnumOrPrimitiveType | MinMultiplicity | MaxMultiplicity | Definition | 
-|----------|-------|-------------|--------------------------|-----------------|-----------------|------------|
-| Person   |       | name        | xsd:string               |                 |                 |            |
-| Person   |       | surname     | xsd:string               |                 |                 |            |
-| Person   |       | dateOfBirth | xsd:dateTime             |                 |                 |            |
-| Employee |       | employedBy  | Employer                 | 1               | 1               |            |
-| Employer |       | employes    | Employee                 | 1               | *               |            |
+| Class        | Curie | Name            | ClassEnumOrPrimitiveType | MinMultiplicity | MaxMultiplicity | Definition | 
+|--------------|-------|-----------------|--------------------------|-----------------|-----------------|------------|
+| Person       |       | name            | xsd:string               |                 |                 |            |
+| Person       |       | surname         | xsd:string               |                 |                 |            |
+| Person       |       | dateOfBirth     | xsd:dateTime             |                 |                 |            |
+| Employee     |       | employedBy      | Employer                 | 1               | 1               |            |
+| Employee     |       | renumeration    | Renumeration             | 1               | 1               |            |
+| Employer     |       | employes        | Employee                 | 1               | *               |            |
+| Renumeration |       | rate            | xsd:decimal              | 1               | 1               |            |
+| Renumeration |       | paymentSchedule | PaymentSchedule          | 1               | 1               |            |
 
 **Class** refers to the class for which we are defining the attributes. Attributes can also be defined using curies, 
-but we again only used names for now. The type of an attribute can be a primitive or a class. Currenlty XML primitive data
+but we again only used names for now. The type of an attribute can be a primitive, a class or an enumeration. Currenlty XML primitive data
 types as used in [Protege Desktop](https://protege.stanford.edu/) data types are supported. When no multiplicity is given,
 [1..1] is assumed. `*` is to refer to infinite as per usual.
 
+#### Enumerations
+An enumeration is specified using two more TSV files. The first lists the enumerations:
+
+| Curie              | Name            | Definition                        |
+|--------------------|-----------------|-----------------------------------|
+| emp:SalarySchedule | PaymentSchedule | Defines the frequency of payments |
+
+Here the enumeration is given both a name and a curie, which means it can be referred to by either.
+
+The second lists the values of each enumeration, where **Enumeration** refers to the enumeration a value belongs to:
+
+| Enumeration        | Curie       | Name   | Definition                                             |
+|--------------------|-------------|--------|--------------------------------------------------------|
+| emp:SalarySchedule | emp:Daily   |        | Employee gets paid at the end of each day              |
+| PaymentSchedule    |             | Weekly | Employee gets paid at the end of each week on a Friday |
+| emp:SalarySchedule | emp:Monthly |        | Employee gets paid at the last day of the month        |
+
+All three rows add a value to the same enumeration, since `PaymentSchedule` and `emp:SalarySchedule` are its name and
+its curie. A value, like a class, is specified using a name, a curie or both.
+
+To use an enumeration as the type of an attribute, give its name or curie in the **ClassEnumOrPrimitiveType** column of
+the attributes file, as the `paymentSchedule` attribute of `Renumeration` does above. An enumeration is translated to an
+OWL class that is equivalent to the set of its values, each value being an individual. The full rules are in the
+[TSV enumerations specification](./docs/specs/tsv-enumerations.md). Enumerations are passed using the `-e` and `-n`
+options.
+
 A Google spreadsheet for this UML class diagram can be found [here](https://docs.google.com/spreadsheets/d/1FXpbc52Ag24Htj3Qq36Z743QB5SzlShzjeg98uxd2Xo/edit?usp=sharing).
-Save the classes and attributes tabs as TSV files.
+Save the Classes, Attributes, Enumerations and EnumerationNamedValues tabs as TSV files.
 
 ### Run uml2semantics using TSV files
 Assuming you have downloaded uml2semantics to a `$uml2semantics` directory (you need to replace `$uml2semantics` with your 
-directory name), the following will generate the employer ontology for the Employer example in `$uml2semantics/examples/employer/`
-as `$uml2semantics/examples/employer/employer.rdf`:
+directory name), the following will generate the employer ontology from the TSV files of the `employer-generalization`
+scenario as `employer.rdf` in the current directory:
 
 ```
 java -jar uml2semantics.jar \
--c "$uml2semantics/examples/employer/Employer - Classes.tsv" \
--a "$uml2semantics/examples/employer/Employer - Attributes.tsv" \
--o "$uml2semantics/examples/employer/employer.rdf" \
+-c "$uml2semantics/src/test/resources/scenarios/employer-generalization/input/tsv/Classes.tsv" \
+-a "$uml2semantics/src/test/resources/scenarios/employer-generalization/input/tsv/Attributes.tsv" \
+-e "$uml2semantics/src/test/resources/scenarios/employer-generalization/input/tsv/Enumerations.tsv" \
+-n "$uml2semantics/src/test/resources/scenarios/employer-generalization/input/tsv/EnumerationNamedValues.tsv" \
+-o "employer.rdf" \
 -p "emp:http://uml2semantics.org/examples/employer#" \
 -i "http://uml2semantics.org/examples/employer/v.0.1" 
 ```
 
+### Where the employer models live
+The employer models used in this quick start are the scenarios the tests run, under
+[`src/test/resources/scenarios`](./src/test/resources/scenarios). Each scenario is one model in up to two encodings:
+
+| Directory | What it holds |
+|-----------|---------------|
+| `input/tsv` | The TSV files of the model |
+| `input/xmi/sparx` | The XMI exports of the model, as generated by Enterprise Architect |
+| `source-models` | The Enterprise Architect models the exports were generated from, and a diagram of each as PNG |
+| `expected` | The ontology each input translates to, which the tests check |
+
+There are two scenarios: `simple-employer` and `employer-generalization`. The latter has an export for each
+combination of generalization set constraints, and one without a generalization set.
+
 ### Run uml2semantics using XMI file
-Consider this example ![UML class diagram](./examples/xmi/sparx/Employer-WithGeneralizationSet-CompleteOverlapping.png).
-Note: Currently enumerations are not read from XMI as yet.
+Consider this example ![UML class diagram](./src/test/resources/scenarios/employer-generalization/source-models/Employer-WithGeneralizationSet-CompleteOverlapping.png).
+Classes, attributes, generalizations, enumerations and associations are read from the XMI file. An
+association becomes an attribute of the class it is drawn from, named by the association and typed
+by the class or enumeration it is drawn to. What is read and how is specified in the
+[XMI enumerations specification](./docs/specs/xmi-enumerations.md) and the
+[XMI associations specification](./docs/specs/xmi-associations.md).
 
 Assuming your in the `$uml2semantics` directory where you have cloned uml2semantics and downloaded the uml2semantics.jar,
 you can read the example XMI as generated by Enterprise Architect using the following:
 
 ```
 java -jar uml2semantics.jar \
--m "./examples/xmi/sparx/Employer-WithGeneralizationSet-CompleteOverlapping.xml" \
--o "./uml2semantics/examples/xmi/sparx/Employer-WithGeneralizationSet-CompleteOverlapping.rdf" \
+-m "./src/test/resources/scenarios/employer-generalization/input/xmi/sparx/WithGeneralizationSet-CompleteOverlapping.xml" \
+-o "./Employer-WithGeneralizationSet-CompleteOverlapping.owl" \
 -p "emp:http://uml2semantics.org/examples/employer#" \
 -i "http://uml2semantics.org/examples/employer/v.0.1" 
 
 ```
-This writes the ontology to `./uml2semantics/examples/xmi/sparx/Employer-WithGeneralizationSet-CompleteOverlapping.rdf`.
+This writes the ontology to `./Employer-WithGeneralizationSet-CompleteOverlapping.owl`.
 
 
 # Run uml2semantics using XMI and TSV files
@@ -117,16 +170,19 @@ override XMI values.
 
 ```
 java -jar uml2semantics.jar \
--m "./examples/xmi/sparx/Employer-WithGeneralizationSet-CompleteOverlapping.xml" \
+-m "./src/test/resources/scenarios/employer-generalization/input/xmi/sparx/WithGeneralizationSet-CompleteOverlapping.xml" \
 -c "./examples/xmi/sparx/Employer - Classes.tsv" \
 -a "./examples/xmi/sparx/Employer - Attributes.tsv" \
 --overrides TSV \
--o "./uml2semantics/examples/xmi/sparx/Employer-WithGeneralizationSet-CompleteOverlapping-TSVOverride.rdf" \
+-o "./Employer-WithGeneralizationSet-CompleteOverlapping-TSVOverrides.owl" \
 -p "emp:http://uml2semantics.org/examples/employer#" \
+-x "schema:http://schema.org/" \
 -i "http://uml2semantics.org/examples/employer/v.0.1" 
 ```
 
-The resulting ontology is written to `./uml2semantics/examples/xmi/sparx/Employer-WithGeneralizationSet-CompleteOverlapping-TSVOverride.rdf`.
+The XMI file is the export of the scenario used above. The two TSV files hold only the overrides, and are in
+`./examples/xmi/sparx`. They use the `schema` prefix in curies, which is why it is configured with `-x`.
+The resulting ontology is written to `./Employer-WithGeneralizationSet-CompleteOverlapping-TSVOverrides.owl`.
 Due to the use of the override, instead of having `http://uml2semantics.org/examples/employer#Person` as the IRI of the 
 Person class, it is now `http://schema.org/Person`. We can do something similar for the name attribute of Person, where 
 we may want to rather make use of1 Schema.org's givenName. This is of use where existing UML class diagrams need to be integrated with 

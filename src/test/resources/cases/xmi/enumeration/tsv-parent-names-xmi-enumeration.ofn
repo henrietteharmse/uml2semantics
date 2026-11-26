@@ -1,0 +1,18 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # A Parents cell naming an enumeration is rejected: no class is built on the fly under that name
+  # and no subclass axiom is written. The class of the row is kept.
+  Declaration(Class(:Colour))
+  AnnotationAssertion(rdfs:label :Colour "Colour")
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/Colour#Red>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Colour#Red> "Red")
+  ClassAssertion(:Colour <https://uml2semantics.com/test/ontology/Colour#Red>)
+  EquivalentClasses(:Colour ObjectOneOf(<https://uml2semantics.com/test/ontology/Colour#Red>))
+  Declaration(Class(:Shade))
+  AnnotationAssertion(rdfs:label :Shade "Shade")
+  AnnotationAssertion(rdfs:comment :Shade "A shade of a colour.")
+  DisjointClasses(:Shade :Colour)
+)

@@ -4,7 +4,7 @@ import com.typesafe.scalalogging.Logger
 import org.uml2semantics.diagnostics.{DiagnosticCode, Diagnostics, SourceLocation, UMLModelException}
 import org.uml2semantics.inline.Code
 import org.uml2semantics.model.UMLCardinality.>=
-import org.uml2semantics.model.cache.{AttributeBuilderCache, AttributeIdentityBuilderCache, ClassBuilderCache}
+import org.uml2semantics.model.cache.{AttributeCache, AttributeIdentityCache, ClassCache, EnumerationCache}
 
 sealed trait UMLAttributeIdentifier(classIdentifier: UMLClassIdentifier) extends UMLNamedElement
 
@@ -112,26 +112,28 @@ object UMLAttributeIdentity:
         classIdentity.getClassIdentifier, _))
       val attributeCurieOption: Option[UMLAttributeCurie] = curieOption.flatMap(UMLAttributeCurie(
         classIdentity.getClassIdentifier, _))
+      // As for a class: a curie that cannot be expanded rejects the identity even when the name is
+      // usable, instead of leaving the attribute under its name alone without saying so.
+      curieOption.filterNot(_.isBlank).filter(_ => attributeCurieOption.isEmpty).foreach(unresolvableCurie =>
+        throw new UMLModelException(DiagnosticCode.UnresolvableCurie,
+          s"Could not interpret '$unresolvableCurie' as a curie. Its prefix must be configured via the -p or " +
+            s"-x command line options."))
       if attributeNameOption.isEmpty && attributeCurieOption.isEmpty then
-        (nameOption.filterNot(_.isBlank), curieOption.filterNot(_.isBlank)) match
-          case (None, None) =>
-            throw new UMLModelException(DiagnosticCode.BlankIdentity,
-              "An attribute needs a name or a curie; both were blank.")
-          case (Some(nameWithColon), None) =>
+        nameOption.filterNot(_.isBlank) match
+          case Some(nameWithColon) =>
             throw new UMLModelException(DiagnosticCode.NameContainsColon,
               s"Could not interpret '$nameWithColon' as an attribute name, because a name may not contain a colon. " +
                 s"If it is intended to be a curie, put it in the Curie column.")
-          case (_, Some(unresolvableCurie)) =>
-            throw new UMLModelException(DiagnosticCode.UnresolvableCurie,
-              s"Could not interpret '$unresolvableCurie' as a curie. Its prefix must be configured via the -p or " +
-                s"-x command line options.")
+          case None =>
+            throw new UMLModelException(DiagnosticCode.BlankIdentity,
+              "An attribute needs a name or a curie; both were blank.")
       val thisAttributeIdentity: UMLAttributeIdentity = UMLAttributeIdentity(classIdentity, attributeNameOption, attributeCurieOption)
       if attributeNameOption.isDefined && attributeCurieOption.isDefined then
-        AttributeIdentityBuilderCache.cacheUMLAttributeIdentity(thisAttributeIdentity,  this)
+        AttributeIdentityCache.cacheUMLAttributeIdentity(thisAttributeIdentity)
         return thisAttributeIdentity
 
-      AttributeIdentityBuilderCache.getUMLAttributeIdentity(thisAttributeIdentity).getOrElse {
-        AttributeIdentityBuilderCache.cacheUMLAttributeIdentity(thisAttributeIdentity,  this)
+      AttributeIdentityCache.getUMLAttributeIdentity(thisAttributeIdentity).getOrElse {
+        AttributeIdentityCache.cacheUMLAttributeIdentity(thisAttributeIdentity)
       }
 
 
@@ -253,6 +255,8 @@ sealed trait UMLAttributeType
 case class UMLXMLDataType(attributeType: SupportedDataType) extends UMLAttributeType
 case class UMLClassType(attributeType: UMLClass) extends UMLAttributeType
 case class CurieBasedUMLClassAttributeType(attributeType: Curie) extends UMLAttributeType
+/** Holds the identity rather than the enumeration, so the type cannot go stale as values are added. */
+case class UMLEnumerationType(attributeType: UMLEnumerationIdentity) extends UMLAttributeType
 
 object UMLAttributeType:
   private val logger = Logger[this.type]
@@ -267,7 +271,9 @@ object UMLAttributeType:
         "An attribute needs a type; a blank type matches no datatype, no class and no curie.")
     val curieOption = Curie.fromString(attributeTypeName)
     val attributeType = curieOption.flatMap(curie => SupportedDataType(curie))
-      .orElse(ClassBuilderCache.getUMLClass(attributeTypeName))
+      .orElse(ClassCache.getUMLClass(attributeTypeName))
+      // Before the curie step, so that the curie of a known enumeration is not taken for an external class.
+      .orElse(EnumerationCache.getUMLEnumeration(attributeTypeName))
       .orElse(curieOption.flatMap(_ => curieOption))
       .orElse(Some(UMLClass.builder(ontologyPrefix).withNameOrCurie(attributeTypeName).build))
       .get
@@ -275,6 +281,7 @@ object UMLAttributeType:
     attributeType match
       case dataType: SupportedDataType => UMLXMLDataType(dataType)
       case umlClass: UMLClass => UMLClassType(umlClass)
+      case umlEnumeration: UMLEnumeration => UMLEnumerationType(umlEnumeration.identity)
       case curie: Curie => CurieBasedUMLClassAttributeType(curie)
 
 case class UMLAttributeDefinition(definition: String)
@@ -331,7 +338,7 @@ object UMLAttribute:
 
     /**
      * A blank type leaves the attribute genuinely untyped rather than rejecting it. Two kinds of
-     * modeller use this tool: one converting a finished UML diagram, for whom a missing type is an
+     * modeller use this tool: one translating a finished UML diagram, for whom a missing type is an
      * omission, and one drafting an ontology through UML because they are not fluent in OWL, for
      * whom an untyped attribute is a legitimate intermediate state. Since the tool cannot tell them
      * apart, it accepts the attribute and warns.
@@ -366,5 +373,5 @@ object UMLAttribute:
         typeOfAttribute,
         multiplicity,
         definition.map(UMLAttributeDefinition.apply(_)))
-      AttributeBuilderCache.cacheUMLAttribute(umlAttribute, this)
+      AttributeCache.cacheUMLAttribute(umlAttribute)
       umlAttribute

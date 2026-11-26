@@ -1,0 +1,15 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # A literal name repeated within one enumeration is one value, enriched by the second occurrence.
+  # With one value there is nothing to declare different.
+  Declaration(Class(:Size))
+  AnnotationAssertion(rdfs:label :Size "Size")
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/Size#Small>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/Size#Small> "Small")
+  AnnotationAssertion(rdfs:comment <https://uml2semantics.com/test/ontology/Size#Small> "The smallest size.")
+  ClassAssertion(:Size <https://uml2semantics.com/test/ontology/Size#Small>)
+  EquivalentClasses(:Size ObjectOneOf(<https://uml2semantics.com/test/ontology/Size#Small>))
+)

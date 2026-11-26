@@ -1,0 +1,20 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # With XMI overriding, the classes file is read first and the diagram second. The children of the
+  # diagram are added to the child the classes file gave, in the same way.
+  Declaration(Class(:Person))
+  AnnotationAssertion(rdfs:label :Person "Person")
+  AnnotationAssertion(rdfs:comment :Person "A person is a human being.")
+  Declaration(Class(:Employee))
+  AnnotationAssertion(rdfs:label :Employee "Employee")
+  Declaration(Class(:Employer))
+  AnnotationAssertion(rdfs:label :Employer "Employer")
+  Declaration(Class(:Contractor))
+  AnnotationAssertion(rdfs:label :Contractor "Contractor")
+  SubClassOf(:Employee :Person)
+  SubClassOf(:Employer :Person)
+  SubClassOf(:Contractor :Person)
+)

@@ -1,0 +1,18 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(ex:=<https://example.org/vocabulary/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # A row with both halves maps the class of the diagram onto an existing IRI: the curie gives the IRI
+  # and the name stays the label. The definition and the children read from the diagram are kept.
+  Declaration(Class(ex:Person))
+  AnnotationAssertion(rdfs:label ex:Person "Person")
+  AnnotationAssertion(rdfs:comment ex:Person "A person is a human being.")
+  Declaration(Class(:Employee))
+  AnnotationAssertion(rdfs:label :Employee "Employee")
+  Declaration(Class(:Employer))
+  AnnotationAssertion(rdfs:label :Employer "Employer")
+  SubClassOf(:Employee ex:Person)
+  SubClassOf(:Employer ex:Person)
+)

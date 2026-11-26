@@ -1,0 +1,13 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # Only connectors of type Association are read. An aggregation gives no attribute, and nothing is
+  # reported.
+  Declaration(Class(:Car))
+  AnnotationAssertion(rdfs:label :Car "Car")
+  Declaration(Class(:Wheel))
+  AnnotationAssertion(rdfs:label :Wheel "Wheel")
+  DisjointClasses(:Car :Wheel)
+)

@@ -1,0 +1,23 @@
+Prefix(:=<https://uml2semantics.com/test/ontology/>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+
+Ontology(<https://uml2semantics.com/test/ontology>
+
+  # An enumeration and its literals come from the standard UML part, their definitions from Enterprise
+  # Architect's extension part. The result is what the same enumeration gives when read from TSV.
+  Declaration(Class(:PaymentSchedule))
+  AnnotationAssertion(rdfs:label :PaymentSchedule "PaymentSchedule")
+  AnnotationAssertion(rdfs:comment :PaymentSchedule "The frequency at which an employee is paid.")
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/PaymentSchedule#Daily>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/PaymentSchedule#Daily> "Daily")
+  AnnotationAssertion(rdfs:comment <https://uml2semantics.com/test/ontology/PaymentSchedule#Daily> "The employee is paid at the end of each day.")
+  ClassAssertion(:PaymentSchedule <https://uml2semantics.com/test/ontology/PaymentSchedule#Daily>)
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly> "Weekly")
+  ClassAssertion(:PaymentSchedule <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly>)
+  Declaration(NamedIndividual(<https://uml2semantics.com/test/ontology/PaymentSchedule#Monthly>))
+  AnnotationAssertion(rdfs:label <https://uml2semantics.com/test/ontology/PaymentSchedule#Monthly> "Monthly")
+  ClassAssertion(:PaymentSchedule <https://uml2semantics.com/test/ontology/PaymentSchedule#Monthly>)
+  EquivalentClasses(:PaymentSchedule ObjectOneOf(<https://uml2semantics.com/test/ontology/PaymentSchedule#Daily> <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly> <https://uml2semantics.com/test/ontology/PaymentSchedule#Monthly>))
+  DifferentIndividuals(<https://uml2semantics.com/test/ontology/PaymentSchedule#Daily> <https://uml2semantics.com/test/ontology/PaymentSchedule#Weekly> <https://uml2semantics.com/test/ontology/PaymentSchedule#Monthly>)
+)

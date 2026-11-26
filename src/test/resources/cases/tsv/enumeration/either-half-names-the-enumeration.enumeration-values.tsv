@@ -1,0 +1,4 @@
+Enumeration	Curie	Name	Definition
+ex:SalarySchedule	ex:Daily		
+PaymentSchedule		Weekly	
+ex:SalarySchedule	ex:Monthly		

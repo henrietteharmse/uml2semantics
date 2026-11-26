@@ -1,7 +1,7 @@
 package org.uml2semantics.model
 
 import org.uml2semantics.diagnostics.{DiagnosticCode, UMLModelException}
-import org.uml2semantics.model.cache.{ClassBuilderCache, ClassIdentityBuilderCache}
+import org.uml2semantics.model.cache.{ClassCache, ClassIdentityCache, EnumerationCache}
 
 import scala.collection.mutable
 
@@ -104,32 +104,41 @@ object UMLClassIdentity:
     def build: UMLClassIdentity =
       if name.isEmpty && curie.isEmpty then
         throw new UMLModelException(DiagnosticCode.BlankIdentity, "Name and curie must not be empty.")
+      // Classes and enumerations share one namespace, and whichever use is read second is refused.
+      // An enumeration checks this against the classes when it is built; this is the other
+      // direction, which arises once a source read earlier has supplied enumerations.
+      (name ++ curie).filterNot(_.isBlank).find(EnumerationCache.getUMLEnumeration(_).isDefined)
+        .foreach(half => throw new UMLModelException(DiagnosticCode.ClassifierKindConflict,
+          s"'$half' already identifies an enumeration, so it cannot also identify a class."))
       val classNameOption = name.flatMap(UMLClassName(_))
       val classCurieOption = curie.flatMap(UMLClassCurie(_))
+      // A curie that cannot be expanded rejects the identity even when the name is usable. Keeping
+      // the class under its name alone would give it another IRI than the one that was asked for,
+      // without saying so.
+      curie.filterNot(_.isBlank).filter(_ => classCurieOption.isEmpty).foreach(unresolvableCurie =>
+        throw new UMLModelException(DiagnosticCode.UnresolvableCurie,
+          s"Could not interpret '$unresolvableCurie' as a curie. Its prefix must be configured via the -p or " +
+            s"-x command line options."))
       if classNameOption.isEmpty && classCurieOption.isEmpty then
-        (name.filterNot(_.isBlank), curie.filterNot(_.isBlank)) match
-          case (None, None) =>
-            throw new UMLModelException(DiagnosticCode.BlankIdentity,
-              "A class needs a name or a curie; both were blank.")
-          case (Some(nameWithColon), None) =>
+        name.filterNot(_.isBlank) match
+          case Some(nameWithColon) =>
             throw new UMLModelException(DiagnosticCode.NameContainsColon,
               s"Could not interpret '$nameWithColon' as a class name, because a name may not contain a colon. " +
                 s"If it is intended to be a curie, put it in the Curie column.")
-          case (_, Some(unresolvableCurie)) =>
-            throw new UMLModelException(DiagnosticCode.UnresolvableCurie,
-              s"Could not interpret '$unresolvableCurie' as a curie. Its prefix must be configured via the -p or " +
-                s"-x command line options.")
+          case None =>
+            throw new UMLModelException(DiagnosticCode.BlankIdentity,
+              "A class needs a name or a curie; both were blank.")
 
       // Assume this class identity is the one to use if it has both a name and a curie.
       val thisClassIdentity = UMLClassIdentity(classNameOption, classCurieOption, prefixNamespace)
       if thisClassIdentity.nameOption.nonEmpty && thisClassIdentity.curieOption.nonEmpty then
-        ClassIdentityBuilderCache.cacheUMLClassIdentity(thisClassIdentity, this)
+        ClassIdentityCache.cacheUMLClassIdentity(thisClassIdentity)
         return thisClassIdentity
 
       // Retrieve the class identity from the cache and return it, if it exists because it might have both name and curie.
       // If it does not exist, cache this class identity even if it has only a name or a curie instead of both.
-      ClassIdentityBuilderCache.getClassIdentity(thisClassIdentity).getOrElse {
-        ClassIdentityBuilderCache.cacheUMLClassIdentity(thisClassIdentity, this)
+      ClassIdentityCache.getClassIdentity(thisClassIdentity).getOrElse {
+        ClassIdentityCache.cacheUMLClassIdentity(thisClassIdentity)
       }
 
 case class UMLClassDefinition(definition: String = "")
@@ -169,14 +178,15 @@ object UMLGeneralizationSet:
     private var disjointConstraint: DisjointConstraint = DisjointConstraint.Overlapping
 
     def withParentAndChildren(parent:String, children: Set[String]): GeneralizationSetBuilder =
-      this.parent = Some(ClassIdentityBuilderCache.getUMLClassIdentity(parent).getOrElse(
+      this.parent = Some(ClassIdentityCache.getUMLClassIdentity(parent).getOrElse(
         UMLClassIdentity.builder(prefixNamespace).withNameOrCurie(parent).build))
-      children.map(child =>
-        var childIdentity = ClassIdentityBuilderCache.getUMLClassIdentity(child).getOrElse(
-          UMLClassIdentity.builder(prefixNamespace).withNameOrCurie(child).build)
-        var childBuilderOption = ClassIdentityBuilderCache.getClassIdentityBuilder(childIdentity)
-        val childBuilder = childBuilderOption.getOrElse(UMLClassIdentity.builder(prefixNamespace).withNameOrCurie(child))
-        this.children += childBuilder.withNameOrCurie(child).build)
+      children.foreach(child =>
+        // The lookup is only here to refuse an identifier that is blank or cannot be a curie, in
+        // the words every other lookup uses. The identity then comes from building the child with
+        // the one half that is known: the build returns the identity the cache holds for that
+        // half, which may have both, and refuses a child that names an enumeration.
+        ClassIdentityCache.getUMLClassIdentity(child)
+        this.children += UMLClassIdentity.builder(prefixNamespace).withNameOrCurie(child).build)
       this
 
     def withParentAndChildren(parent: UMLClassIdentity, children: Set[UMLClassIdentity]): GeneralizationSetBuilder =
@@ -278,6 +288,6 @@ object UMLClass:
         definition.map(UMLClassDefinition.apply(_)),
         UMLClassChildren(children.map(_.build).toSet)
       )
-      ClassBuilderCache.cacheUMLClass(umlClass, this)
+      ClassCache.cacheUMLClass(umlClass)
       umlClass
 

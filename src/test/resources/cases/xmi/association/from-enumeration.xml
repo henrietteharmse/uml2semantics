@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Rule 12. The association usedBy, drawn from the enumeration Colour to the class Paint.
+-->
+<xmi:XMI xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmi:version="2.1" xmlns:uml="http://schema.omg.org/spec/UML/2.1">
+	<xmi:Documentation exporter="Enterprise Architect" exporterVersion="6.5"/>
+	<uml:Model xmi:type="uml:Model" name="EA_Model" visibility="public">
+		<packagedElement xmi:type="uml:Package" xmi:id="EAPK_Model" name="Model" visibility="public">
+			<packagedElement xmi:type="uml:Enumeration" xmi:id="EAID_Colour" name="Colour" visibility="public">
+				<ownedLiteral xmi:type="uml:EnumerationLiteral" xmi:id="EAID_Colour_Red" name="Red" visibility="public"/>
+			</packagedElement>
+			<packagedElement xmi:type="uml:Class" xmi:id="EAID_Paint" name="Paint" visibility="public"/>
+		</packagedElement>
+	</uml:Model>
+	<xmi:Extension extender="Enterprise Architect" extenderID="6.5">
+		<connectors>
+			<connector xmi:idref="EAID_usedBy" name="usedBy">
+				<source xmi:idref="EAID_Colour">
+					<model type="Enumeration" name="Colour"/>
+					<role visibility="Public" targetScope="instance"/>
+					<type aggregation="none" containment="Unspecified"/>
+					<documentation/>
+				</source>
+				<target xmi:idref="EAID_Paint">
+					<model type="Class" name="Paint"/>
+					<role visibility="Public" targetScope="instance"/>
+					<type multiplicity="0..*" aggregation="none" containment="Unspecified"/>
+					<documentation/>
+				</target>
+				<properties ea_type="Association" direction="Unspecified"/>
+				<documentation/>
+			</connector>
+		</connectors>
+	</xmi:Extension>
+</xmi:XMI>
