@@ -11,3 +11,4 @@ class UML2SHACLWriter(shapeGraphIRI: String,
                       attributes: Set[UMLAttribute]):
 
   private val logger = Logger("UML2SHACLWriter")
+

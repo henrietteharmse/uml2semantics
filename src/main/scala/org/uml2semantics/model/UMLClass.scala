@@ -1,7 +1,7 @@
 package org.uml2semantics.model
 
 import org.uml2semantics.diagnostics.{DiagnosticCode, UMLModelException}
-import org.uml2semantics.model.cache.{ClassBuilderCache, ClassIdentityBuilderCache, EnumerationCache}
+import org.uml2semantics.model.cache.{ClassCache, ClassIdentityCache, EnumerationCache}
 
 import scala.collection.mutable
 
@@ -132,13 +132,13 @@ object UMLClassIdentity:
       // Assume this class identity is the one to use if it has both a name and a curie.
       val thisClassIdentity = UMLClassIdentity(classNameOption, classCurieOption, prefixNamespace)
       if thisClassIdentity.nameOption.nonEmpty && thisClassIdentity.curieOption.nonEmpty then
-        ClassIdentityBuilderCache.cacheUMLClassIdentity(thisClassIdentity, this)
+        ClassIdentityCache.cacheUMLClassIdentity(thisClassIdentity)
         return thisClassIdentity
 
       // Retrieve the class identity from the cache and return it, if it exists because it might have both name and curie.
       // If it does not exist, cache this class identity even if it has only a name or a curie instead of both.
-      ClassIdentityBuilderCache.getClassIdentity(thisClassIdentity).getOrElse {
-        ClassIdentityBuilderCache.cacheUMLClassIdentity(thisClassIdentity, this)
+      ClassIdentityCache.getClassIdentity(thisClassIdentity).getOrElse {
+        ClassIdentityCache.cacheUMLClassIdentity(thisClassIdentity)
       }
 
 case class UMLClassDefinition(definition: String = "")
@@ -178,14 +178,15 @@ object UMLGeneralizationSet:
     private var disjointConstraint: DisjointConstraint = DisjointConstraint.Overlapping
 
     def withParentAndChildren(parent:String, children: Set[String]): GeneralizationSetBuilder =
-      this.parent = Some(ClassIdentityBuilderCache.getUMLClassIdentity(parent).getOrElse(
+      this.parent = Some(ClassIdentityCache.getUMLClassIdentity(parent).getOrElse(
         UMLClassIdentity.builder(prefixNamespace).withNameOrCurie(parent).build))
-      children.map(child =>
-        var childIdentity = ClassIdentityBuilderCache.getUMLClassIdentity(child).getOrElse(
-          UMLClassIdentity.builder(prefixNamespace).withNameOrCurie(child).build)
-        var childBuilderOption = ClassIdentityBuilderCache.getClassIdentityBuilder(childIdentity)
-        val childBuilder = childBuilderOption.getOrElse(UMLClassIdentity.builder(prefixNamespace).withNameOrCurie(child))
-        this.children += childBuilder.withNameOrCurie(child).build)
+      children.foreach(child =>
+        // The lookup is only here to refuse an identifier that is blank or cannot be a curie, in
+        // the words every other lookup uses. The identity then comes from building the child with
+        // the one half that is known: the build returns the identity the cache holds for that
+        // half, which may have both, and refuses a child that names an enumeration.
+        ClassIdentityCache.getUMLClassIdentity(child)
+        this.children += UMLClassIdentity.builder(prefixNamespace).withNameOrCurie(child).build)
       this
 
     def withParentAndChildren(parent: UMLClassIdentity, children: Set[UMLClassIdentity]): GeneralizationSetBuilder =
@@ -287,6 +288,6 @@ object UMLClass:
         definition.map(UMLClassDefinition.apply(_)),
         UMLClassChildren(children.map(_.build).toSet)
       )
-      ClassBuilderCache.cacheUMLClass(umlClass, this)
+      ClassCache.cacheUMLClass(umlClass)
       umlClass
 

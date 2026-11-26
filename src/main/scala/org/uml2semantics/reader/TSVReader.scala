@@ -5,7 +5,7 @@ import com.typesafe.scalalogging.Logger
 import org.uml2semantics.InputParameters
 import org.uml2semantics.diagnostics.{Diagnostic, DiagnosticCode, Diagnostics, SourceLocation, UMLModelException}
 import org.uml2semantics.model.*
-import org.uml2semantics.model.cache.{ClassBuilderCache, EnumerationCache}
+import org.uml2semantics.model.cache.{ClassCache, EnumerationCache}
 import org.uml2semantics.reader.ReaderHelper.populateParentsWithTheirChildren
 
 import java.io.File
@@ -168,6 +168,6 @@ object TSVReader extends UMLClassDiagramReader:
       //
       // Deliberately after the attribute is built, not before: a row that was rejected should not
       // leave a class behind, so only a valid attribute is evidence that its owner exists.
-      if ClassBuilderCache.getUMLClass(classIdentity).isEmpty then
+      if ClassCache.getUMLClass(classIdentity).isEmpty then
         UMLClass.builder(ontologyPrefix).withNameOrCurie(classIdentifier).build
     }

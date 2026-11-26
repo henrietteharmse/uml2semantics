@@ -4,7 +4,7 @@ import com.typesafe.scalalogging.Logger
 import org.uml2semantics.diagnostics.{Diagnostic, DiagnosticCode, DiagnosticSeverity, Diagnostics}
 import org.uml2semantics.inline.Code
 import org.uml2semantics.model.PrefixNamespace
-import org.uml2semantics.model.cache.{AttributeCache, ClassBuilderCache, EnumerationCache}
+import org.uml2semantics.model.cache.{AttributeCache, ClassCache, EnumerationCache}
 import org.uml2semantics.reader.{ReaderHelper, TSVReader, XMIReader}
 import org.uml2semantics.writer.UML2OWLWriter
 
@@ -75,7 +75,7 @@ def translate(input: InputParameters): TranslationResult =
   val writtenFile = input.owlOntologyFile.flatMap { owlOntologyFile =>
     val owlWriter = new UML2OWLWriter(input.ontologyIRI,
       owlOntologyFile,
-      ClassBuilderCache.getClasses,
+      ClassCache.getClasses,
       AttributeCache.getAttributes,
       EnumerationCache.getEnumerations,
       input.globalDisjointness)

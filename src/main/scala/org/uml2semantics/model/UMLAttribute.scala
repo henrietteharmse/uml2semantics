@@ -4,7 +4,7 @@ import com.typesafe.scalalogging.Logger
 import org.uml2semantics.diagnostics.{DiagnosticCode, Diagnostics, SourceLocation, UMLModelException}
 import org.uml2semantics.inline.Code
 import org.uml2semantics.model.UMLCardinality.>=
-import org.uml2semantics.model.cache.{AttributeCache, AttributeIdentityCache, ClassBuilderCache, EnumerationCache}
+import org.uml2semantics.model.cache.{AttributeCache, AttributeIdentityCache, ClassCache, EnumerationCache}
 
 sealed trait UMLAttributeIdentifier(classIdentifier: UMLClassIdentifier) extends UMLNamedElement
 
@@ -271,7 +271,7 @@ object UMLAttributeType:
         "An attribute needs a type; a blank type matches no datatype, no class and no curie.")
     val curieOption = Curie.fromString(attributeTypeName)
     val attributeType = curieOption.flatMap(curie => SupportedDataType(curie))
-      .orElse(ClassBuilderCache.getUMLClass(attributeTypeName))
+      .orElse(ClassCache.getUMLClass(attributeTypeName))
       // Before the curie step, so that the curie of a known enumeration is not taken for an external class.
       .orElse(EnumerationCache.getUMLEnumeration(attributeTypeName))
       .orElse(curieOption.flatMap(_ => curieOption))

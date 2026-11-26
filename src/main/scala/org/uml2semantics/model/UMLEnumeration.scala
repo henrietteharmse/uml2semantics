@@ -1,7 +1,7 @@
 package org.uml2semantics.model
 
 import org.uml2semantics.diagnostics.{DiagnosticCode, UMLModelException}
-import org.uml2semantics.model.cache.{ClassBuilderCache, EnumerationCache}
+import org.uml2semantics.model.cache.{ClassCache, EnumerationCache}
 
 /**
  * Reads the two halves of an identity, a name and a curie, as the modeller wrote them.
@@ -243,7 +243,7 @@ object UMLEnumeration:
                                               prefixNamespace: PrefixNamespace): UMLEnumerationIdentity =
     val (enumerationName, enumerationCurie) = halves
 
-    (enumerationName ++ enumerationCurie.map(_.curie)).find(ClassBuilderCache.getUMLClass(_).isDefined)
+    (enumerationName ++ enumerationCurie.map(_.curie)).find(ClassCache.getUMLClass(_).isDefined)
       .foreach(half => throw new UMLModelException(DiagnosticCode.ClassifierKindConflict,
         s"'$half' already identifies a class, so it cannot also identify an enumeration."))
 

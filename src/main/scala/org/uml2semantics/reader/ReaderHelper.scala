@@ -2,9 +2,8 @@ package org.uml2semantics.reader
 
 import com.typesafe.scalalogging.Logger
 import org.uml2semantics.diagnostics.{DiagnosticCode, Diagnostics, SourceLocation, UMLModelException}
-import org.uml2semantics.model.UMLClass.ClassBuilder
-import org.uml2semantics.model.{PrefixNamespace, UMLClass, UMLClassIdentity}
-import org.uml2semantics.model.cache.{ClassBuilderCache, ClassIdentityBuilderCache, EnumerationCache}
+import org.uml2semantics.model.{PrefixNamespace, UMLClass}
+import org.uml2semantics.model.cache.EnumerationCache
 
 import scala.collection.mutable
 
@@ -21,16 +20,14 @@ object ReaderHelper:
                                        diagnostics: Diagnostics,
                                        location: SourceLocation): Unit =
 
-    var classesToRebuild = scala.collection.mutable.Set[ClassBuilder]()
-
     parentToChildrenMap.foreach { (parent, children) =>
       try
-        val parentClassIdentity = ClassIdentityBuilderCache.getUMLClassIdentity(parent).getOrElse(
-          UMLClassIdentity.builder(ontologyPrefix).withNameOrCurie(parent).build)
-        val classBuilder = ClassBuilderCache.getUMLClassBuilder(parentClassIdentity).getOrElse(
-            UMLClass.builder(ontologyPrefix).withNameOrCurie(parent))
+        // The parent is built again with nothing but its identity and these children. Building
+        // caches it, and the cache merges it into the parent as read so far.
+        UMLClass.builder(ontologyPrefix)
+          .withNameOrCurie(parent)
           .withChildren(parent, children.toSet)
-        classesToRebuild += classBuilder
+          .build
       catch
         case e: UMLModelException =>
           val message = s"Parent '$parent' of ${children.toSeq.sorted.mkString("'", "', '", "'")} was not read: " +
@@ -38,11 +35,6 @@ object ReaderHelper:
           logger.error(message)
           diagnostics.error(e.code, message, Some(location))
     }
-
-    classesToRebuild.foreach(classBuilder =>
-      val umlClass = classBuilder.build
-      ClassBuilderCache.cacheUMLClass(umlClass, classBuilder)
-    )
 
   /**
    * An enumeration without values is accepted, for the same reason a blank attribute type is: the

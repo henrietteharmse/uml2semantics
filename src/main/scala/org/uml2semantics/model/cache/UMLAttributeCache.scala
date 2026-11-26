@@ -135,8 +135,8 @@ object AttributeCache:
   private def withCurrentType(umlAttribute: UMLAttribute): UMLAttribute =
     umlAttribute.typeOfAttribute match
       case Some(UMLClassType(umlClass)) =>
-        val currentClass = ClassIdentityBuilderCache.getClassIdentity(umlClass.classIdentity)
-          .flatMap(ClassBuilderCache.getUMLClass).getOrElse(umlClass)
+        val currentClass = ClassIdentityCache.getClassIdentity(umlClass.classIdentity)
+          .flatMap(ClassCache.getUMLClass).getOrElse(umlClass)
         umlAttribute.copy(typeOfAttribute = Some(UMLClassType(currentClass)))
       case Some(UMLEnumerationType(enumerationIdentity)) =>
         val currentIdentity = EnumerationCache.getEnumerations.map(_.identity)

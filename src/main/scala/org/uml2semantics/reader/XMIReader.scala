@@ -5,8 +5,7 @@ import org.uml2semantics.InputParameters
 import org.uml2semantics.diagnostics.{Diagnostic, DiagnosticCode, Diagnostics, SourceLocation, UMLModelException}
 import org.uml2semantics.inline.Code
 import org.uml2semantics.model.*
-import org.uml2semantics.model.UMLClass.ClassBuilder
-import org.uml2semantics.model.cache.{AttributeCache, ClassBuilderCache, ClassIdentityBuilderCache, EnumerationCache}
+import org.uml2semantics.model.cache.{AttributeCache, ClassCache, EnumerationCache}
 import org.w3c.dom.{Document, Node}
 
 import javax.xml.parsers.DocumentBuilderFactory
@@ -123,24 +122,20 @@ object XMIReader extends UMLClassDiagramReader :
   private def populateParentsWithTheirChildren(reading: Reading,
                                                parentToChildrenMap: mutable.Map[String, XMIGeneralizationSet]): Unit =
 
-    var classesToRebuild = scala.collection.mutable.Set[ClassBuilder]()
-
     parentToChildrenMap.foreach { (parent, generalizationSet) =>
       try
-        val parentClassIdentity = ClassIdentityBuilderCache.getUMLClassIdentity(parent).getOrElse(
-          UMLClassIdentity.builder(reading.ontologyPrefix).withNameOrCurie(parent).build)
-        val classBuilder = ClassBuilderCache.getUMLClassBuilder(parentClassIdentity).getOrElse(
-            UMLClass.builder(reading.ontologyPrefix).withNameOrCurie(parent))
+        // The parent is built again with nothing but its identity and this generalization set.
+        // Building caches it, and the cache merges it into the parent as read so far.
+        UMLClass.builder(reading.ontologyPrefix)
+          .withNameOrCurie(parent)
           .withChildren(parent, generalizationSet.getChildren)
           .withCompleteDisjoint(generalizationSet.isComplete, generalizationSet.isDisjoint)
-        classesToRebuild += classBuilder
+          .build
       catch
         case e: UMLModelException =>
           reading.error(e.code, s"Parent '$parent' of " +
             s"${generalizationSet.getChildren.toSeq.sorted.mkString("'", "', '", "'")} was not read: ${e.getMessage}")
     }
-
-    classesToRebuild.foreach(classBuilder => classBuilder.build)
 
   // --- Enumerations --------------------------------------------------------------------------
 
@@ -321,7 +316,7 @@ object XMIReader extends UMLClassDiagramReader :
 
       // As for a row of the TSV attributes file: only an attribute that was accepted is evidence
       // that its owner exists.
-      if ClassBuilderCache.getUMLClass(classIdentity).isEmpty then
+      if ClassCache.getUMLClass(classIdentity).isEmpty then
         UMLClass.builder(reading.ontologyPrefix).withNameOrCurie(owner.classifier).build
     catch
       case e: UMLModelException =>

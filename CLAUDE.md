@@ -40,7 +40,7 @@ The pipeline follows a **Read → Cache → Write** pattern:
 
 ### Model & Caches (`model/`, `model/cache/`)
 Readers populate global mutable caches rather than returning data:
-- **ClassBuilderCache / ClassIdentityBuilderCache** — stores UML classes
+- **ClassCache / ClassIdentityCache** — stores UML classes
 - **AttributeCache / AttributeIdentityCache** — stores UML attributes
 - **EnumerationCache** — stores UML enumerations, each holding its values
 - Key model types: `UMLClass`, `UMLAttribute`, `UMLEnumeration`, `LabeledIRI`, `PrefixNamespace`, `SupportedDataType`
