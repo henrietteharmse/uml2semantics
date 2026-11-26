@@ -16,7 +16,7 @@ echo "BASE_DIR: $BASE_DIR"
 mkdir -p "$BASE_DIR/test-output/employer"
 
 java -jar "$BASE_DIR/target/scala-3.6.3/uml2semantics.jar" \
--m "$BASE_DIR/src/test/resources/scenarios/employer-generalization/input/xmi/sparx/WithGeneralizationSet-CompleteDisjoint.xml" \
--i "https://uml2semantics.com/examples/employer" \
+-m "$BASE_DIR/src/test/resources/cases/xmi/EA-export-xmi-2.1.mod.xml" \
+-i "https://uml2semantics.com/examples/du" \
 -x "foaf:http://xmlns.com/foaf/0.1/,vcard:http://www.w3.org/2006/vcard/ns#,dct:http://purl.org/dc/terms/,dctype:http://purl.org/dc/dcmitype/,dct:http://purl.org/dc/terms/,prov:http://www.w3.org/ns/prov#,skos:http://www.w3.org/2004/02/skos/core#,sdo:http://schema.org/" \
--o "$BASE_DIR/src/test/resources/scenarios/employer-generalization/expected/WithGeneralizationSet-CompleteDisjoint.owl"
+-o "$BASE_DIR/src/test/resources/cases/xmi/DU.owl"

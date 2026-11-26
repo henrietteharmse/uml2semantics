@@ -19,8 +19,8 @@
 <!--    <logger name="extractAttributes" level="trace" />-->
 <!--    <logger name="### evaluateFunction ###" level="trace" />-->
 <!--    <logger name="XMIReader" level="trace" />-->
-    <logger name="UML2OWLWriter" level="trace" />
-    <logger name="cacheUMLClassIdentity-classIdentity" level="trace" />
+    <logger name="UML2OWLWriter" level="error" />
+    <logger name="cacheUMLClassIdentity-classIdentity" level="error" />
 
     <!-- org.uml2semantics.model.UMLClassDiagram.scala -->
 <!--    <logger name="org.uml2semantics.model.UMLClassCurie" level="error" />-->
