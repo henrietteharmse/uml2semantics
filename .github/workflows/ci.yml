@@ -1,0 +1,61 @@
+# Continuous integration: compile, test, build the assembly jar, and check that
+# build.sbt and CHANGELOG.md agree about any pending release.
+#
+# Runs on every pull request and on every push to main. The release workflow
+# performs the actual tagging and publishing; this workflow is the gate that
+# keeps a broken main from ever reaching it.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# A newer run on the same branch or pull request supersedes an older one.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test and build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      # Apache Jena 5.x needs Java 17 or newer, so that is the floor we test on.
+      - name: Set up Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: sbt
+
+      - name: Set up sbt
+        uses: sbt/setup-sbt@v1
+
+      - name: Test
+        run: sbt -batch test
+
+      # Building the fat jar here means a release can never fail on packaging
+      # after the tests have already passed.
+      - name: Build assembly jar
+        run: sbt -batch assembly
+
+  release-metadata:
+    name: Release metadata
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      # Fails when build.sbt declares a version that has no tag yet and
+      # CHANGELOG.md has no section for it, so a release pull request cannot
+      # merge half-finished.
+      - name: Check build.sbt against CHANGELOG.md
+        run: .github/scripts/release-metadata.sh --notes-file "$RUNNER_TEMP/changelog-notes.md"

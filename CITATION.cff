@@ -1,0 +1,27 @@
+# Citation metadata in the Citation File Format, https://citation-file-format.github.io/
+#
+# Zenodo reads this file when it archives a GitHub release, so these fields become
+# the metadata of the Zenodo record and its DOI. Version and release date are
+# deliberately left out: Zenodo takes them from the GitHub release itself, so a
+# release pull request only ever touches build.sbt and CHANGELOG.md.
+cff-version: 1.2.0
+message: If you use uml2semantics in your work, please cite it using this metadata.
+type: software
+title: uml2semantics
+abstract: >-
+  uml2semantics translates UML class diagrams, supplied as TSV files or as XMI
+  exported from tools such as Enterprise Architect, into OWL 2 ontologies, so
+  that a reasoner can check the model for inconsistencies and unintended
+  consequences.
+authors:
+  - family-names: Harmse
+    given-names: Henriette
+    # orcid: https://orcid.org/XXXX-XXXX-XXXX-XXXX
+repository-code: https://github.com/henrietteharmse/uml2semantics
+license: Apache-2.0
+keywords:
+  - UML
+  - OWL 2
+  - ontology
+  - XMI
+  - conceptual modelling
