@@ -16,6 +16,11 @@ requests that GitHub generates.
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-27 - Automated releases and Zenodo archiving
+
+No change to the translation itself; this release introduces the release
+process it is published with.
+
 ### Added
 
 - Continuous integration on GitHub Actions: every pull request and push to
@@ -23,6 +28,14 @@ requests that GitHub generates.
 - Automated releases: merging a version bump into `main` tags the commit and
   publishes a GitHub release carrying `uml2semantics.jar`, a versioned copy and
   a `SHA256SUMS` file.
+- `CITATION.cff` with citation metadata; releases are archived on Zenodo, which
+  mints a DOI for each one.
+- ADR 0001 in `docs/adr/` recording the release strategy.
+
+### Changed
+
+- The documented Java requirement is now 17 or newer, which Apache Jena 5 has
+  required all along.
 
 ## [0.0.5] - 2026-11-26 - Support for enumerations in both TSV and XMI formats
 
@@ -59,7 +72,8 @@ requests that GitHub generates.
 
 First release of uml2semantics.
 
-[Unreleased]: https://github.com/henrietteharmse/uml2semantics/compare/v0.0.5...HEAD
+[Unreleased]: https://github.com/henrietteharmse/uml2semantics/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/henrietteharmse/uml2semantics/compare/v0.0.5...v0.1.0
 [0.0.5]: https://github.com/henrietteharmse/uml2semantics/compare/v0.0.4...v0.0.5
 [0.0.4]: https://github.com/henrietteharmse/uml2semantics/compare/v0.0.3...v0.0.4
 [0.0.3]: https://github.com/henrietteharmse/uml2semantics/compare/v0.0.2...v0.0.3
