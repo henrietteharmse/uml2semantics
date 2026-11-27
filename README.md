@@ -15,10 +15,19 @@ This tool assumes that the UML class diagrams are conceptual models and as such 
 details like interfaces, access modifiers or operations.
 
 # Downloading
-Download `uml2semantics.jar` from [latest release](https://github.com/henrietteharmse/uml2semantics/releases/latest).
+Download `uml2semantics.jar` from the [latest release](https://github.com/henrietteharmse/uml2semantics/releases/latest).
+Each release also carries a versioned copy of the jar and a `SHA256SUMS` file to check the download against:
 
-# Java Version 
-Java 11+
+```
+sha256sum -c SHA256SUMS
+```
+
+# Java Version
+Java 17 or newer. Apache Jena 5, which uml2semantics builds on, requires Java 17.
+
+# Citing
+Release metadata for citation lives in [CITATION.cff](CITATION.cff). Releases are archived on
+[Zenodo](https://zenodo.org), which mints a DOI for each one; cite the DOI of the version you used.
 
 # Command Line Parameters
 
@@ -192,6 +201,15 @@ include additional classes and attributes.
 ## DCAT version 2 Example
 Initial DCAT version 2 example is defined [here](./examples/dcat2/README.md). 
 
+# Releasing
+Releases are automated and described in [ADR 0001](docs/adr/0001-automated-releases-from-main.md).
+Nothing is tagged or uploaded by hand. To release:
 
+1. Open a pull request that sets `ThisBuild / version` in `build.sbt` to the new version and moves the
+   `[Unreleased]` notes in [CHANGELOG.md](CHANGELOG.md) under a heading
+   `## [MAJOR.MINOR.PATCH] - YYYY-MM-DD - Release title`. Leave an empty `[Unreleased]` heading above it.
+2. CI checks that `build.sbt` and `CHANGELOG.md` agree and that the tests pass.
+3. Merge. The Release workflow tags the merge commit, builds the jar, publishes the GitHub release with the
+   CHANGELOG section as its notes, and Zenodo archives the release and mints its DOI.
 
-
+A merge that does not change the version is not a release.

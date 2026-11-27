@@ -13,6 +13,7 @@ uml2semantics translates UML class diagrams into OWL 2 ontologies. It accepts in
 - **Build assembly JAR**: `sbt assembly` (outputs `target/scala-3.6.3/uml2semantics.jar`)
 - **Run**: `java -jar target/scala-3.6.3/uml2semantics.jar [options]`
 - **Manual test**: `./runTest.sh` (runs a sample XMI-to-OWL translation)
+- **Release**: automated. A pull request bumps `ThisBuild / version` in `build.sbt` and adds the matching `CHANGELOG.md` section; merging it into `main` tags, builds and publishes the GitHub release, which Zenodo archives. Never tag or upload by hand. See `docs/adr/0001-automated-releases-from-main.md`.
 
 Additional scenarios can also be tested manually via `runTest.sh` by comparing output OWL files against expected outputs in `src/test/resources/`.
 
@@ -23,7 +24,7 @@ Additional scenarios can also be tested manually via `runTest.sh` by comparing o
 - Apache Jena 5.3.0 for RDF support
 - scopt for CLI argument parsing
 - scala-csv for TSV reading
-- Requires Java 11+
+- Requires Java 17+ (Apache Jena 5 needs it)
 
 ## Architecture
 
