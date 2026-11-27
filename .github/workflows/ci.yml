@@ -1,0 +1,47 @@
+# Continuous integration: compile, test and build the assembly jar.
+#
+# Runs on every pull request and on every push to main. The release workflow
+# (added separately) performs the actual tagging and publishing; this workflow
+# is the gate that keeps a broken main from ever reaching it.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# A newer run on the same branch or pull request supersedes an older one.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test and build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      # Apache Jena 5.x needs Java 17 or newer, so that is the floor we test on.
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: sbt
+
+      - name: Set up sbt
+        uses: sbt/setup-sbt@v1
+
+      - name: Test
+        run: sbt -batch test
+
+      # Building the fat jar here means a release can never fail on packaging
+      # after the tests have already passed.
+      - name: Build assembly jar
+        run: sbt -batch assembly
