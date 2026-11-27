@@ -65,16 +65,29 @@ fi
 title="$tag"
 if $release; then
   [ -f CHANGELOG.md ] || fail "CHANGELOG.md is missing"
-  version_re=$(printf '%s' "$version" | sed 's/\./\\./g')
-  heading=$(grep -E "^## \[$version_re\]" CHANGELOG.md || true)
+  # The heading is matched as a literal prefix, not a regular expression: awk
+  # implementations disagree on backslash escapes in -v values, so a regex with
+  # \[ or \. passed that way breaks on some of them (POSIX awk, busybox) while
+  # working on others (mawk). A heading matches when it is exactly the prefix or
+  # continues with a space, so "## [0.1.0]" does not match "## [0.1.01]".
+  heading_prefix="## [$version]"
+  heading=$(awk -v prefix="$heading_prefix" '
+    index($0, prefix) == 1 && (length($0) == length(prefix) || substr($0, length(prefix) + 1, 1) == " ")
+  ' CHANGELOG.md | head -n 1)
   [ -n "$heading" ] || fail "CHANGELOG.md has no '## [$version]' section for the pending release"
   # Body: lines after the heading up to the next '## ' heading, trimmed of
   # leading and trailing blank lines.
-  awk -v re="^## \\[$version_re\\]" '
+  awk -v prefix="$heading_prefix" '
     found && /^## / { exit }
-    found { print }
-    $0 ~ re { found = 1 }
-  ' CHANGELOG.md | sed -e :a -e '/^\n*$/{$d;N;ba' -e '}' | awk 'NF {p=1} p' > "$notes_file"
+    found { lines[++n] = $0 }
+    !found && index($0, prefix) == 1 && (length($0) == length(prefix) || substr($0, length(prefix) + 1, 1) == " ") { found = 1 }
+    END {
+      while (n > 0 && lines[n] ~ /^[[:space:]]*$/) n--
+      first = 1
+      while (first <= n && lines[first] ~ /^[[:space:]]*$/) first++
+      for (i = first; i <= n; i++) print lines[i]
+    }
+  ' CHANGELOG.md > "$notes_file"
   [ -s "$notes_file" ] || fail "the '## [$version]' section in CHANGELOG.md is empty"
   heading_title=$(printf '%s' "$heading" \
     | sed -E 's/^## \[[^]]+\]( - [0-9]{4}-[0-9]{2}-[0-9]{2})?( - )?//')
