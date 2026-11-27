@@ -1,0 +1,119 @@
+# Automated release: tag and publish when a version bump reaches main.
+#
+# The version in build.sbt is the single source of truth. On every push to main
+# this workflow asks .github/scripts/release-metadata.sh whether a tag for that
+# version already exists. If it does, nothing happens. If it does not, the
+# tests run, the assembly jar is built, and a GitHub release is published with
+# the jar, a versioned copy, a SHA256SUMS file, and notes taken from the
+# matching CHANGELOG.md section followed by GitHub's generated pull request list.
+#
+# Publishing the release is what triggers Zenodo, once the repository is
+# enabled there, so no Zenodo credentials are needed here.
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Releases must never overlap; a second push waits for the first to finish.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  metadata:
+    name: Pending release?
+    runs-on: ubuntu-latest
+    outputs:
+      release: ${{ steps.meta.outputs.release }}
+      version: ${{ steps.meta.outputs.version }}
+      tag: ${{ steps.meta.outputs.tag }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Read build.sbt and CHANGELOG.md
+        id: meta
+        run: .github/scripts/release-metadata.sh --notes-file "$RUNNER_TEMP/changelog-notes.md"
+
+      - name: Report
+        run: |
+          if [ "${{ steps.meta.outputs.release }}" = "true" ]; then
+            echo "Version ${{ steps.meta.outputs.version }} has no tag yet: releasing ${{ steps.meta.outputs.tag }}."
+          else
+            echo "Tag ${{ steps.meta.outputs.tag }} already exists: nothing to release."
+          fi
+
+  release:
+    name: Build and publish
+    needs: metadata
+    if: needs.metadata.outputs.release == 'true'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      # Run again to get the release title and the CHANGELOG notes file.
+      - name: Read release notes
+        id: meta
+        run: .github/scripts/release-metadata.sh --notes-file "$RUNNER_TEMP/changelog-notes.md"
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: sbt
+
+      - name: Set up sbt
+        uses: sbt/setup-sbt@v1
+
+      - name: Test and build assembly jar
+        run: sbt -batch test assembly
+
+      - name: Collect release files
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          set -euo pipefail
+          jars=(target/scala-*/uml2semantics.jar)
+          [ "${#jars[@]}" -eq 1 ] || { echo "expected one assembly jar, found: ${jars[*]}" >&2; exit 1; }
+          mkdir dist
+          cp "${jars[0]}" dist/uml2semantics.jar
+          cp "${jars[0]}" "dist/uml2semantics-${VERSION}.jar"
+          (cd dist && sha256sum -- * > SHA256SUMS)
+          ls -l dist
+
+      - name: Compose release notes
+        env:
+          TAG: ${{ steps.meta.outputs.tag }}
+        run: |
+          set -euo pipefail
+          gh api "repos/${GITHUB_REPOSITORY}/releases/generate-notes" \
+            -f tag_name="$TAG" -f target_commitish="$GITHUB_SHA" \
+            --jq .body > "$RUNNER_TEMP/generated-notes.md"
+          {
+            cat "$RUNNER_TEMP/changelog-notes.md"
+            echo
+            echo
+            cat "$RUNNER_TEMP/generated-notes.md"
+          } > "$RUNNER_TEMP/release-notes.md"
+          cat "$RUNNER_TEMP/release-notes.md"
+
+      # Creating the release also creates the tag at this commit.
+      - name: Publish GitHub release
+        env:
+          TAG: ${{ steps.meta.outputs.tag }}
+          TITLE: ${{ steps.meta.outputs.title }}
+        run: |
+          gh release create "$TAG" \
+            --target "$GITHUB_SHA" \
+            --title "$TITLE" \
+            --notes-file "$RUNNER_TEMP/release-notes.md" \
+            dist/*

@@ -1,8 +1,9 @@
-# Continuous integration: compile, test and build the assembly jar.
+# Continuous integration: compile, test, build the assembly jar, and check that
+# build.sbt and CHANGELOG.md agree about any pending release.
 #
 # Runs on every pull request and on every push to main. The release workflow
-# (added separately) performs the actual tagging and publishing; this workflow
-# is the gate that keeps a broken main from ever reaching it.
+# performs the actual tagging and publishing; this workflow is the gate that
+# keeps a broken main from ever reaching it.
 name: CI
 
 on:
@@ -45,3 +46,16 @@ jobs:
       # after the tests have already passed.
       - name: Build assembly jar
         run: sbt -batch assembly
+
+  release-metadata:
+    name: Release metadata
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      # Fails when build.sbt declares a version that has no tag yet and
+      # CHANGELOG.md has no section for it, so a release pull request cannot
+      # merge half-finished.
+      - name: Check build.sbt against CHANGELOG.md
+        run: .github/scripts/release-metadata.sh --notes-file "$RUNNER_TEMP/changelog-notes.md"
